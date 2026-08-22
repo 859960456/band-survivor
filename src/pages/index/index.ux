@@ -2194,6 +2194,14 @@ export default {
       { title: '收藏家', desc: '收藏家愿意出高价收药水。', options: [
         { label: '卖1药水(+25金)', effect: 'tradePotion', value: 25 },
         { label: '离开', effect: 'none' }
+      ] },
+      { title: '迷路精灵', desc: '精灵愿为你指明道路。', options: [
+        { label: '传送至楼梯', effect: 'teleport' },
+        { label: '拒绝', effect: 'none' }
+      ] },
+      { title: '古老咒语', desc: '墙上刻着晦涩的文字。', options: [
+        { label: '解读', effect: 'curse' },
+        { label: '离开', effect: 'none' }
       ] }
     ];
     var e = events[Math.floor(Math.random() * events.length)];
@@ -2277,6 +2285,26 @@ export default {
           this._addLog('售出药水 +' + opt.value + ' 金币');
         } else {
           this._addLog('没有药水可卖');
+        }
+      } else if (opt.effect === 'teleport') {
+        this._playerR = this._stairsR;
+        this._playerC = this._stairsC;
+        this._revealAround();
+        this._addLog('精灵将你传送至楼梯处');
+      } else if (opt.effect === 'curse') {
+        var cr = Math.random();
+        if (cr < 0.4) {
+          this.baseAtk += 2;
+          this.atk = this.baseAtk + this.weaponAtk;
+          this._addLog('咒语强化：攻击 +2');
+        } else if (cr < 0.7) {
+          this.maxHp += 10;
+          this.hp = Math.min(this.maxHp, this.hp + 10);
+          this._updateHp();
+          this._addLog('咒语强化：生命上限 +10');
+        } else {
+          this.gold += 20;
+          this._addLog('咒语赐予金币 +20');
         }
       } else if (opt.effect === 'heal50') {
         this.hp = Math.min(this.maxHp, this.hp + 50);
