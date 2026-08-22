@@ -89,6 +89,18 @@
       </div>
     </div>
 
+    <!-- 新手引导 -->
+    <div if="{{phase === 'tutorial'}}" class="overlay dead-overlay">
+      <text class="dead-title">新手提示</text>
+      <text class="dead-text">滑动屏幕移动角色</text>
+      <text class="dead-text">撞上怪物进入战斗</text>
+      <text class="dead-text">击杀获得经验，升级三选一</text>
+      <text class="dead-text">未探索区域被迷雾遮挡</text>
+      <div class="btn" @click="closeTutorial">
+        <text class="btn-text">开始冒险</text>
+      </div>
+    </div>
+
     <!-- 随机事件 -->
     <div if="{{phase === 'event'}}" class="overlay dead-overlay">
       <text class="dead-title">{{eventTitle}}</text>
@@ -252,6 +264,7 @@ export default {
     eventTitle: '',
     eventDesc: '',
     eventOptions: [],
+    tutorialSeen: false,
 
     floor: 0,
     gold: 0,
@@ -343,6 +356,14 @@ export default {
       }
     });
     storage.get({
+      key: 'BAND_SURVIVOR_TUT',
+      success: function(data) {
+        if (data === '1') {
+          that.tutorialSeen = true;
+        }
+      }
+    });
+    storage.get({
       key: 'BAND_SURVIVOR_ACH',
       success: function(data) {
         try {
@@ -371,9 +392,13 @@ export default {
 
   startGame() {
     this._resetRun();
-    this.phase = 'grid';
+    this.phase = this.tutorialSeen ? 'grid' : 'tutorial';
     this._genFloor(1);
     this._addLog('你踏入了第 1 层地牢');
+    if (!this.tutorialSeen) {
+      this.tutorialSeen = true;
+      storage.set({ key: 'BAND_SURVIVOR_TUT', value: '1' });
+    }
     this._saveRun();
   },
 
@@ -1330,6 +1355,11 @@ export default {
     } else {
       this._addLog('获得 ' + armor.name + '，但不如当前防具');
     }
+  },
+
+  closeTutorial() {
+    this.phase = 'grid';
+    this._renderMap();
   },
 
   _openEvent() {
