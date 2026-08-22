@@ -193,7 +193,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES } from '../../common/game-data.js';
 
 const MAX_LOG = 3;
 const BOSS_EVERY = 5;
@@ -975,6 +975,22 @@ export default {
     this._afterMonstersTurn();
   },
 
+  _rollWeapon() {
+    var base = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
+    var q = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
+    var affix = WEAPON_AFFIXES[Math.floor(Math.random() * WEAPON_AFFIXES.length)];
+    var atk = Math.round(base.atk * q.mult) + affix.atk;
+    return { name: q.name + '·' + base.name + '(' + affix.name + ')', atk: atk, q: q };
+  },
+
+  _rollArmor() {
+    var base = ARMORS[Math.floor(Math.random() * ARMORS.length)];
+    var q = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
+    var affix = ARMOR_AFFIXES[Math.floor(Math.random() * ARMOR_AFFIXES.length)];
+    var def = Math.round(base.def * q.mult) + affix.def;
+    return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, q: q };
+  },
+
   _pickItem(item) {
     this._vibrate(30);
     if (item.type === 'gold') {
@@ -985,7 +1001,7 @@ export default {
       this.potions += 1;
       this._addLog('拾取药水，现有 ' + this.potions + ' 瓶');
     } else if (item.type === 'weapon') {
-      var weapon = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
+      var weapon = this._rollWeapon();
       if (weapon.atk > this.weaponAtk) {
         this.weaponAtk = weapon.atk;
         this.weaponName = weapon.name;
@@ -995,7 +1011,7 @@ export default {
         this._addLog('获得 ' + weapon.name + '，但不如当前武器');
       }
     } else if (item.type === 'armor') {
-      var armor = ARMORS[Math.floor(Math.random() * ARMORS.length)];
+      var armor = this._rollArmor();
       if (armor.def > this.armorDef) {
         this.armorDef = armor.def;
         this.armorName = armor.name;
@@ -1154,7 +1170,7 @@ export default {
     if (Math.random() >= 0.35) {
       return;
     }
-    var weapon = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
+    var weapon = this._rollWeapon();
     if (weapon.atk > this.weaponAtk) {
       this.weaponAtk = weapon.atk;
       this.weaponName = weapon.name;
@@ -1169,7 +1185,7 @@ export default {
     if (Math.random() >= 0.25) {
       return;
     }
-    var armor = ARMORS[Math.floor(Math.random() * ARMORS.length)];
+    var armor = this._rollArmor();
     if (armor.def > this.armorDef) {
       this.armorDef = armor.def;
       this.armorName = armor.name;

@@ -108,3 +108,22 @@ export const SHOP_ITEMS = [
   { id: 'chain',  type: 'armor',  name: '锁子甲',   desc: '防御 +7',     price: 55 },
   { id: 'plate',  type: 'armor',  name: '板甲',     desc: '防御 +10',    price: 90 }
 ];
+
+export const QUALITIES = [
+  { id: 'white',  name: '普通', color: '#c8c8d0', mult: 1.0 },
+  { id: 'green',  name: '精良', color: '#5fd068', mult: 1.18 },
+  { id: 'blue',   name: '稀有', color: '#5a9cf8', mult: 1.4 },
+  { id: 'purple', name: '史诗', color: '#b46ef5', mult: 1.7 }
+];
+
+export const WEAPON_AFFIXES = [
+  { name: '锋锐', atk: 2 },
+  { name: '破甲', atk: 3 },
+  { name: '猎杀', atk: 5 }
+];
+
+export const ARMOR_AFFIXES = [
+  { name: '坚韧', def: 2 },
+  { name: '厚重', def: 3 },
+  { name: '庇护', def: 5 }
+];
