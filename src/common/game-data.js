@@ -46,6 +46,15 @@ export const AREAS = [
     boss: 'frost_king',
     effect: { hp: 1.3, atk: 1.15, gold: 1.4, exp: 1.4 },
     effDesc: '雪原生物坚韧且凶猛，回报极高'
+  },
+  {
+    id: 'lava',
+    name: '熔岩炼狱',
+    desc: '灼热空气扭曲视线，岩浆在脚下翻滚。',
+    monsters: ['imp', 'demon', 'lava_golem', 'fire_imp'],
+    boss: 'inferno_lord',
+    effect: { hp: 1.4, atk: 1.35, gold: 1.5, exp: 1.5 },
+    effDesc: '炼狱生物攻击骇人，奖励极为丰厚'
   }
 ];
 
@@ -69,7 +78,10 @@ export const MONSTERS = {
   imp:        { name: '小恶魔',   hp: 50, atk: 13, gold: 14, exp: 30 },
   yeti:       { name: '雪怪',     hp: 58, atk: 15, gold: 18, exp: 36 },
   ice_wolf:   { name: '冰原狼',   hp: 46, atk: 12, gold: 14, exp: 30 },
-  frost_king: { name: '霜冻王',   hp: 180, atk: 24, gold: 130, exp: 200 }
+  frost_king: { name: '霜冻王',   hp: 180, atk: 24, gold: 130, exp: 200 },
+  lava_golem: { name: '熔岩巨像', hp: 64, atk: 17, gold: 20, exp: 42 },
+  fire_imp:   { name: '炎魔',     hp: 54, atk: 15, gold: 16, exp: 34 },
+  inferno_lord: { name: '炼狱领主', hp: 210, atk: 28, gold: 160, exp: 260 }
 };
 
 export const UPGRADES = [
@@ -121,7 +133,9 @@ export const WEAPONS = [
   { name: '冰霜法杖', atk: 10 },
   { name: '圣剑', atk: 14 },
   { name: '寒冰弓', atk: 11 },
-  { name: '雷神锤', atk: 16 }
+  { name: '雷神锤', atk: 16 },
+  { name: '熔岩之刃', atk: 18 },
+  { name: '龙牙枪', atk: 20 }
 ];
 
 export const ARMORS = [
@@ -132,7 +146,9 @@ export const ARMORS = [
   { name: '鳞甲', def: 8 },
   { name: '秘银甲', def: 12 },
   { name: '龙骨甲', def: 14 },
-  { name: '冰晶甲', def: 11 }
+  { name: '冰晶甲', def: 11 },
+  { name: '熔岩甲', def: 13 },
+  { name: '龙鳞甲', def: 16 }
 ];
 
 export const SHOP_ITEMS = [
