@@ -2984,6 +2984,8 @@ export default {
       this._freezeChance += 0.15;
     } else if (id === 'stun2') {
       this._stunChance += 0.15;
+    } else if (id === 'block2') {
+      this._blockChance += 0.2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
