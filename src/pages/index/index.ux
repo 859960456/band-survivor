@@ -209,6 +209,7 @@
       <text class="bag-line">防具：{{armorName}} +{{armorDef}} · 闪{{dodge}}%</text>
       <text class="bag-line">药水：{{potions}} 瓶</text>
       <text class="bag-line">金币：{{gold}}</text>
+      <text class="bag-line" if="{{relics.length}}">遗物：{{relics.length}} 件</text>
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
       </div>
@@ -266,7 +267,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS } from '../../common/game-data.js';
 
 const MAX_LOG = 3;
 const BOSS_EVERY = 5;
@@ -345,6 +346,7 @@ export default {
     codex: [],
     codexTotal: 0,
     codexCount: 0,
+    relics: [],
 
     mapRows: [],
     mapCells: [],
@@ -493,6 +495,7 @@ export default {
       sc: this._stairsC,
       grid: this._grid,
       visited: this._visited,
+      relics: this.relics,
       monsters: this._monsters,
       items: this._items
     };
@@ -540,6 +543,7 @@ export default {
         that._width = s.mw || 6;
         that._grid = s.grid || [];
         that._visited = s.visited || [];
+        that.relics = s.relics || [];
         that._monsters = s.monsters || [];
         that._items = s.items || [];
         that._playerR = s.pr || 0;
@@ -596,6 +600,7 @@ export default {
     this.expPercent = 0;
     this.exp = BASE_PLAYER.exp;
     this.expNext = BASE_PLAYER.expNext;
+    this.relics = [];
     this.potions = BASE_PLAYER.potions;
     this.monsterAlive = false;
     this.monsterName = '';
@@ -1415,6 +1420,15 @@ export default {
     this._discoverMonster(this.monsterId);
     if (this.isBoss) {
       this.bossKills += 1;
+      var avail = [];
+      for (var ri = 0; ri < RELICS.length; ri++) {
+        if (this.relics.indexOf(RELICS[ri].id) < 0) {
+          avail.push(RELICS[ri].id);
+        }
+      }
+      if (avail.length > 0) {
+        this._gainRelic(avail[Math.floor(Math.random() * avail.length)]);
+      }
     }
     this._vibrate(120);
     this.gold += Math.round(this.monsterGold * this.goldMul);
@@ -1531,6 +1545,36 @@ export default {
     }
     this.phase = 'grid';
     this._renderMap();
+  },
+
+  _gainRelic(id) {
+    var relic = null;
+    for (var i = 0; i < RELICS.length; i++) {
+      if (RELICS[i].id === id) {
+        relic = RELICS[i];
+        break;
+      }
+    }
+    if (!relic) {
+      return;
+    }
+    if (this.relics.indexOf(id) >= 0) {
+      return;
+    }
+    this.relics.push(id);
+    if (relic.stat === 'atk') {
+      this.baseAtk += relic.value;
+      this.atk = this.baseAtk + this.weaponAtk;
+    } else if (relic.stat === 'hp') {
+      this.maxHp += relic.value;
+    } else if (relic.stat === 'goldMul') {
+      this.goldMul += relic.value;
+    } else if (relic.stat === 'expMul') {
+      this.expMul += relic.value;
+    } else if (relic.stat === 'cd') {
+      this.skillCdMax = Math.max(1, this.skillCdMax - relic.value);
+    }
+    this._addLog('获得遗物：' + relic.name + '（' + relic.desc + '）');
   },
 
   _openReward() {

@@ -157,3 +157,11 @@ export const ACHIEVEMENTS = [
   { id: 'rich',         name: '腰缠万贯',   desc: '持有 100 金币' },
   { id: 'potion_master',name: '药剂师',     desc: '同时持有 3 瓶药水' }
 ];
+
+export const RELICS = [
+  { id: 'berserk',  name: '狂暴之心', desc: '攻击 +3',     stat: 'atk',      value: 3 },
+  { id: 'vitality', name: '生命之泉', desc: '生命上限 +20', stat: 'hp',       value: 20 },
+  { id: 'greed',    name: '贪婪之戒', desc: '金币获取 +10%', stat: 'goldMul', value: 0.1 },
+  { id: 'wisdom',   name: '智慧之书', desc: '经验获取 +10%', stat: 'expMul',  value: 0.1 },
+  { id: 'swift',    name: '疾风靴',   desc: '技能冷却 -0.4s', stat: 'cd',     value: 0.4 }
+];
