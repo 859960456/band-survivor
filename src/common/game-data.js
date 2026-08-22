@@ -174,7 +174,8 @@ export const UPGRADES = [
   { id: 'block2',   name: '格挡大师', desc: '格挡几率 +20%',            rarity: 'rare'   },
   { id: 'clean2',   name: '净化大师', desc: '免疫中毒 +25%',            rarity: 'rare'   },
   { id: 'healboost2', name: '疗愈大师', desc: '药水回复 +10',            rarity: 'common' },
-  { id: 'material2', name: '材料大师', desc: '材料掉落 +1',             rarity: 'rare'   }
+  { id: 'material2', name: '材料大师', desc: '材料掉落 +1',             rarity: 'rare'   },
+  { id: 'skillpower2', name: '技能大师', desc: '技能增伤 +0.5',           rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {
