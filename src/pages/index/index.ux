@@ -733,6 +733,7 @@ export default {
       stunChance: this._stunChance,
       execute: this._execute,
       craftDiscount: this._craftDiscount,
+      cdkill: this._cdkill,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -861,6 +862,7 @@ export default {
         that._stunChance = s.stunChance || 0;
         that._execute = !!s.execute;
         that._craftDiscount = s.craftDiscount || 0;
+        that._cdkill = s.cdkill || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -955,6 +957,7 @@ export default {
     this._stunChance = 0;
     this._execute = false;
     this._craftDiscount = 0;
+    this._cdkill = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2152,6 +2155,9 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    if (this._cdkill > 0 && this.skillCd > 0) {
+      this.skillCd = Math.max(0, this.skillCd - 1);
+    }
     if (this._bloodlust > 0) {
       this._bloodlust += 1;
     }
@@ -2715,6 +2721,8 @@ export default {
       this._execute = true;
     } else if (id === 'artisan') {
       this._craftDiscount += 0.2;
+    } else if (id === 'cdkill') {
+      this._cdkill = 1;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
