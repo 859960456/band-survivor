@@ -151,6 +151,19 @@
       </div>
     </div>
 
+    <!-- 操作说明 -->
+    <div if="{{phase === 'help'}}" class="overlay dead-overlay">
+      <text class="dead-title">操作说明</text>
+      <text class="dead-text">滑动屏幕移动角色</text>
+      <text class="dead-text">撞上怪物进入战斗</text>
+      <text class="dead-text">击杀获得经验升级，三选一强化</text>
+      <text class="dead-text">未探索区域被迷雾遮挡</text>
+      <text class="dead-text">精英/事件/陷阱/暗门等你探索</text>
+      <div class="btn" @click="closeHelp">
+        <text class="btn-text">返回</text>
+      </div>
+    </div>
+
     <!-- 永久强化 -->
     <div if="{{phase === 'meta'}}" class="overlay dead-overlay">
       <text class="dead-title">永久强化</text>
@@ -198,6 +211,9 @@
       </div>
       <div class="btn" @click="openTalents">
         <text class="btn-text">天赋（{{talentPoints}}点）</text>
+      </div>
+      <div class="btn" @click="openHelp">
+        <text class="btn-text">操作说明</text>
       </div>
       <div class="settings">
         <div class="setting-row" @click="toggleVibrate">
@@ -2161,6 +2177,15 @@ export default {
     this.metaUpgradeCostHp = 20 + this.metaHp * 20;
     this.metaUpgradeCostPotion = 25 + this.metaPotion * 25;
     this.metaUpgradeCostAtk = 30 + this.metaAtk * 30;
+  },
+
+  openHelp() {
+    this._lastPhase = this.phase;
+    this.phase = 'help';
+  },
+
+  closeHelp() {
+    this.phase = this._lastPhase || 'pause';
   },
 
   openMeta() {
