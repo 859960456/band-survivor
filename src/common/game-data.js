@@ -139,7 +139,9 @@ export const WEAPONS = [
   { name: '寒冰弓', atk: 11 },
   { name: '雷神锤', atk: 16 },
   { name: '熔岩之刃', atk: 18 },
-  { name: '龙牙枪', atk: 20 }
+  { name: '龙牙枪', atk: 20 },
+  { name: '裁决之刃', atk: 22 },
+  { name: '苍穹法杖', atk: 19 }
 ];
 
 export const ARMORS = [
@@ -152,7 +154,9 @@ export const ARMORS = [
   { name: '龙骨甲', def: 14 },
   { name: '冰晶甲', def: 11 },
   { name: '熔岩甲', def: 13 },
-  { name: '龙鳞甲', def: 16 }
+  { name: '龙鳞甲', def: 16 },
+  { name: '神谕甲', def: 18 },
+  { name: '星界甲', def: 15 }
 ];
 
 export const SHOP_ITEMS = [
