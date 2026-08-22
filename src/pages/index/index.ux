@@ -1252,8 +1252,9 @@ export default {
   padding-top: 34px;
   padding-bottom: 8px;
   background-color: #16161e;
-  border-top-left-radius: 50px;
-  border-top-right-radius: 50px;
+  /* 上圆角取屏宽的一半(212/2=106)，让上缘成为一条完整弧线贴合胶囊 */
+  border-top-left-radius: 106px;
+  border-top-right-radius: 106px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
