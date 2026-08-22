@@ -127,3 +127,13 @@ export const ARMOR_AFFIXES = [
   { name: '厚重', def: 3 },
   { name: '庇护', def: 5 }
 ];
+
+export const ACHIEVEMENTS = [
+  { id: 'first_kill',   name: '初次击杀',   desc: '击杀第 1 个怪物' },
+  { id: 'floor_5',      name: '深入五层',   desc: '到达第 5 层' },
+  { id: 'floor_10',     name: '深渊十层',   desc: '到达第 10 层' },
+  { id: 'level_10',     name: '战意昂扬',   desc: '等级达到 10' },
+  { id: 'boss_slayer',  name: '屠戮首领',   desc: '击败 1 个 BOSS' },
+  { id: 'rich',         name: '腰缠万贯',   desc: '持有 100 金币' },
+  { id: 'potion_master',name: '药剂师',     desc: '同时持有 3 瓶药水' }
+];

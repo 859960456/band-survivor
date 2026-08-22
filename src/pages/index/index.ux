@@ -17,6 +17,9 @@
         <text class="btn-text">继续冒险</text>
         <text class="btn-sub">第{{saveFloor}}层 · Lv.{{saveLevel}}</text>
       </div>
+      <div class="btn" @click="openAchievements">
+        <text class="btn-text">成就 {{achievementCount}}/{{achievementTotal}}</text>
+      </div>
       <text class="best">最佳记录：第 {{best}} 层</text>
     </div>
 
@@ -83,6 +86,20 @@
       <div for="{{upgradeOptions}}" class="upgrade-option rarity-{{$item.rarity || 'common'}}" @click="chooseUpgrade($item.id)">
         <text class="option-name">{{$item.name}}</text>
         <text class="option-desc">{{$item.desc}}</text>
+      </div>
+    </div>
+
+    <!-- 成就 -->
+    <div if="{{phase === 'achievements'}}" class="overlay dead-overlay">
+      <text class="dead-title">成就</text>
+      <scroll class="shop-scroll" scroll-y="true">
+        <div for="{{achievementList}}" class="ach-item {{$item.done ? 'done' : ''}}">
+          <text class="ach-name">{{$item.name}}</text>
+          <text class="ach-desc">{{$item.desc}}</text>
+        </div>
+      </scroll>
+      <div class="btn" @click="closeAchievements">
+        <text class="btn-text">关闭</text>
       </div>
     </div>
 
@@ -203,7 +220,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS } from '../../common/game-data.js';
 
 const MAX_LOG = 3;
 const BOSS_EVERY = 5;
@@ -219,10 +236,15 @@ export default {
     vibrateOn: true,
     sensitivity: 1,
     sensLabel: '中',
+    unlockedAchievements: [],
+    achievementCount: 0,
+    achievementTotal: 0,
+    achievementList: [],
 
     floor: 0,
     gold: 0,
     kills: 0,
+    bossKills: 0,
 
     level: 1,
     baseAtk: 10,
@@ -306,6 +328,18 @@ export default {
             that._updateSensLabel();
           }
         } catch (e) {}
+      }
+    });
+    storage.get({
+      key: 'BAND_SURVIVOR_ACH',
+      success: function(data) {
+        try {
+          var arr = JSON.parse(data);
+          if (arr && arr.length) {
+            that.unlockedAchievements = arr;
+          }
+        } catch (e) {}
+        that._updateAchievementCount();
       }
     });
     storage.get({
@@ -446,6 +480,7 @@ export default {
     this.floor = 0;
     this.gold = 0;
     this.kills = 0;
+    this.bossKills = 0;
     this.level = BASE_PLAYER.level;
     this.baseAtk = BASE_PLAYER.atk;
     this.weaponAtk = 0;
@@ -591,6 +626,7 @@ export default {
 
   _genFloor(num) {
     this.floor = num;
+    this._checkAchievements();
     var sizes = [
       [6, 8],
       [7, 9],
@@ -1166,6 +1202,9 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    if (this.isBoss) {
+      this.bossKills += 1;
+    }
     this._vibrate(120);
     this.gold += Math.round(this.monsterGold * this.goldMul);
     this.exp += Math.round(this.monsterExp * this.expMul);
@@ -1188,6 +1227,7 @@ export default {
 
     this._dropWeapon();
     this._dropArmor();
+    this._checkAchievements();
 
     if (this.exp >= this.expNext) {
       this._openReward();
@@ -1275,6 +1315,7 @@ export default {
     this.expNext = Math.floor(this.expNext * 1.35);
     this._updateExp();
     this._updateHp();
+    this._checkAchievements();
     this.phase = 'grid';
     this._renderMap();
     this._addLog('升级到 Lv.' + this.level);
@@ -1373,6 +1414,55 @@ export default {
     this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
     this._monstersTurn();
     this._afterMonstersTurn();
+  },
+
+  _updateAchievementCount() {
+    this.achievementTotal = ACHIEVEMENTS.length;
+    this.achievementCount = this.unlockedAchievements.length;
+    this.achievementList = ACHIEVEMENTS.map(function(a) {
+      return { id: a.id, name: a.name, desc: a.desc, done: this.unlockedAchievements.indexOf(a.id) >= 0 };
+    }.bind(this));
+  },
+
+  _unlockAchievement(id) {
+    if (this.unlockedAchievements.indexOf(id) >= 0) {
+      return;
+    }
+    this.unlockedAchievements.push(id);
+    storage.set({
+      key: 'BAND_SURVIVOR_ACH',
+      value: JSON.stringify(this.unlockedAchievements)
+    });
+    this._updateAchievementCount();
+    this._addLog('成就达成：' + this._achievementName(id));
+  },
+
+  _achievementName(id) {
+    for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+      if (ACHIEVEMENTS[i].id === id) {
+        return ACHIEVEMENTS[i].name;
+      }
+    }
+    return id;
+  },
+
+  _checkAchievements() {
+    if (this.kills >= 1) { this._unlockAchievement('first_kill'); }
+    if (this.floor >= 5) { this._unlockAchievement('floor_5'); }
+    if (this.floor >= 10) { this._unlockAchievement('floor_10'); }
+    if (this.level >= 10) { this._unlockAchievement('level_10'); }
+    if (this.bossKills >= 1) { this._unlockAchievement('boss_slayer'); }
+    if (this.gold >= 100) { this._unlockAchievement('rich'); }
+    if (this.potions >= 3) { this._unlockAchievement('potion_master'); }
+  },
+
+  openAchievements() {
+    this._updateAchievementCount();
+    this.phase = 'achievements';
+  },
+
+  closeAchievements() {
+    this.phase = 'home';
   },
 
   _saveSettings() {
@@ -1990,6 +2080,34 @@ export default {
   color: #a8b7ff;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.ach-item {
+  width: 192px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background-color: #22273a;
+  border: 1px solid #2d3240;
+  display: flex;
+  flex-direction: column;
+}
+
+.ach-item.done {
+  border-color: #ffd75e;
+  background-color: #2a2741;
+}
+
+.ach-name {
+  color: #e8e8f0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ach-desc {
+  color: #8994b6;
+  font-size: 11px;
+  margin-top: 2px;
 }
 
 .settings {
