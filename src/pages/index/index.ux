@@ -1291,12 +1291,15 @@ export default {
       } else if (roll < 0.95) {
         type = 'challenge';
         icon = '★';
-      } else if (roll < 0.97) {
+      } else if (roll < 0.96) {
         type = 'chest';
         icon = '◈';
-      } else if (roll < 0.99) {
+      } else if (roll < 0.98) {
         type = 'altar';
         icon = '▲';
+      } else if (roll < 0.99) {
+        type = 'rune';
+        icon = '◆';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -1443,6 +1446,8 @@ export default {
         } else if (cls === 'chest') {
           icon = '';
         } else if (cls === 'altar') {
+          icon = '';
+        } else if (cls === 'rune') {
           icon = '';
         }
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
@@ -1649,6 +1654,9 @@ export default {
       }
     } else if (item.type === 'challenge') {
       this._startChallenge();
+    } else if (item.type === 'rune') {
+      this.talentPoints += 1;
+      this._addLog('参悟符文，天赋点 +1');
     } else if (item.type === 'altar') {
       var ar = Math.random();
       if (ar < 0.3) {
@@ -3442,6 +3450,11 @@ export default {
   width: 18px;
   height: 20px;
   border-radius: 3px;
+}
+
+.rune {
+  background-color: #4fd0c0;
+  border-radius: 50%;
 }
 
 .altar {
