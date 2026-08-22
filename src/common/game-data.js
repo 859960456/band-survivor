@@ -126,7 +126,8 @@ export const UPGRADES = [
   { id: 'vigor',   name: '活力',         desc: '每层回复 8 生命',          rarity: 'common' },
   { id: 'ironhide', name: '铁肤',         desc: '固定减伤 +2',             rarity: 'rare'   },
   { id: 'bloodlust', name: '血怒',        desc: '每击杀攻击 +1',           rarity: 'epic'   },
-  { id: 'gale',    name: '疾风',         desc: '每场战斗开始 +1 迅捷',    rarity: 'rare'   }
+  { id: 'gale',    name: '疾风',         desc: '每场战斗开始 +1 迅捷',    rarity: 'rare'   },
+  { id: 'lootmat', name: '掠夺',         desc: '材料掉落 +1',             rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

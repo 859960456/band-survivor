@@ -726,6 +726,7 @@ export default {
       bonusDef: this._bonusDef,
       bloodlust: this._bloodlust,
       startHaste: this._startHaste,
+      materialBonus: this._materialBonus,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -847,6 +848,7 @@ export default {
         that._bonusDef = s.bonusDef || 0;
         that._bloodlust = s.bloodlust || 0;
         that._startHaste = s.startHaste || 0;
+        that._materialBonus = s.materialBonus || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -932,6 +934,7 @@ export default {
     this._bonusDef = 0;
     this._bloodlust = 0;
     this._startHaste = 0;
+    this._materialBonus = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -2114,7 +2117,7 @@ export default {
       this._updateHp();
     }
     this._advanceDaily(this.dailyType === 'kill' ? 1 : 0);
-    this.materials += 1 + Math.floor(Math.random() * 2);
+    this.materials += 1 + Math.floor(Math.random() * 2) + (this._materialBonus || 0);
     if (this.isBoss) {
       this.materials += 5;
       this.potions += 1;
@@ -2655,6 +2658,8 @@ export default {
       this._bloodlust = 1;
     } else if (id === 'gale') {
       this._startHaste += 1;
+    } else if (id === 'lootmat') {
+      this._materialBonus += 1;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
