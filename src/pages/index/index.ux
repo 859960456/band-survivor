@@ -1711,6 +1711,23 @@ export default {
     this._vibrate(60);
     this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害');
 
+    // 怪物技能
+    if (this.monsterId === 'spider' && Math.random() < 0.35) {
+      this._poisonTurns = 2;
+      this._poisonDmg = Math.max(2, Math.round(this.monsterAtk * 0.3));
+      this._addLog('被蜘蛛毒液侵蚀，陷入中毒！');
+    }
+    if (this.monsterId === 'demon' && Math.random() < 0.25) {
+      var drain = Math.max(1, Math.round(dmg * 0.5));
+      this.monsterHp = Math.min(this.monsterMaxHp, this.monsterHp + drain);
+      this._updateMonsterHp();
+      this._addLog('恶魔汲取了生命 +' + drain);
+    }
+    if (this.monsterId === 'orc' && this.monsterHp < this.monsterMaxHp * 0.4 && Math.random() < 0.3) {
+      this.monsterAtk = Math.round(this.monsterAtk * 1.2);
+      this._addLog('兽人狂暴了！');
+    }
+
     if (this.hp <= 0) {
       this.hp = 0;
       this._updateHp();
