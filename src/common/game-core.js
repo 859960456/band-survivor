@@ -88,3 +88,16 @@ export function rollArmor(armors, qualities, affixes) {
   var dodge = Math.round(q.mult * 3);
   return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, dodge: dodge, q: q };
 }
+
+export function randPick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export function achievementName(achievements, id) {
+  for (var i = 0; i < achievements.length; i++) {
+    if (achievements[i].id === id) {
+      return achievements[i].name;
+    }
+  }
+  return id;
+}

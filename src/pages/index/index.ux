@@ -382,7 +382,7 @@
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES } from '../../common/game-data.js';
-import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor } from '../../common/game-core.js';
+import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor, randPick, achievementName } from '../../common/game-core.js';
 
 const MAX_LOG = 6;
 const BOSS_EVERY = 5;
@@ -975,8 +975,7 @@ export default {
 
   _randomMonsterForArea() {
     var area = this._areaByFloor(this.floor);
-    var list = area.monsters;
-    return list[Math.floor(Math.random() * list.length)];
+    return randPick(area.monsters);
   },
 
   _difficultyMul() {
@@ -2317,12 +2316,7 @@ export default {
   },
 
   _achievementName(id) {
-    for (var i = 0; i < ACHIEVEMENTS.length; i++) {
-      if (ACHIEVEMENTS[i].id === id) {
-        return ACHIEVEMENTS[i].name;
-      }
-    }
-    return id;
+    return achievementName(ACHIEVEMENTS, id);
   },
 
   _checkAchievements() {
