@@ -1593,11 +1593,11 @@ export default {
   },
 
   _rollWeapon() {
-    return rollWeapon(WEAPONS, QUALITIES, WEAPON_AFFIXES);
+    return rollWeapon(WEAPONS, QUALITIES, WEAPON_AFFIXES, this.floor);
   },
 
   _rollArmor() {
-    return rollArmor(ARMORS, QUALITIES, ARMOR_AFFIXES);
+    return rollArmor(ARMORS, QUALITIES, ARMOR_AFFIXES, this.floor);
   },
 
   _pickItem(item) {
