@@ -176,7 +176,8 @@ export const UPGRADES = [
   { id: 'healboost2', name: '疗愈大师', desc: '药水回复 +10',            rarity: 'common' },
   { id: 'material2', name: '材料大师', desc: '材料掉落 +1',             rarity: 'rare'   },
   { id: 'skillpower2', name: '技能大师', desc: '技能增伤 +0.5',           rarity: 'epic'   },
-  { id: 'omni2',   name: '全属性',     desc: '攻/血/金币/经验小幅提升',  rarity: 'epic'   }
+  { id: 'omni2',   name: '全属性',     desc: '攻/血/金币/经验小幅提升',  rarity: 'epic'   },
+  { id: 'levelhp', name: '茁壮',       desc: '升级时生命 +5',            rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

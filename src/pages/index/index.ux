@@ -759,6 +759,7 @@ export default {
       revive: this._revive,
       reviveUsed: this._reviveUsed,
       comboPerStack: this._comboPerStack,
+      levelHp: this._levelHp,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -913,6 +914,7 @@ export default {
         that._revive = !!s.revive;
         that._reviveUsed = !!s.reviveUsed;
         that._comboPerStack = s.comboPerStack || 0.03;
+        that._levelHp = s.levelHp || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1034,6 +1036,7 @@ export default {
     this._revive = false;
     this._reviveUsed = false;
     this._comboPerStack = 0.03;
+    this._levelHp = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -3000,6 +3003,8 @@ export default {
       this.maxHp += 5;
       this.goldMul += 0.02;
       this.expMul += 0.02;
+    } else if (id === 'levelhp') {
+      this._levelHp += 5;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
@@ -3008,6 +3013,9 @@ export default {
 
     this.level += 1;
     this.talentPoints += 1;
+    if (this._levelHp > 0) {
+      this.maxHp += this._levelHp;
+    }
     if (this._levelShield > 0) {
       this._shield += this._levelShield;
     }
