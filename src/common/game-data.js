@@ -105,7 +105,8 @@ export const UPGRADES = [
   { id: 'materials', name: '材料 +3',     desc: '立即获得制作材料',     rarity: 'common' },
   { id: 'gold100',  name: '金币 +20',     desc: '立即获得金币',         rarity: 'common' },
   { id: 'regen',   name: '再生',         desc: '每步回复 2 生命',        rarity: 'rare'   },
-  { id: 'thorns',  name: '荆棘',         desc: '受击反弹 3 伤害',        rarity: 'rare'   }
+  { id: 'thorns',  name: '荆棘',         desc: '受击反弹 3 伤害',        rarity: 'rare'   },
+  { id: 'holy',    name: '神圣',         desc: '击杀回复 5 生命',        rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {

@@ -709,6 +709,7 @@ export default {
       challengeMod: this.challengeMod,
       regen: this._regen,
       thorns: this._thorns,
+      killHeal: this._killHeal,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -816,6 +817,7 @@ export default {
         that.challengeMod = s.challengeMod || '';
         that._regen = s.regen || 0;
         that._thorns = s.thorns || 0;
+        that._killHeal = s.killHeal || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -887,6 +889,7 @@ export default {
     this._isElite = false;
     this._regen = 0;
     this._thorns = 0;
+    this._killHeal = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -2011,6 +2014,10 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    if (this._killHeal > 0 && this.hp < this.maxHp) {
+      this.hp = Math.min(this.maxHp, this.hp + this._killHeal);
+      this._updateHp();
+    }
     this._advanceDaily(this.dailyType === 'kill' ? 1 : 0);
     this.materials += 1 + Math.floor(Math.random() * 2);
     if (this.isBoss) {
@@ -2495,6 +2502,8 @@ export default {
       this._regen += 2;
     } else if (id === 'thorns') {
       this._thorns += 3;
+    } else if (id === 'holy') {
+      this._killHeal += 5;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
