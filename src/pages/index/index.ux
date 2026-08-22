@@ -235,7 +235,7 @@
         </div>
         <div class="btn action-btn {{skillCd > 0 ? 'disabled' : ''}}" @click="doSkill">
           <text class="btn-text">技能</text>
-          <text class="btn-sub">{{skillCd > 0 ? 'CD ' + skillCd : '2.5倍'}}</text>
+          <text class="btn-sub">{{skillCd > 0 ? 'CD ' + skillCd : skillName}}</text>
         </div>
         <div class="btn action-btn {{potions <= 0 ? 'disabled' : ''}}" @click="doHeal">
           <text class="btn-text">药水</text>
@@ -285,6 +285,7 @@ export default {
     baseAtk: 10,
     weaponAtk: 0,
     weaponName: '无',
+    skillName: '重击',
     armorDef: 0,
     armorName: '无',
     atk: 10,
@@ -535,6 +536,7 @@ export default {
     this.baseAtk = BASE_PLAYER.atk;
     this.weaponAtk = 0;
     this.weaponName = '无';
+    this.skillName = '重击';
     this.armorDef = 0;
     this.armorName = '无';
     this.atk = BASE_PLAYER.atk;
@@ -1172,6 +1174,7 @@ export default {
         this.weaponAtk = weapon.atk;
         this.weaponName = weapon.name;
         this.atk = this.baseAtk + this.weaponAtk;
+        this.skillName = this._skillName();
         this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
       } else {
         this._addLog('获得 ' + weapon.name + '，但不如当前武器');
@@ -1232,6 +1235,17 @@ export default {
     this._playerAction(1);
   },
 
+  _skillName() {
+    if (this.weaponAtk >= 14) { return '圣光斩'; }
+    if (this.weaponAtk >= 10) { return '烈焰斩'; }
+    if (this.weaponAtk >= 6) { return '剑气'; }
+    return '重击';
+  },
+
+  _skillMult() {
+    return 2.5 + Math.min(1.5, this.weaponAtk * 0.04);
+  },
+
   doSkill() {
     if (this.phase !== 'battle' || !this.monsterAlive) {
       return;
@@ -1240,7 +1254,8 @@ export default {
       return;
     }
     this.skillCd = this.skillCdMax;
-    this._playerAction(2.5);
+    this._addLog('释放 ' + this._skillName());
+    this._playerAction(this._skillMult());
   },
 
   doHeal() {
@@ -1347,6 +1362,7 @@ export default {
       this.weaponAtk = weapon.atk;
       this.weaponName = weapon.name;
       this.atk = this.baseAtk + this.weaponAtk;
+      this.skillName = this._skillName();
       this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
     } else {
       this._addLog('获得 ' + weapon.name + '，但不如当前武器');
@@ -1686,6 +1702,7 @@ export default {
     this.gold -= this.weaponUpgradeCost;
     this.weaponAtk += 2;
     this.atk = this.baseAtk + this.weaponAtk;
+    this.skillName = this._skillName();
     this.weaponName = this.weaponName.replace(/\([^)]*\)?$/, '') + '(强化)';
     this._addLog('强化武器至 +' + this.weaponAtk);
     this._updateUpgradeCosts();
@@ -1739,6 +1756,7 @@ export default {
         this.weaponAtk = weapon.atk;
         this.weaponName = weapon.name;
         this.atk = this.baseAtk + this.weaponAtk;
+        this.skillName = this._skillName();
         this._addLog('购买武器 ' + weapon.name + '，攻击 +' + weapon.atk);
       } else {
         this._addLog('你已经拥有更好的武器');
