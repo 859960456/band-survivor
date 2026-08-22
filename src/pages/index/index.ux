@@ -440,6 +440,8 @@ export default {
     dodge: 0,
     combo: 0,
     _poisonTurns: 0,
+    _shield: 0,
+    _hasteCharges: 0,
     _bossEnraged: false,
     _poisonDmg: 0,
     _burnTurns: 0,
@@ -658,6 +660,8 @@ export default {
       burnChance: this.burnChance,
       dodge: this.dodge,
       skillName: this.skillName,
+      shield: this._shield,
+      hasteCharges: this._hasteCharges,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -758,6 +762,8 @@ export default {
         that.burnChance = s.burnChance || 0;
         that.dodge = s.dodge || 0;
         that.skillName = s.skillName || that._skillName();
+        that._shield = s.shield || 0;
+        that._hasteCharges = s.hasteCharges || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -822,6 +828,8 @@ export default {
     this.dodge = 0;
     this.combo = 0;
     this._poisonTurns = 0;
+    this._shield = 0;
+    this._hasteCharges = 0;
     this._bossEnraged = false;
     this._poisonDmg = 0;
     this._burnTurns = 0;
@@ -1523,7 +1531,12 @@ export default {
       }
       this._revealAround();
       this._renderMap();
-      this._monstersTurn();
+      if (this._hasteCharges > 0) {
+        this._hasteCharges--;
+        this._addLog('迅捷：本回合怪物未行动');
+      } else {
+        this._monstersTurn();
+      }
       this._afterMonstersTurn();
       return;
     }
@@ -1532,7 +1545,12 @@ export default {
     this._playerC = nc;
     this._revealAround();
     this._renderMap();
-    this._monstersTurn();
+    if (this._hasteCharges > 0) {
+      this._hasteCharges--;
+      this._addLog('迅捷：本回合怪物未行动');
+    } else {
+      this._monstersTurn();
+    }
     this._afterMonstersTurn();
   },
 
@@ -1777,10 +1795,13 @@ export default {
       return;
     }
     var dmg = Math.max(1, Math.round((this.monsterAtk - this.armorDef) * (0.85 + Math.random() * 0.3)));
+    var absorbed = Math.min(this._shield, dmg);
+    this._shield -= absorbed;
+    dmg -= absorbed;
     this.hp -= dmg;
     this._updateHp();
     this._vibrate(60);
-    this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害');
+    this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害' + (absorbed > 0 ? '（护盾吸收 ' + absorbed + '）' : ''));
 
     // 怪物技能
     if (this.monsterId === 'spider' && Math.random() < 0.35) {
@@ -2085,6 +2106,10 @@ export default {
       this.atk = this.baseAtk + this.weaponAtk;
       this.goldMul += 0.05;
       this.expMul += 0.05;
+    } else if (id === 'shield') {
+      this._shield += 15;
+    } else if (id === 'haste') {
+      this._hasteCharges += 1;
     }
 
     this.level += 1;

@@ -37,6 +37,15 @@ export const AREAS = [
     boss: 'abyss_lord',
     effect: { hp: 1.25, atk: 1.3, gold: 1.35, exp: 1.35 },
     effDesc: '深渊之力侵蚀，敌人极强，回报极高'
+  },
+  {
+    id: 'tundra',
+    name: '极寒雪原',
+    desc: '风雪呼啸，白骨在冰原上若隐若现。',
+    monsters: ['wolf', 'skeleton', 'wraith', 'yeti'],
+    boss: 'frost_king',
+    effect: { hp: 1.3, atk: 1.15, gold: 1.4, exp: 1.4 },
+    effDesc: '雪原生物坚韧且凶猛，回报极高'
   }
 ];
 
@@ -57,7 +66,10 @@ export const MONSTERS = {
   boar:       { name: '野猪',     hp: 40, atk: 9,  gold: 9,  exp: 22 },
   spider:     { name: '洞穴蜘蛛', hp: 34, atk: 8,  gold: 7,  exp: 19 },
   wraith:     { name: '怨灵',     hp: 42, atk: 11, gold: 11, exp: 26 },
-  imp:        { name: '小恶魔',   hp: 50, atk: 13, gold: 14, exp: 30 }
+  imp:        { name: '小恶魔',   hp: 50, atk: 13, gold: 14, exp: 30 },
+  yeti:       { name: '雪怪',     hp: 58, atk: 15, gold: 18, exp: 36 },
+  ice_wolf:   { name: '冰原狼',   hp: 46, atk: 12, gold: 14, exp: 30 },
+  frost_king: { name: '霜冻王',   hp: 180, atk: 24, gold: 130, exp: 200 }
 };
 
 export const UPGRADES = [
@@ -73,7 +85,9 @@ export const UPGRADES = [
   { id: 'lifesteal', name: '吸血 +2',    desc: '攻击时回复生命',      rarity: 'rare'   },
   { id: 'burn',    name: '焚灼',         desc: '攻击有几率点燃怪物',  rarity: 'rare'   },
   { id: 'cd',      name: '冷却 -0.3s',   desc: '技能冷却缩短',        rarity: 'epic'   },
-  { id: 'omni',    name: '全能 +5%',     desc: '攻击+2 并小幅强化',   rarity: 'epic'   }
+  { id: 'omni',    name: '全能 +5%',     desc: '攻击+2 并小幅强化',   rarity: 'epic'   },
+  { id: 'shield',  name: '护盾',         desc: '获得 15 点临时护盾', rarity: 'rare'   },
+  { id: 'haste',   name: '迅捷',         desc: '移动不触发怪物回合(1 次)', rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {
@@ -105,7 +119,9 @@ export const WEAPONS = [
   { name: '短弓', atk: 4 },
   { name: '战锤', atk: 7 },
   { name: '冰霜法杖', atk: 10 },
-  { name: '圣剑', atk: 14 }
+  { name: '圣剑', atk: 14 },
+  { name: '寒冰弓', atk: 11 },
+  { name: '雷神锤', atk: 16 }
 ];
 
 export const ARMORS = [
@@ -114,7 +130,9 @@ export const ARMORS = [
   { name: '锁子甲', def: 7 },
   { name: '板甲', def: 10 },
   { name: '鳞甲', def: 8 },
-  { name: '秘银甲', def: 12 }
+  { name: '秘银甲', def: 12 },
+  { name: '龙骨甲', def: 14 },
+  { name: '冰晶甲', def: 11 }
 ];
 
 export const SHOP_ITEMS = [
