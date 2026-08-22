@@ -26,3 +26,16 @@ export function computeMonsterStats(base, floor, mul, endless, areaEffect) {
 export function randInt(min, max) {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
+
+export function areaByFloor(floor, areas, every) {
+  var index = Math.floor((floor - 1) / every) % areas.length;
+  return areas[index];
+}
+
+export function isBossFloor(floor, every) {
+  return floor % every === 0;
+}
+
+export function healAmount(maxHp, baseHeal) {
+  return baseHeal + Math.round(maxHp * 0.05);
+}
