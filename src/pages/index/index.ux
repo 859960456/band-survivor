@@ -758,6 +758,7 @@ export default {
       shieldReflect: this._shieldReflect,
       revive: this._revive,
       reviveUsed: this._reviveUsed,
+      comboPerStack: this._comboPerStack,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -911,6 +912,7 @@ export default {
         that._shieldReflect = s.shieldReflect || 0;
         that._revive = !!s.revive;
         that._reviveUsed = !!s.reviveUsed;
+        that._comboPerStack = s.comboPerStack || 0.03;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1031,6 +1033,7 @@ export default {
     this._shieldReflect = 0;
     this._revive = false;
     this._reviveUsed = false;
+    this._comboPerStack = 0.03;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2100,7 +2103,7 @@ export default {
         this._updateHp();
       }
     }
-    var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6 + this._comboMaxAdd);
+    var comboBonus = 1 + Math.min(this.combo * this._comboPerStack, 0.6 + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
     var effectiveAtk = this.atk + this._bloodlust - 1 + (this._battleAtkBonus || 0);
     var dmg = Math.max(1, Math.round(effectiveAtk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
@@ -2963,6 +2966,8 @@ export default {
       this._shieldReflect += 0.5;
     } else if (id === 'revive') {
       this._revive = true;
+    } else if (id === 'comboPower') {
+      this._comboPerStack += 0.01;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
