@@ -228,3 +228,9 @@ export const CLASSES = [
   { id: 'ranger',  name: '游侠', desc: '高闪避',   hp: 95,  atk: 11, potions: 3, dodge: 6,  crit: 0 },
   { id: 'mage',    name: '法师', desc: '高暴击',   hp: 85,  atk: 13, potions: 2, dodge: 0,  crit: 0.15 }
 ];
+
+export const CHALLENGE_MODS = [
+  { id: 'glass', name: '玻璃大炮', desc: '攻击+30% 生命-30%', atkMul: 1.3, hpMul: 0.7 },
+  { id: 'iron',  name: '铁血',     desc: '攻击+5 生命+20',     atkAdd: 5,  hpAdd: 20 },
+  { id: 'greed', name: '贪婪',     desc: '金币+30% 经验-20%', goldMul: 1.3, expMul: 0.8 }
+];

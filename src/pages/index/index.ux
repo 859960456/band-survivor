@@ -59,7 +59,7 @@
       <div class="bar grid-bar">
         <div class="bar-fill hp-fill" style="width: {{hpPercent}}%;"></div>
       </div>
-      <text class="hp-text">HP {{hp}}/{{maxHp}} · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}</text>
+      <text class="hp-text">HP {{hp}}/{{maxHp}} · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}{{challengeMod ? ' · 词条:' : ''}}</text>
       <text class="map-msg">{{lastLog}}</text>
 
       <div class="map-area">
@@ -392,7 +392,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS } from '../../common/game-data.js';
 import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor, randPick, achievementName } from '../../common/game-core.js';
 
 const MAX_LOG = 6;
@@ -461,6 +461,7 @@ export default {
     _hasteCharges: 0,
     _damageDealt: 0,
     _comboMaxAdd: 0,
+    challengeMod: '',
     _damageTaken: 0,
     _maxCombo: 0,
     _bossEnraged: false,
@@ -643,6 +644,7 @@ export default {
 
   startGame() {
     this._resetRun();
+    this._applyChallengeMod();
     this.phase = this.tutorialSeen ? 'grid' : 'tutorial';
     this._genFloor(1);
     this._addLog('你踏入了第 1 层地牢');
@@ -689,6 +691,7 @@ export default {
       shield: this._shield,
       hasteCharges: this._hasteCharges,
       comboMaxAdd: this._comboMaxAdd,
+      challengeMod: this.challengeMod,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -793,6 +796,7 @@ export default {
         that._shield = s.shield || 0;
         that._hasteCharges = s.hasteCharges || 0;
         that._comboMaxAdd = s.comboMaxAdd || 0;
+        that.challengeMod = s.challengeMod || '';
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -862,6 +866,7 @@ export default {
     this._damageDealt = 0;
     this._damageTaken = 0;
     this._isElite = false;
+    this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
     this._bossEnraged = false;
@@ -2714,6 +2719,37 @@ export default {
       }
     }
     return ok;
+  },
+
+  _applyChallengeMod() {
+    if (!this.challengeMode || this.challengeMod) {
+      return;
+    }
+    var mod = CHALLENGE_MODS[Math.floor(Math.random() * CHALLENGE_MODS.length)];
+    this.challengeMod = mod.id;
+    if (mod.atkMul) {
+      this.baseAtk = Math.round(this.baseAtk * mod.atkMul);
+      this.atk = this.baseAtk + this.weaponAtk;
+    }
+    if (mod.hpMul) {
+      this.maxHp = Math.round(this.maxHp * mod.hpMul);
+      this.hp = Math.min(this.hp, this.maxHp);
+    }
+    if (mod.atkAdd) {
+      this.baseAtk += mod.atkAdd;
+      this.atk = this.baseAtk + this.weaponAtk;
+    }
+    if (mod.hpAdd) {
+      this.maxHp += mod.hpAdd;
+    }
+    if (mod.goldMul) {
+      this.goldMul *= mod.goldMul;
+    }
+    if (mod.expMul) {
+      this.expMul *= mod.expMul;
+    }
+    this._updateHp();
+    this._addLog('挑战词条：' + mod.name + '（' + mod.desc + '）');
   },
 
   _saveSettings() {
