@@ -229,7 +229,7 @@
       <div class="bar">
         <div class="bar-fill hp-fill" style="width: {{hpPercent}}%;"></div>
       </div>
-      <text class="hp-text">HP {{hp}}/{{maxHp}}</text>
+      <text class="hp-text">HP {{hp}}/{{maxHp}} · 连击{{combo}}</text>
 
       <scroll class="battle-scroll" scroll-y="true">
         <div class="monster-card">
@@ -315,6 +315,7 @@ export default {
     skillCdMax: SKILL_CD,
     burnChance: 0,
     dodge: 0,
+    combo: 0,
     _burnTurns: 0,
     _burnPower: 0,
     hp: 100,
@@ -592,6 +593,7 @@ export default {
     this.skillCdMax = SKILL_CD;
     this.burnChance = 0;
     this.dodge = 0;
+    this.combo = 0;
     this._burnTurns = 0;
     this._burnPower = 0;
     this.hp = BASE_PLAYER.hp;
@@ -1301,6 +1303,7 @@ export default {
     this.monsterExp = stats.exp;
     this.isBoss = isBoss;
     this.skillCd = 0;
+    this.combo = 0;
     this.phase = 'battle';
     this._addLog('遭遇 ' + stats.name);
   },
@@ -1369,8 +1372,10 @@ export default {
       this._burnPower = Math.max(2, Math.round(this.atk * 0.25));
       this._addLog('怪物被点燃了');
     }
+    this.combo += 1;
+    var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6);
     var isCrit = Math.random() < this.critChance;
-    var dmg = Math.max(1, Math.round(this.atk * multiplier * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
+    var dmg = Math.max(1, Math.round(this.atk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
     this.monsterHp -= dmg;
     this._updateMonsterHp();
     if (isCrit) {
