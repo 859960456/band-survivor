@@ -218,6 +218,14 @@
         <text class="btn-text">强化防具（{{armorUpgradeCost}}金）</text>
         <text class="btn-sub">当前 +{{armorDef}}</text>
       </div>
+      <div class="btn shop-close {{materials < 3 || gold < 20 ? 'disabled' : ''}}" @click="craftItem">
+        <text class="btn-text">打造装备（3材料+20金）</text>
+        <text class="btn-sub">材料 {{materials}}</text>
+      </div>
+      <div class="btn shop-close {{gold < 40 ? 'disabled' : ''}}" @click="gambleEquip">
+        <text class="btn-text">赌装备（40金）</text>
+        <text class="btn-sub">高概率高品质</text>
+      </div>
       <div class="btn shop-close" @click="closeShop">
         <text class="btn-text">离开商店</text>
       </div>
@@ -229,7 +237,7 @@
       <text class="bag-line">武器：{{weaponName}} +{{weaponAtk}}</text>
       <text class="bag-line">防具：{{armorName}} +{{armorDef}} · 闪{{dodge}}%</text>
       <text class="bag-line">药水：{{potions}} 瓶</text>
-      <text class="bag-line">金币：{{gold}}</text>
+      <text class="bag-line">金币：{{gold}} · 材料：{{materials}}</text>
       <text class="bag-line" if="{{relics.length}}">遗物：{{relics.length}} 件</text>
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
@@ -373,6 +381,7 @@ export default {
     codexTotal: 0,
     codexCount: 0,
     relics: [],
+    materials: 0,
     talentPoints: 0,
     talents: [],
 
@@ -532,6 +541,7 @@ export default {
       grid: this._grid,
       visited: this._visited,
       relics: this.relics,
+      materials: this.materials,
       talentPoints: this.talentPoints,
       talents: this.talents,
       monsters: this._monsters,
@@ -582,6 +592,7 @@ export default {
         that._grid = s.grid || [];
         that._visited = s.visited || [];
         that.relics = s.relics || [];
+        that.materials = s.materials || 0;
         that.talentPoints = s.talentPoints || 0;
         that.talents = s.talents || [];
         that._monsters = s.monsters || [];
@@ -644,6 +655,7 @@ export default {
     this.exp = BASE_PLAYER.exp;
     this.expNext = BASE_PLAYER.expNext;
     this.relics = [];
+    this.materials = 0;
     this.talentPoints = 0;
     this.talents = [];
     this.potions = BASE_PLAYER.potions;
@@ -1563,6 +1575,7 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    this.materials += 1 + Math.floor(Math.random() * 2);
     this._discoverMonster(this.monsterId);
     if (this.isBoss) {
       this.bossKills += 1;
@@ -2073,6 +2086,67 @@ export default {
       return;
     }
     this.phase = 'shop';
+    this._updateUpgradeCosts();
+  },
+
+  _equipRolled(weapon) {
+    if (weapon) {
+      if (weapon.atk > this.weaponAtk) {
+        this.weaponAtk = weapon.atk;
+        this.weaponName = weapon.name;
+        this.atk = this.baseAtk + this.weaponAtk;
+        this.skillName = this._skillName();
+        this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
+        return true;
+      }
+      this._addLog('获得 ' + weapon.name + '，但不如当前武器');
+      return false;
+    }
+    return false;
+  },
+
+  _equipRolledArmor(armor) {
+    if (armor) {
+      if (armor.def > this.armorDef) {
+        this.armorDef = armor.def;
+        this.armorName = armor.name;
+        this.dodge = armor.dodge || 0;
+        this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
+        return true;
+      }
+      this._addLog('获得 ' + armor.name + '，但不如当前防具');
+      return false;
+    }
+    return false;
+  },
+
+  craftItem() {
+    if (this.phase !== 'shop' || this.materials < 3 || this.gold < 20) {
+      return;
+    }
+    this.materials -= 3;
+    this.gold -= 20;
+    if (Math.random() < 0.5) {
+      this._equipRolled(this._rollWeapon());
+    } else {
+      this._equipRolledArmor(this._rollArmor());
+    }
+    this._updateUpgradeCosts();
+  },
+
+  gambleEquip() {
+    if (this.phase !== 'shop' || this.gold < 40) {
+      return;
+    }
+    this.gold -= 40;
+    // 保底高品质：直接取最高两档品质
+    var weapon = this._rollWeapon();
+    var armor = this._rollArmor();
+    if (Math.random() < 0.5) {
+      this._equipRolled(weapon);
+    } else {
+      this._equipRolledArmor(armor);
+    }
     this._updateUpgradeCosts();
   },
 
