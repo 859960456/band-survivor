@@ -29,6 +29,9 @@
       <div class="btn" @click="openCodex">
         <text class="btn-text">图鉴 {{codexCount}}/{{codexTotal}}</text>
       </div>
+      <div class="btn" @click="openMeta">
+        <text class="btn-text">灵魂 {{soul}} · 永久强化</text>
+      </div>
       <text class="best">称号：{{title}} · 最佳：第 {{best}} 层</text>
     </div>
 
@@ -144,6 +147,24 @@
         </div>
       </scroll>
       <div class="btn" @click="closeCodex">
+        <text class="btn-text">关闭</text>
+      </div>
+    </div>
+
+    <!-- 永久强化 -->
+    <div if="{{phase === 'meta'}}" class="overlay dead-overlay">
+      <text class="dead-title">永久强化</text>
+      <text class="dead-text">灵魂：{{soul}}</text>
+      <div class="btn" @click="buyMetaHp">
+        <text class="btn-text">生命上限 +10（{{metaUpgradeCostHp}}魂）</text>
+      </div>
+      <div class="btn" @click="buyMetaPotion">
+        <text class="btn-text">开局药水 +1（{{metaUpgradeCostPotion}}魂）</text>
+      </div>
+      <div class="btn" @click="buyMetaAtk">
+        <text class="btn-text">开局攻击 +2（{{metaUpgradeCostAtk}}魂）</text>
+      </div>
+      <div class="btn" @click="closeMeta">
         <text class="btn-text">关闭</text>
       </div>
     </div>
@@ -323,6 +344,10 @@ export default {
     achievementTotal: 0,
     achievementList: [],
     title: '初行者',
+    soul: 0,
+    metaHp: 0,
+    metaPotion: 0,
+    metaAtk: 0,
     eventTitle: '',
     eventDesc: '',
     eventOptions: [],
@@ -451,6 +476,20 @@ export default {
           if (s && typeof s.sensitivity === 'number') {
             that.sensitivity = s.sensitivity;
             that._updateSensLabel();
+          }
+        } catch (e) {}
+      }
+    });
+    storage.get({
+      key: 'BAND_SURVIVOR_META',
+      success: function(data) {
+        try {
+          var m = JSON.parse(data);
+          if (m) {
+            that.soul = m.soul || 0;
+            that.metaHp = m.metaHp || 0;
+            that.metaPotion = m.metaPotion || 0;
+            that.metaAtk = m.metaAtk || 0;
           }
         } catch (e) {}
       }
@@ -700,6 +739,14 @@ export default {
     this._stairsC = 0;
     this._battleMonsterR = -1;
     this._battleMonsterC = -1;
+    // 应用永久强化
+    this.baseAtk = BASE_PLAYER.atk + this.metaAtk;
+    this.atk = this.baseAtk + this.weaponAtk;
+    this.maxHp = BASE_PLAYER.maxHp + this.metaHp;
+    this.hp = this.maxHp;
+    this.potions = BASE_PLAYER.potions + this.metaPotion;
+    this._updateHp();
+    this._updateExp();
   },
 
   _addLog(text) {
@@ -1973,6 +2020,8 @@ export default {
     this.phase = 'dead';
     this._vibrate(200);
     this._clearSave();
+    this.soul += this.floor * 2 + this.level;
+    this._saveMeta();
     if (this.floor > this.best) {
       this.best = this.floor;
       storage.set({
@@ -2099,6 +2148,52 @@ export default {
 
   closeAchievements() {
     this.phase = 'home';
+  },
+
+  _saveMeta() {
+    storage.set({
+      key: 'BAND_SURVIVOR_META',
+      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk })
+    });
+  },
+
+  _updateMetaList() {
+    this.metaUpgradeCostHp = 20 + this.metaHp * 20;
+    this.metaUpgradeCostPotion = 25 + this.metaPotion * 25;
+    this.metaUpgradeCostAtk = 30 + this.metaAtk * 30;
+  },
+
+  openMeta() {
+    this._updateMetaList();
+    this.phase = 'meta';
+  },
+
+  closeMeta() {
+    this.phase = 'home';
+  },
+
+  buyMetaHp() {
+    if (this.soul < this.metaUpgradeCostHp) { this._addLog('灵魂不足'); return; }
+    this.soul -= this.metaUpgradeCostHp;
+    this.metaHp += 10;
+    this._saveMeta();
+    this._updateMetaList();
+  },
+
+  buyMetaPotion() {
+    if (this.soul < this.metaUpgradeCostPotion) { this._addLog('灵魂不足'); return; }
+    this.soul -= this.metaUpgradeCostPotion;
+    this.metaPotion += 1;
+    this._saveMeta();
+    this._updateMetaList();
+  },
+
+  buyMetaAtk() {
+    if (this.soul < this.metaUpgradeCostAtk) { this._addLog('灵魂不足'); return; }
+    this.soul -= this.metaUpgradeCostAtk;
+    this.metaAtk += 2;
+    this._saveMeta();
+    this._updateMetaList();
   },
 
   _saveSettings() {
