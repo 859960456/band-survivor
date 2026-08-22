@@ -1943,7 +1943,8 @@ export default {
     if (this.isBoss) {
       this.materials += 5;
       this.potions += 1;
-      this._addLog('BOSS 战利品：材料 +5，药水 +1');
+      this.talentPoints += 1;
+      this._addLog('BOSS 战利品：材料 +5，药水 +1，天赋点 +1');
     } else if (this._isElite) {
       this.materials += 3;
       this._addLog('精英战利品：材料 +3');
