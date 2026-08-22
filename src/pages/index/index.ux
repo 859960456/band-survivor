@@ -13,18 +13,17 @@
 
     <!-- 地牢探索 -->
     <div if="{{phase === 'grid'}}" class="screen grid-screen">
-      <!-- 顶部状态栏：全宽顶到胶囊上缘，由设备裁剪贴合弧形 -->
-      <div class="status-bar">
+      <!-- 顶部状态+经验面板：全宽顶到胶囊上缘，由设备裁剪贴合弧形 -->
+      <div class="top-panel">
         <div class="hud">
           <text class="hud-item">第{{floor}}层</text>
           <text class="hud-item">Lv.{{level}}</text>
           <text class="hud-item">金币{{gold}}</text>
           <text class="hud-item">杀{{kills}}</text>
         </div>
-      </div>
-      <!-- 经验条 -->
-      <div class="exp-bar">
-        <div class="exp-fill" style="width: {{expPercent}}%;"></div>
+        <div class="exp-bar">
+          <div class="exp-fill" style="width: {{expPercent}}%;"></div>
+        </div>
       </div>
       <!-- 血条 -->
       <div class="bar grid-bar">
@@ -1260,11 +1259,11 @@ export default {
   font-size: 12px;
 }
 
-.status-bar {
+.top-panel {
   width: 100%;
-  padding-top: 42px;
-  padding-bottom: 6px;
-  background-color: #1e2740;
+  padding-top: 48px;
+  padding-bottom: 8px;
+  background-color: #2a3f7f;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -1280,10 +1279,12 @@ export default {
 
 /* 经验条 */
 .exp-bar {
-  width: 100%;
+  width: 192px;
   height: 6px;
-  background-color: #262c3a;
+  margin-top: 5px;
+  background-color: rgba(0, 0, 0, 0.35);
   overflow: hidden;
+  border-radius: 3px;
 }
 
 .exp-fill {
