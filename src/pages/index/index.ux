@@ -735,6 +735,7 @@ export default {
       craftDiscount: this._craftDiscount,
       cdkill: this._cdkill,
       cleanChance: this._cleanChance,
+      openingStrike: this._openingStrike,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -865,6 +866,7 @@ export default {
         that._craftDiscount = s.craftDiscount || 0;
         that._cdkill = s.cdkill || 0;
         that._cleanChance = s.cleanChance || 0;
+        that._openingStrike = s.openingStrike || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -961,6 +963,7 @@ export default {
     this._craftDiscount = 0;
     this._cdkill = 0;
     this._cleanChance = 0;
+    this._openingStrike = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1904,6 +1907,18 @@ export default {
     if (this._intimidate) {
       this.monsterAtk = Math.max(1, Math.round(this.monsterAtk * 0.8));
     }
+    if (this._openingStrike > 0) {
+      this.monsterHp -= this._openingStrike;
+      this._updateMonsterHp();
+      this._addLog('先机打击！造成 ' + this._openingStrike + ' 伤害');
+      if (this.monsterHp <= 0) {
+        this.monsterHp = 0;
+        this._updateMonsterHp();
+        this.monsterAlive = false;
+        this._onMonsterDead();
+        return;
+      }
+    }
     this.phase = 'battle';
     this._addLog('遭遇 ' + stats.name);
   },
@@ -2733,6 +2748,8 @@ export default {
       this._cdkill = 1;
     } else if (id === 'clean') {
       this._cleanChance += 0.25;
+    } else if (id === 'opening') {
+      this._openingStrike += 8;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
