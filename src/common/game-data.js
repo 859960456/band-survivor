@@ -147,7 +147,8 @@ export const UPGRADES = [
   { id: 'critCombo', name: '猎杀',     desc: '暴击时 +1 连击',           rarity: 'rare'   },
   { id: 'soulKill', name: '敛魂',     desc: '击杀几率获得灵魂',          rarity: 'epic'   },
   { id: 'stairvision', name: '鹰眼',   desc: '开局预知楼梯位置',          rarity: 'rare'   },
-  { id: 'startCombo', name: '先声',   desc: '战斗开始 +2 连击',          rarity: 'rare'   }
+  { id: 'startCombo', name: '先声',   desc: '战斗开始 +2 连击',          rarity: 'rare'   },
+  { id: 'comboHeal', name: '连击治愈', desc: '连击里程碑回复生命',        rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

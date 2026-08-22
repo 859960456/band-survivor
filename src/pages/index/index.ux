@@ -748,6 +748,7 @@ export default {
       soulOnKillChance: this._soulOnKillChance,
       stairVision: this._stairVision,
       startCombo: this._startCombo,
+      comboHeal: this._comboHeal,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -891,6 +892,7 @@ export default {
         that._soulOnKillChance = s.soulOnKillChance || 0;
         that._stairVision = !!s.stairVision;
         that._startCombo = s.startCombo || 0;
+        that._comboHeal = s.comboHeal || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1000,6 +1002,7 @@ export default {
     this._soulOnKillChance = 0;
     this._stairVision = false;
     this._startCombo = 0;
+    this._comboHeal = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2052,6 +2055,10 @@ export default {
     if (this.combo === 5 || this.combo === 10 || this.combo === 15) {
       this._vibrate(200);
       this._addLog('连击 x' + this.combo + '！');
+      if (this._comboHeal > 0 && this.hp < this.maxHp) {
+        this.hp = Math.min(this.maxHp, this.hp + this._comboHeal);
+        this._updateHp();
+      }
     }
     var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6 + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
@@ -2858,6 +2865,8 @@ export default {
       this._stairVision = true;
     } else if (id === 'startCombo') {
       this._startCombo += 2;
+    } else if (id === 'comboHeal') {
+      this._comboHeal += 4;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
