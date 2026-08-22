@@ -744,6 +744,7 @@ export default {
       haggle: this._haggle,
       potionShield: this._potionShield,
       potionCombo: this._potionCombo,
+      critCombo: this._critCombo,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -883,6 +884,7 @@ export default {
         that._haggle = s.haggle || 0;
         that._potionShield = s.potionShield || 0;
         that._potionCombo = s.potionCombo || 0;
+        that._critCombo = s.critCombo || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -988,6 +990,7 @@ export default {
     this._haggle = 0;
     this._potionShield = 0;
     this._potionCombo = 0;
+    this._critCombo = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2061,6 +2064,9 @@ export default {
       if (this._critGold > 0) {
         this.gold += this._critGold;
       }
+      if (this._critCombo > 0) {
+        this.combo += this._critCombo;
+      }
     } else {
       this._addLog('你造成 ' + dmg + ' 点伤害');
     }
@@ -2818,6 +2824,8 @@ export default {
       this._potionShield += 8;
     } else if (id === 'potionCombo') {
       this._potionCombo += 2;
+    } else if (id === 'critCombo') {
+      this._critCombo += 1;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;

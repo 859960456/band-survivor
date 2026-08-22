@@ -143,7 +143,8 @@ export const UPGRADES = [
   { id: 'comboHit', name: '韧性',        desc: '受击有几率 +1 连击',        rarity: 'rare'   },
   { id: 'haggle',  name: '议价',         desc: '商店价格 -15%',            rarity: 'common' },
   { id: 'potionShield', name: '圣水',     desc: '使用药水获得护盾',        rarity: 'rare'   },
-  { id: 'potionCombo', name: '聚气',     desc: '使用药水获得连击',        rarity: 'rare'   }
+  { id: 'potionCombo', name: '聚气',     desc: '使用药水获得连击',        rarity: 'rare'   },
+  { id: 'critCombo', name: '猎杀',     desc: '暴击时 +1 连击',           rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
