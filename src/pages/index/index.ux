@@ -1682,6 +1682,10 @@ export default {
       { title: '补给箱', desc: '里面似乎有物资。', options: [
         { label: '搜刮', effect: 'potion', value: 1 },
         { label: '离开', effect: 'none' }
+      ] },
+      { title: '行脚商人', desc: '商人在兜售补给。', options: [
+        { label: '买药水(-15金)', cost: 15, potion: 1 },
+        { label: '无视', effect: 'none' }
       ] }
     ];
     var e = events[Math.floor(Math.random() * events.length)];
@@ -1708,6 +1712,16 @@ export default {
         this.hp = Math.max(1, this.hp + opt.value);
         this._updateHp();
         this._addLog(opt.value < 0 ? '你付出了代价' : '你恢复了生命');
+      } else if (opt.cost) {
+        if (this.gold >= opt.cost) {
+          this.gold -= opt.cost;
+          if (opt.potion) {
+            this.potions += opt.potion;
+            this._addLog('购买药水，花费 ' + opt.cost + ' 金币');
+          }
+        } else {
+          this._addLog('金币不足');
+        }
       }
     }
     this.phase = 'grid';
@@ -1883,9 +1897,20 @@ export default {
           return;
         }
       } else {
-        this._moveMonster(mon, dr, dc);
+        if (Math.abs(dr) + Math.abs(dc) > 3 && Math.random() < 0.25) {
+          this._chargeMonster(mon, dr, dc);
+        } else {
+          this._moveMonster(mon, dr, dc);
+        }
       }
     }
+  },
+
+  _chargeMonster(mon, dr, dc) {
+    this._moveMonster(mon, dr, dc);
+    var dr2 = this._playerR - mon.row;
+    var dc2 = this._playerC - mon.col;
+    this._moveMonster(mon, dr2, dc2);
   },
 
   _moveMonster(mon, dr, dc) {
