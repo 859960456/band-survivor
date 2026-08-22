@@ -368,6 +368,7 @@
             <div class="bar-fill monster-fill" style="width: {{monsterHpPercent}}%;"></div>
           </div>
           <text class="monster-atk">攻击 {{monsterAtk}}</text>
+          <text class="monster-skill" if="{{monsterSkillHint}}">技能：{{monsterSkillHint}}</text>
         </div>
 
         <div class="log-box">
@@ -491,6 +492,7 @@ export default {
 
     monsterAlive: false,
     monsterName: '',
+    monsterSkillHint: '',
     monsterHp: 0,
     monsterMaxHp: 0,
     monsterHpPercent: 0,
@@ -1772,6 +1774,7 @@ export default {
     this.monsterAlive = true;
     this.monsterId = id;
     this.monsterName = elite.name;
+    this.monsterSkillHint = this._monsterSkillHint(id);
     this.monsterMaxHp = elite.hp;
     this.monsterHp = elite.hp;
     this.monsterHpPercent = 100;
@@ -1797,6 +1800,7 @@ export default {
     this.monsterId = monsterId;
     this.monsterAlive = true;
     this.monsterName = stats.name;
+    this.monsterSkillHint = this._monsterSkillHint(monsterId);
     this.monsterMaxHp = stats.hp;
     this.monsterHp = stats.hp;
     this.monsterHpPercent = 100;
@@ -1817,6 +1821,11 @@ export default {
       return;
     }
     this._playerAction(1);
+  },
+
+  _monsterSkillHint(id) {
+    var map = { spider: '毒液', demon: '吸血', orc: '狂暴', wolf: '突袭', bat: '吸血', goblin: '偷金', yeti: '寒伤', fire_imp: '灼伤', lava_golem: '灼伤', inferno_lord: '灼伤', frost_king: '冰甲', cave_rat: '撕咬', magma_spider: '灼伤', void_walker: '虚空', cursed_knight: '诅咒', treant: '缠绕', frost_wolf: '寒咬' };
+    return map[id] || '';
   },
 
   _skillName() {
@@ -3766,6 +3775,12 @@ export default {
 
 .monster-fill {
   background: linear-gradient(90deg, #e05a4e, #c23b2f);
+}
+
+.monster-skill {
+  margin-top: 4px;
+  color: #ffaa88;
+  font-size: 11px;
 }
 
 .monster-atk {
