@@ -2994,6 +2994,12 @@ export default {
       this._materialBonus += 1;
     } else if (id === 'skillpower2') {
       this._skillPowerAdd += 0.5;
+    } else if (id === 'omni2') {
+      this.baseAtk += 1;
+      this.atk = this.baseAtk + this.weaponAtk;
+      this.maxHp += 5;
+      this.goldMul += 0.02;
+      this.expMul += 0.02;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
