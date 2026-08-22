@@ -2022,6 +2022,14 @@ export default {
       { title: '神秘井', desc: '井水泛起奇异微光。', options: [
         { label: '饮下', effect: 'well' },
         { label: '离开', effect: 'none' }
+      ] },
+      { title: '医疗站', desc: '废弃的医疗仓还在运转。', options: [
+        { label: '治疗(+50血)', effect: 'heal50' },
+        { label: '离开', effect: 'none' }
+      ] },
+      { title: '军械库', desc: '尘封的武器架上还有装备。', options: [
+        { label: '挑武器', effect: 'gearWeapon' },
+        { label: '挑防具', effect: 'gearArmor' }
       ] }
     ];
     var e = events[Math.floor(Math.random() * events.length)];
@@ -2088,6 +2096,14 @@ export default {
           this.gold += 20;
           this._addLog('幸运符：获得 20 金币');
         }
+      } else if (opt.effect === 'heal50') {
+        this.hp = Math.min(this.maxHp, this.hp + 50);
+        this._updateHp();
+        this._addLog('医疗站恢复 50 生命');
+      } else if (opt.effect === 'gearWeapon') {
+        this._equipRolled(this._rollWeapon());
+      } else if (opt.effect === 'gearArmor') {
+        this._equipRolledArmor(this._rollArmor());
       } else if (opt.effect === 'well') {
         var wr = Math.random();
         if (wr < 0.4) {
