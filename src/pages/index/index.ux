@@ -746,6 +746,7 @@ export default {
       potionCombo: this._potionCombo,
       critCombo: this._critCombo,
       soulOnKillChance: this._soulOnKillChance,
+      stairVision: this._stairVision,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -887,6 +888,7 @@ export default {
         that._potionCombo = s.potionCombo || 0;
         that._critCombo = s.critCombo || 0;
         that._soulOnKillChance = s.soulOnKillChance || 0;
+        that._stairVision = !!s.stairVision;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -994,6 +996,7 @@ export default {
     this._potionCombo = 0;
     this._critCombo = 0;
     this._soulOnKillChance = 0;
+    this._stairVision = false;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1181,6 +1184,18 @@ export default {
     this._height = sizes[idx][0];
     this._width = sizes[idx][1];
     this._genMap();
+    if (this._stairVision && this._visited && this._visited[this._stairsR]) {
+      var svR = this._stairsR, svC = this._stairsC;
+      for (var sd = -1; sd <= 1; sd++) {
+        for (var se = -1; se <= 1; se++) {
+          var nr2 = svR + sd, nc2 = svC + se;
+          if (nr2 >= 0 && nr2 < this._height && nc2 >= 0 && nc2 < this._width) {
+            if (!this._visited[nr2]) { this._visited[nr2] = []; }
+            this._visited[nr2][nc2] = true;
+          }
+        }
+      }
+    }
     this._renderMap();
     var area = this._areaByFloor(num);
     this.areaName = area.name;
@@ -2836,6 +2851,8 @@ export default {
       this._critCombo += 1;
     } else if (id === 'soulKill') {
       this._soulOnKillChance += 0.2;
+    } else if (id === 'stairvision') {
+      this._stairVision = true;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
