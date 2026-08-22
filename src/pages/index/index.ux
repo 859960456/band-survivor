@@ -737,6 +737,8 @@ export default {
       cleanChance: this._cleanChance,
       openingStrike: this._openingStrike,
       thunderChance: this._thunderChance,
+      shieldGainChance: this._shieldGainChance,
+      shieldGainAmt: this._shieldGainAmt,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -869,6 +871,8 @@ export default {
         that._cleanChance = s.cleanChance || 0;
         that._openingStrike = s.openingStrike || 0;
         that._thunderChance = s.thunderChance || 0;
+        that._shieldGainChance = s.shieldGainChance || 0;
+        that._shieldGainAmt = s.shieldGainAmt || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -967,6 +971,8 @@ export default {
     this._cleanChance = 0;
     this._openingStrike = 0;
     this._thunderChance = 0;
+    this._shieldGainChance = 0;
+    this._shieldGainAmt = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2091,6 +2097,10 @@ export default {
     this._updateHp();
     this._vibrate(60);
     this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害' + (absorbed > 0 ? '（护盾吸收 ' + absorbed + '）' : ''));
+    if (this._shieldGainChance > 0 && Math.random() < this._shieldGainChance) {
+      this._shield += this._shieldGainAmt;
+      this._addLog('守护获得护盾 +' + this._shieldGainAmt);
+    }
     if (this._resolve && !this._resolveUsed && this.hp > 0 && this.hp < this.maxHp * 0.3) {
       this.hp = Math.min(this.maxHp, this.hp + 20);
       this._resolveUsed = true;
@@ -2768,6 +2778,9 @@ export default {
       this._openingStrike += 8;
     } else if (id === 'thunder') {
       this._thunderChance += 0.2;
+    } else if (id === 'guarded') {
+      this._shieldGainChance += 0.25;
+      this._shieldGainAmt += 4;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
