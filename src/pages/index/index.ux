@@ -2041,6 +2041,12 @@ export default {
       this.lifesteal += t.value;
     } else if (t.stat === 'burnChance') {
       this.burnChance += t.value;
+    } else if (t.stat === 'shield') {
+      this._shield += t.value;
+    } else if (t.stat === 'haste') {
+      this._hasteCharges += t.value;
+    } else if (t.stat === 'combo') {
+      this._comboMaxAdd += t.value;
     }
   },
 

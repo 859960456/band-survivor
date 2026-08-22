@@ -213,7 +213,10 @@ export const TALENTS = [
   { id: 't_gold',     name: '敛财', desc: '金币获取 +5%',    stat: 'goldMul',    value: 0.05 },
   { id: 't_exp',      name: '求知', desc: '经验获取 +5%',    stat: 'expMul',     value: 0.05 },
   { id: 't_lifesteal',name: '嗜血', desc: '吸血 +1',         stat: 'lifesteal',  value: 1 },
-  { id: 't_burn',     name: '焚心', desc: '点燃几率 +5%',    stat: 'burnChance', value: 0.05 }
+  { id: 't_burn',     name: '焚心', desc: '点燃几率 +5%',    stat: 'burnChance', value: 0.05 },
+  { id: 't_shield',   name: '铁躯', desc: '获得 10 点护盾',   stat: 'shield',    value: 10 },
+  { id: 't_haste',    name: '轻灵', desc: '获得 1 迅捷次数',  stat: 'haste',     value: 1 },
+  { id: 't_combo',    name: '连击', desc: '连击上限 +0.1',    stat: 'combo',     value: 0.1 }
 ];
 
 export const CLASSES = [
