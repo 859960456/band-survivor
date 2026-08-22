@@ -404,6 +404,7 @@ export default {
       sr: this._stairsR,
       sc: this._stairsC,
       grid: this._grid,
+      visited: this._visited,
       monsters: this._monsters,
       items: this._items
     };
@@ -450,6 +451,7 @@ export default {
         that._height = s.mh || 10;
         that._width = s.mw || 6;
         that._grid = s.grid || [];
+        that._visited = s.visited || [];
         that._monsters = s.monsters || [];
         that._items = s.items || [];
         that._playerR = s.pr || 0;
@@ -458,6 +460,7 @@ export default {
         that._stairsC = s.sc || 0;
         that._updateHp();
         that._updateExp();
+        that._revealAround();
         that.phase = 'grid';
         that._renderMap();
         that._addLog('继续冒险 · 第 ' + that.floor + ' 层');
@@ -517,6 +520,7 @@ export default {
     this.mapRows = [];
     this.mapCells = [];
     this._grid = [];
+    this._visited = [];
     this._monsters = [];
     this._items = [];
     this._playerR = 0;
@@ -774,6 +778,15 @@ export default {
     }
 
     this._grid = grid;
+    this._visited = [];
+    for (var vi = 0; vi < h; vi++) {
+      var vrow = [];
+      for (var vj = 0; vj < w; vj++) {
+        vrow.push(false);
+      }
+      this._visited.push(vrow);
+    }
+    this._revealAround();
     var first = rooms[0];
     var last = rooms[rooms.length - 1];
     // 避免出生点和楼梯同一个格子
@@ -895,11 +908,17 @@ export default {
       for (var vc = 0; vc < viewW; vc++) {
         var c = this._camC + vc;
         var cls = this._grid[r][c] === '#' ? 'wall' : 'floor';
+        var visited = this._visited && this._visited[r] && this._visited[r][c];
         if (r === this._playerR && c === this._playerC) {
           cls = 'player';
+        } else if (!visited && cls === 'floor') {
+          cls = 'fog';
         } else if (r === this._stairsR && c === this._stairsC) {
           cls = 'stairs';
         } else {
+          if (cls === 'fog') {
+            cls = 'floor';
+          }
           var mon = this._monsterAt(r, c);
           if (mon) {
             cls = 'monster';
@@ -912,6 +931,8 @@ export default {
         }
         var icon = '';
         if (cls === 'player') {
+          icon = '';
+        } else if (cls === 'fog') {
           icon = '';
         } else if (cls === 'monster') {
           icon = '/common/icons/monster.png';
@@ -1006,6 +1027,21 @@ export default {
     }
   },
 
+  _revealAround() {
+    var r = this._playerR, c = this._playerC;
+    for (var dr = -2; dr <= 2; dr++) {
+      for (var dc = -2; dc <= 2; dc++) {
+        var nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < this._height && nc >= 0 && nc < this._width && this._grid[nr][nc] !== '#') {
+          if (!this._visited[nr]) {
+            this._visited[nr] = [];
+          }
+          this._visited[nr][nc] = true;
+        }
+      }
+    }
+  },
+
   _tryMove(dr, dc) {
     var nr = this._playerR + dr;
     var nc = this._playerC + dc;
@@ -1037,6 +1073,7 @@ export default {
 
     this._playerR = nr;
     this._playerC = nc;
+    this._revealAround();
     this._renderMap();
     this._monstersTurn();
     this._afterMonstersTurn();
@@ -1824,6 +1861,10 @@ export default {
   width: 18px;
   height: 20px;
   border-radius: 3px;
+}
+
+.fog {
+  background-color: #17171f;
 }
 
 .wall {
