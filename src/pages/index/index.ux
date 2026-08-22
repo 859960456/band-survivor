@@ -2968,6 +2968,8 @@ export default {
       this._revive = true;
     } else if (id === 'comboPower') {
       this._comboPerStack += 0.01;
+    } else if (id === 'keenEye') {
+      this.critChance += 0.05;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;

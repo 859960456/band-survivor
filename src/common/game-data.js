@@ -162,7 +162,8 @@ export const UPGRADES = [
   { id: 'luck',     name: '幸运',     desc: '装备品质概率提升',          rarity: 'rare'   },
   { id: 'shieldReflect', name: '反射护盾', desc: '护盾吸收反弹 50%',       rarity: 'rare'   },
   { id: 'revive',  name: '涅槃',       desc: '每局死亡重生一次30%血',    rarity: 'epic'   },
-  { id: 'comboPower', name: '连击精通', desc: '连击加成更强',            rarity: 'epic'   }
+  { id: 'comboPower', name: '连击精通', desc: '连击加成更强',            rarity: 'epic'   },
+  { id: 'keenEye', name: '锐眼',      desc: '暴击率 +5%',               rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
