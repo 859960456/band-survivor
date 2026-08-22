@@ -119,7 +119,8 @@ export const UPGRADES = [
   { id: 'block',   name: '格挡',         desc: '受击有几率减半伤害',      rarity: 'rare'   },
   { id: 'barrier', name: '壁垒',         desc: '每层开始获得 8 护盾',      rarity: 'epic'   },
   { id: 'berserk', name: '狂怒',         desc: '生命越低伤害越高',        rarity: 'epic'   },
-  { id: 'skillcombo', name: '连击涌',     desc: '技能额外 +2 连击',        rarity: 'rare'   }
+  { id: 'skillcombo', name: '连击涌',     desc: '技能额外 +2 连击',        rarity: 'rare'   },
+  { id: 'vision',   name: '远见',         desc: '探索视野 +1 格',          rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

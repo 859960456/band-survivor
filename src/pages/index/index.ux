@@ -720,6 +720,7 @@ export default {
       barrier: this._barrier,
       berserk: this._berserk,
       skillCombo: this._skillCombo,
+      revealBonus: this._revealBonus,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -835,6 +836,7 @@ export default {
         that._barrier = s.barrier || 0;
         that._berserk = !!s.berserk;
         that._skillCombo = s.skillCombo || 0;
+        that._revealBonus = s.revealBonus || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -914,6 +916,7 @@ export default {
     this._barrier = 0;
     this._berserk = false;
     this._skillCombo = 0;
+    this._revealBonus = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1575,8 +1578,9 @@ export default {
 
   _revealAround() {
     var r = this._playerR, c = this._playerC;
-    for (var dr = -2; dr <= 2; dr++) {
-      for (var dc = -2; dc <= 2; dc++) {
+    var R = 2 + (this._revealBonus || 0);
+    for (var dr = -R; dr <= R; dr++) {
+      for (var dc = -R; dc <= R; dc++) {
         var nr = r + dr, nc = c + dc;
         if (nr >= 0 && nr < this._height && nc >= 0 && nc < this._width && this._grid[nr][nc] !== '#') {
           if (!this._visited[nr]) {
@@ -2611,6 +2615,8 @@ export default {
       this._berserk = true;
     } else if (id === 'skillcombo') {
       this._skillCombo += 2;
+    } else if (id === 'vision') {
+      this._revealBonus += 1;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
