@@ -172,6 +172,14 @@
           <text class="shop-desc">{{$item.desc}} · {{$item.price}}金</text>
         </div>
       </scroll>
+      <div class="btn shop-close {{gold < weaponUpgradeCost ? 'disabled' : ''}}" @click="upgradeWeapon">
+        <text class="btn-text">强化武器（{{weaponUpgradeCost}}金）</text>
+        <text class="btn-sub">当前 +{{weaponAtk}}</text>
+      </div>
+      <div class="btn shop-close {{gold < armorUpgradeCost ? 'disabled' : ''}}" @click="upgradeArmor">
+        <text class="btn-text">强化防具（{{armorUpgradeCost}}金）</text>
+        <text class="btn-sub">当前 +{{armorDef}}</text>
+      </div>
       <div class="btn shop-close" @click="closeShop">
         <text class="btn-text">离开商店</text>
       </div>
@@ -265,6 +273,8 @@ export default {
     eventDesc: '',
     eventOptions: [],
     tutorialSeen: false,
+    weaponUpgradeCost: 30,
+    armorUpgradeCost: 30,
 
     floor: 0,
     gold: 0,
@@ -1661,6 +1671,35 @@ export default {
       return;
     }
     this.phase = 'shop';
+    this._updateUpgradeCosts();
+  },
+
+  _updateUpgradeCosts() {
+    this.weaponUpgradeCost = 30 + this.weaponAtk * 10;
+    this.armorUpgradeCost = 30 + this.armorDef * 10;
+  },
+
+  upgradeWeapon() {
+    if (this.phase !== 'shop' || this.gold < this.weaponUpgradeCost) {
+      return;
+    }
+    this.gold -= this.weaponUpgradeCost;
+    this.weaponAtk += 2;
+    this.atk = this.baseAtk + this.weaponAtk;
+    this.weaponName = this.weaponName.replace(/\([^)]*\)?$/, '') + '(强化)';
+    this._addLog('强化武器至 +' + this.weaponAtk);
+    this._updateUpgradeCosts();
+  },
+
+  upgradeArmor() {
+    if (this.phase !== 'shop' || this.gold < this.armorUpgradeCost) {
+      return;
+    }
+    this.gold -= this.armorUpgradeCost;
+    this.armorDef += 2;
+    this.armorName = this.armorName.replace(/\([^)]*\)?$/, '') + '(强化)';
+    this._addLog('强化防具至 +' + this.armorDef);
+    this._updateUpgradeCosts();
   },
 
   closeShop() {
