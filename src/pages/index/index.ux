@@ -1851,6 +1851,10 @@ export default {
     }
     this.combo += 1;
     this._maxCombo = Math.max(this._maxCombo, this.combo);
+    if (this.combo === 5 || this.combo === 10 || this.combo === 15) {
+      this._vibrate(200);
+      this._addLog('连击 x' + this.combo + '！');
+    }
     var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6 + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
     var dmg = Math.max(1, Math.round(this.atk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
