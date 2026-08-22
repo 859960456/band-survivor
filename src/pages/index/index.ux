@@ -10,6 +10,9 @@
         <div class="diff-btn {{difficulty === 1 ? 'active' : ''}}" @click="setDifficulty(1)">普通</div>
         <div class="diff-btn {{difficulty === 2 ? 'active' : ''}}" @click="setDifficulty(2)">困难</div>
       </div>
+      <div class="btn big-btn {{endless ? 'active-toggle' : ''}}" @click="toggleEndless">
+        <text class="btn-text">无尽模式：{{endless ? '开' : '关'}}</text>
+      </div>
       <div class="btn big-btn" @click="startGame">
         <text class="btn-text">开始冒险</text>
       </div>
@@ -295,6 +298,7 @@ export default {
     phase: 'home',
     best: 0,
     difficulty: 1,
+    endless: false,
     hasSave: false,
     saveFloor: 0,
     saveLevel: 0,
@@ -391,6 +395,14 @@ export default {
     this._touchStartY = 0;
     this._touchMoved = false;
     var that = this;
+    storage.get({
+      key: 'BAND_SURVIVOR_ENDLESS',
+      success: function(data) {
+        if (data === '1') {
+          that.endless = true;
+        }
+      }
+    });
     storage.get({
       key: 'BAND_SURVIVOR_DIFF',
       success: function(data) {
@@ -688,6 +700,14 @@ export default {
     });
   },
 
+  toggleEndless() {
+    this.endless = !this.endless;
+    storage.set({
+      key: 'BAND_SURVIVOR_ENDLESS',
+      value: this.endless ? '1' : '0'
+    });
+  },
+
   setDifficulty(n) {
     if (n < 0 || n > 2) {
       return;
@@ -751,7 +771,7 @@ export default {
     var mul = this._difficultyMul();
     var area = this._areaByFloor(this.floor);
     var ae = area.effect || { hp: 1, atk: 1, gold: 1, exp: 1 };
-    var scale = 1 + this.floor * 0.06;
+    var scale = 1 + this.floor * (this.endless ? 0.09 : 0.06);
     return {
       name: base.name,
       hp: Math.round(base.hp * scale * mul.hp * ae.hp),
@@ -2195,6 +2215,11 @@ export default {
   font-size: 12px;
   line-height: 26px;
   text-align: center;
+}
+
+.btn.active-toggle {
+  border: 1px solid #ffd75e;
+  background-color: #3a3560;
 }
 
 .diff-btn.active {
