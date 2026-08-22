@@ -13,6 +13,9 @@
       <div class="btn big-btn {{endless ? 'active-toggle' : ''}}" @click="toggleEndless">
         <text class="btn-text">无尽模式：{{endless ? '开' : '关'}}</text>
       </div>
+      <div class="btn big-btn {{challengeMode ? 'active-toggle' : ''}}" @click="toggleChallenge">
+        <text class="btn-text">挑战模式：{{challengeMode ? '开' : '关'}}</text>
+      </div>
       <div class="btn big-btn" @click="startGame">
         <text class="btn-text">开始冒险</text>
       </div>
@@ -191,6 +194,7 @@
       <text class="dead-title">你倒下了</text>
       <text class="dead-text">探索到第 {{floor}} 层</text>
       <text class="dead-text">等级 Lv.{{level}} / 击杀 {{kills}}</text>
+      <text class="dead-text">遗物 {{relics.length}} · 材料 {{materials}}</text>
       <text class="dead-text">最佳记录：第 {{best}} 层</text>
       <div class="btn" @click="restart">
         <text class="btn-text">再来一局</text>
@@ -234,7 +238,7 @@
     <!-- 背包 -->
     <div if="{{phase === 'bag'}}" class="overlay bag-overlay">
       <text class="bag-title">背包</text>
-      <text class="bag-line">武器：{{weaponName}} +{{weaponAtk}}</text>
+      <text class="bag-line">武器：{{weaponName}} +{{weaponAtk}} · {{skillName}}</text>
       <text class="bag-line">防具：{{armorName}} +{{armorDef}} · 闪{{dodge}}%</text>
       <text class="bag-line">药水：{{potions}} 瓶</text>
       <text class="bag-line">金币：{{gold}} · 材料：{{materials}}</text>
@@ -307,6 +311,7 @@ export default {
     best: 0,
     difficulty: 1,
     endless: false,
+    challengeMode: false,
     hasSave: false,
     saveFloor: 0,
     saveLevel: 0,
@@ -406,6 +411,14 @@ export default {
     this._touchStartY = 0;
     this._touchMoved = false;
     var that = this;
+    storage.get({
+      key: 'BAND_SURVIVOR_CHALLENGE',
+      success: function(data) {
+        if (data === '1') {
+          that.challengeMode = true;
+        }
+      }
+    });
     storage.get({
       key: 'BAND_SURVIVOR_ENDLESS',
       success: function(data) {
@@ -715,6 +728,14 @@ export default {
     });
   },
 
+  toggleChallenge() {
+    this.challengeMode = !this.challengeMode;
+    storage.set({
+      key: 'BAND_SURVIVOR_CHALLENGE',
+      value: this.challengeMode ? '1' : '0'
+    });
+  },
+
   toggleEndless() {
     this.endless = !this.endless;
     storage.set({
@@ -772,6 +793,10 @@ export default {
   },
 
   _difficultyMul() {
+    if (this.challengeMode) {
+      var base = this.difficulty === 0 ? { hp: 0.9, atk: 0.95, exp: 1.1, gold: 1.1 } : (this.difficulty === 2 ? { hp: 1.45, atk: 1.3, exp: 1.35, gold: 1.25 } : { hp: 1.1, atk: 1.1, exp: 1.2, gold: 1.15 });
+      return base;
+    }
     if (this.difficulty === 0) {
       return { hp: 0.8, atk: 0.85, exp: 1.0, gold: 1.0 };
     }
@@ -1961,6 +1986,10 @@ export default {
     if (this.phase !== 'grid') {
       return;
     }
+    if (this.challengeMode) {
+      this._addLog('挑战模式：无法休息');
+      return;
+    }
     var heal = Math.round(this.maxHp * 0.25);
     this.hp = Math.min(this.maxHp, this.hp + heal);
     this._updateHp();
@@ -1971,6 +2000,10 @@ export default {
 
   usePotion() {
     if (this.phase !== 'grid' || this.potions <= 0 || this.hp >= this.maxHp) {
+      return;
+    }
+    if (this.challengeMode) {
+      this._addLog('挑战模式：无法使用药水');
       return;
     }
     this.potions -= 1;
@@ -2287,6 +2320,10 @@ export default {
 
   usePotionFromBag() {
     if (this.phase !== 'bag' || this.potions <= 0 || this.hp >= this.maxHp) {
+      return;
+    }
+    if (this.challengeMode) {
+      this._addLog('挑战模式：无法使用药水');
       return;
     }
     this.potions -= 1;
