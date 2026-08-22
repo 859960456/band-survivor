@@ -127,7 +127,8 @@ export const UPGRADES = [
   { id: 'ironhide', name: '铁肤',         desc: '固定减伤 +2',             rarity: 'rare'   },
   { id: 'bloodlust', name: '血怒',        desc: '每击杀攻击 +1',           rarity: 'epic'   },
   { id: 'gale',    name: '疾风',         desc: '每场战斗开始 +1 迅捷',    rarity: 'rare'   },
-  { id: 'lootmat', name: '掠夺',         desc: '材料掉落 +1',             rarity: 'rare'   }
+  { id: 'lootmat', name: '掠夺',         desc: '材料掉落 +1',             rarity: 'rare'   },
+  { id: 'healboost', name: '疗愈',       desc: '药水回复 +10',            rarity: 'common' }
 ];
 
 export const RARITY_COLOR = {
