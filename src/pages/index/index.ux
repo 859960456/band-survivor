@@ -20,6 +20,9 @@
       <div class="btn" @click="openAchievements">
         <text class="btn-text">成就 {{achievementCount}}/{{achievementTotal}}</text>
       </div>
+      <div class="btn" @click="openCodex">
+        <text class="btn-text">图鉴 {{codexCount}}/{{codexTotal}}</text>
+      </div>
       <text class="best">最佳记录：第 {{best}} 层</text>
     </div>
 
@@ -107,6 +110,20 @@
       <text class="dead-text">{{eventDesc}}</text>
       <div for="{{eventOptions}}" class="btn event-btn" @click="chooseEvent($index)">
         <text class="btn-text">{{$item.label}}</text>
+      </div>
+    </div>
+
+    <!-- 图鉴 -->
+    <div if="{{phase === 'codex'}}" class="overlay dead-overlay">
+      <text class="dead-title">怪物图鉴</text>
+      <scroll class="shop-scroll" scroll-y="true">
+        <div for="{{codexList}}" class="ach-item {{$item.found ? 'done' : ''}}">
+          <text class="ach-name">{{$item.name || $item.id}}</text>
+          <text class="ach-desc">{{$item.found ? '已收录' : '未发现'}}</text>
+        </div>
+      </scroll>
+      <div class="btn" @click="closeCodex">
+        <text class="btn-text">关闭</text>
       </div>
     </div>
 
@@ -325,6 +342,9 @@ export default {
     shopItems: [],
     areaName: '',
     areaEff: '',
+    codex: [],
+    codexTotal: 0,
+    codexCount: 0,
 
     mapRows: [],
     mapCells: [],
@@ -380,6 +400,18 @@ export default {
         if (data === '1') {
           that.tutorialSeen = true;
         }
+      }
+    });
+    storage.get({
+      key: 'BAND_SURVIVOR_CODEX',
+      success: function(data) {
+        try {
+          var arr = JSON.parse(data);
+          if (arr && arr.length) {
+            that.codex = arr;
+          }
+        } catch (e) {}
+        that._updateCodexCount();
       }
     });
     storage.get({
@@ -567,6 +599,7 @@ export default {
     this.potions = BASE_PLAYER.potions;
     this.monsterAlive = false;
     this.monsterName = '';
+    this.monsterId = '';
     this.monsterHp = 0;
     this.monsterMaxHp = 0;
     this.monsterHpPercent = 0;
@@ -1252,6 +1285,7 @@ export default {
 
   _spawnMonster(monsterId, isBoss) {
     var stats = this._monsterStats(monsterId);
+    this.monsterId = monsterId;
     this.monsterAlive = true;
     this.monsterName = stats.name;
     this.monsterMaxHp = stats.hp;
@@ -1378,6 +1412,7 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    this._discoverMonster(this.monsterId);
     if (this.isBoss) {
       this.bossKills += 1;
     }
@@ -1648,6 +1683,35 @@ export default {
     this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
     this._monstersTurn();
     this._afterMonstersTurn();
+  },
+
+  _updateCodexCount() {
+    this.codexTotal = Object.keys(MONSTERS).length;
+    this.codexCount = this.codex.length;
+    this.codexList = Object.keys(MONSTERS).map(function(id) {
+      return { id: id, name: MONSTERS[id].name, found: this.codex.indexOf(id) >= 0 };
+    }.bind(this));
+  },
+
+  _discoverMonster(id) {
+    if (!id || this.codex.indexOf(id) >= 0) {
+      return;
+    }
+    this.codex.push(id);
+    storage.set({
+      key: 'BAND_SURVIVOR_CODEX',
+      value: JSON.stringify(this.codex)
+    });
+    this._updateCodexCount();
+  },
+
+  openCodex() {
+    this._updateCodexCount();
+    this.phase = 'codex';
+  },
+
+  closeCodex() {
+    this.phase = 'home';
   },
 
   _updateAchievementCount() {
