@@ -756,6 +756,8 @@ export default {
       forgeBonus: this._forgeBonus,
       luck: this._luck,
       shieldReflect: this._shieldReflect,
+      revive: this._revive,
+      reviveUsed: this._reviveUsed,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -907,6 +909,8 @@ export default {
         that._forgeBonus = s.forgeBonus || 0;
         that._luck = s.luck || 0;
         that._shieldReflect = s.shieldReflect || 0;
+        that._revive = !!s.revive;
+        that._reviveUsed = !!s.reviveUsed;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1025,6 +1029,8 @@ export default {
     this._forgeBonus = 0;
     this._luck = 0;
     this._shieldReflect = 0;
+    this._revive = false;
+    this._reviveUsed = false;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2955,6 +2961,8 @@ export default {
       this._luck += 1;
     } else if (id === 'shieldReflect') {
       this._shieldReflect += 0.5;
+    } else if (id === 'revive') {
+      this._revive = true;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
@@ -3048,6 +3056,17 @@ export default {
   },
 
   _die() {
+    if (this._revive && !this._reviveUsed) {
+      this._reviveUsed = true;
+      this.hp = Math.max(1, Math.round(this.maxHp * 0.3));
+      this._updateHp();
+      this.monsterAlive = false;
+      this.phase = 'grid';
+      this._vibrate(200);
+      this._addLog('涅槃重生！恢复 30% 生命');
+      this._renderMap();
+      return;
+    }
     this.phase = 'dead';
     this._vibrate(200);
     this._clearSave();
