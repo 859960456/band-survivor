@@ -827,7 +827,7 @@ export default {
     this._touchStartY = ty;
   },
 
-  onTouchEnd(e) {
+  onTouchEnd() {
     if (this._touchMoved) {
       this._touchMoved = false;
     }
