@@ -103,7 +103,9 @@ export const UPGRADES = [
   { id: 'dodgeup', name: '闪避 +3%',     desc: '提高闪避几率',        rarity: 'rare'   },
   { id: 'hppct',   name: '生命 +10%',    desc: '提升最大生命',        rarity: 'epic'   },
   { id: 'materials', name: '材料 +3',     desc: '立即获得制作材料',     rarity: 'common' },
-  { id: 'gold100',  name: '金币 +20',     desc: '立即获得金币',         rarity: 'common' }
+  { id: 'gold100',  name: '金币 +20',     desc: '立即获得金币',         rarity: 'common' },
+  { id: 'regen',   name: '再生',         desc: '每步回复 2 生命',        rarity: 'rare'   },
+  { id: 'thorns',  name: '荆棘',         desc: '受击反弹 3 伤害',        rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

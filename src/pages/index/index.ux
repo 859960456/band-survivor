@@ -707,6 +707,8 @@ export default {
       hasteCharges: this._hasteCharges,
       comboMaxAdd: this._comboMaxAdd,
       challengeMod: this.challengeMod,
+      regen: this._regen,
+      thorns: this._thorns,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -812,6 +814,8 @@ export default {
         that._hasteCharges = s.hasteCharges || 0;
         that._comboMaxAdd = s.comboMaxAdd || 0;
         that.challengeMod = s.challengeMod || '';
+        that._regen = s.regen || 0;
+        that._thorns = s.thorns || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -881,6 +885,8 @@ export default {
     this._damageDealt = 0;
     this._damageTaken = 0;
     this._isElite = false;
+    this._regen = 0;
+    this._thorns = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1573,6 +1579,10 @@ export default {
         return;
       }
     }
+    if (this._regen > 0 && this.hp < this.maxHp) {
+      this.hp = Math.min(this.maxHp, this.hp + this._regen);
+      this._updateHp();
+    }
 
     // 楼梯
     if (nr === this._stairsR && nc === this._stairsC) {
@@ -1904,6 +1914,19 @@ export default {
     this._updateHp();
     this._vibrate(60);
     this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害' + (absorbed > 0 ? '（护盾吸收 ' + absorbed + '）' : ''));
+
+    if (this._thorns > 0 && this.monsterAlive) {
+      this.monsterHp -= this._thorns;
+      this._updateMonsterHp();
+      this._addLog('荆棘反伤 ' + this._thorns);
+      if (this.monsterHp <= 0) {
+        this.monsterHp = 0;
+        this._updateMonsterHp();
+        this.monsterAlive = false;
+        this._onMonsterDead();
+        return;
+      }
+    }
 
     // 怪物技能
     if (this.monsterId === 'spider' && Math.random() < 0.35) {
@@ -2468,6 +2491,10 @@ export default {
       this.materials += 3;
     } else if (id === 'gold100') {
       this.gold += 20;
+    } else if (id === 'regen') {
+      this._regen += 2;
+    } else if (id === 'thorns') {
+      this._thorns += 3;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
