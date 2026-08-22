@@ -89,6 +89,15 @@
       </div>
     </div>
 
+    <!-- 随机事件 -->
+    <div if="{{phase === 'event'}}" class="overlay dead-overlay">
+      <text class="dead-title">{{eventTitle}}</text>
+      <text class="dead-text">{{eventDesc}}</text>
+      <div for="{{eventOptions}}" class="btn event-btn" @click="chooseEvent($index)">
+        <text class="btn-text">{{$item.label}}</text>
+      </div>
+    </div>
+
     <!-- 成就 -->
     <div if="{{phase === 'achievements'}}" class="overlay dead-overlay">
       <text class="dead-title">成就</text>
@@ -240,6 +249,9 @@ export default {
     achievementCount: 0,
     achievementTotal: 0,
     achievementList: [],
+    eventTitle: '',
+    eventDesc: '',
+    eventOptions: [],
 
     floor: 0,
     gold: 0,
@@ -821,15 +833,18 @@ export default {
       var roll = Math.random();
       var type = 'gold';
       var icon = '$';
-      if (roll < 0.3) {
+      if (roll < 0.28) {
         type = 'potion';
         icon = '!';
-      } else if (roll < 0.5) {
+      } else if (roll < 0.48) {
         type = 'weapon';
         icon = '/';
-      } else if (roll < 0.65) {
+      } else if (roll < 0.62) {
         type = 'armor';
         icon = 'A';
+      } else if (roll < 0.78) {
+        type = 'event';
+        icon = '?';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -946,6 +961,8 @@ export default {
           icon = '/common/icons/weapon.png';
         } else if (cls === 'armor') {
           icon = '/common/icons/armor.png';
+        } else if (cls === 'event') {
+          icon = '';
         }
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
       }
@@ -1067,8 +1084,18 @@ export default {
 
     var item = this._itemAt(nr, nc);
     if (item) {
+      this._playerR = nr;
+      this._playerC = nc;
       this._pickItem(item);
       this._removeItem(item);
+      if (this.phase !== 'grid') {
+        return;
+      }
+      this._revealAround();
+      this._renderMap();
+      this._monstersTurn();
+      this._afterMonstersTurn();
+      return;
     }
 
     this._playerR = nr;
@@ -1114,6 +1141,8 @@ export default {
       } else {
         this._addLog('获得 ' + weapon.name + '，但不如当前武器');
       }
+    } else if (item.type === 'event') {
+      this._openEvent();
     } else if (item.type === 'armor') {
       var armor = this._rollArmor();
       if (armor.def > this.armorDef) {
@@ -1301,6 +1330,55 @@ export default {
     } else {
       this._addLog('获得 ' + armor.name + '，但不如当前防具');
     }
+  },
+
+  _openEvent() {
+    var events = [
+      { title: '神秘宝箱', desc: '箱子上布满灰尘。', options: [
+        { label: '打开', effect: 'gold', value: 18 },
+        { label: '离开', effect: 'none' }
+      ] },
+      { title: '受伤旅人', desc: '旅人恳求你分他药水。', options: [
+        { label: '帮助(-1药水)', effect: 'potion', value: -1 },
+        { label: '无视', effect: 'none' }
+      ] },
+      { title: '古老祭坛', desc: '祭坛似乎在渴求鲜血。', options: [
+        { label: '献祭(-12血)', effect: 'hp', value: -12 },
+        { label: '离开', effect: 'none' }
+      ] },
+      { title: '补给箱', desc: '里面似乎有物资。', options: [
+        { label: '搜刮', effect: 'potion', value: 1 },
+        { label: '离开', effect: 'none' }
+      ] }
+    ];
+    var e = events[Math.floor(Math.random() * events.length)];
+    this.eventTitle = e.title;
+    this.eventDesc = e.desc;
+    this.eventOptions = e.options;
+    this.phase = 'event';
+  },
+
+  chooseEvent(idx) {
+    var opt = this.eventOptions[idx];
+    if (opt) {
+      if (opt.effect === 'gold') {
+        this.gold += opt.value;
+        this._addLog('事件获得 ' + opt.value + ' 金币');
+      } else if (opt.effect === 'potion') {
+        if (this.potions + opt.value >= 0) {
+          this.potions += opt.value;
+          this._addLog(opt.value > 0 ? '事件获得药水' : '事件消耗药水');
+        } else {
+          this._addLog('你已没有足够的药水');
+        }
+      } else if (opt.effect === 'hp') {
+        this.hp = Math.max(1, this.hp + opt.value);
+        this._updateHp();
+        this._addLog(opt.value < 0 ? '你付出了代价' : '你恢复了生命');
+      }
+    }
+    this.phase = 'grid';
+    this._renderMap();
   },
 
   _openReward() {
@@ -1744,6 +1822,11 @@ export default {
   margin-top: 1px;
 }
 
+.event-btn {
+  width: 160px;
+  margin-top: 12px;
+}
+
 .disabled {
   background-color: #333344;
 }
@@ -1861,6 +1944,11 @@ export default {
   width: 18px;
   height: 20px;
   border-radius: 3px;
+}
+
+.event {
+  background-color: #7a5fd0;
+  border-radius: 50%;
 }
 
 .fog {
