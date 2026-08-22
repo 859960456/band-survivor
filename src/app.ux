@@ -1,0 +1,7 @@
+<script>
+export default {
+  onInit() {
+    console.log('band-survivor app init');
+  }
+}
+</script>

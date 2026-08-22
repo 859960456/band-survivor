@@ -1,0 +1,112 @@
+// 文字肉鸽 RPG - 基础数据模块
+// 后续所有新怪物/区域/升级都可以在这里扩展
+
+export const AREAS = [
+  {
+    id: 'forest',
+    name: '迷雾森林',
+    desc: '树木遮天蔽日，远处传来低沉的咆哮声。',
+    monsters: ['slime', 'wolf', 'goblin'],
+    boss: 'bear_king'
+  },
+  {
+    id: 'cave',
+    name: '幽暗洞穴',
+    desc: '洞壁潮湿，脚下的碎石发出细碎的声响。',
+    monsters: ['bat', 'skeleton', 'goblin'],
+    boss: 'cave_guard'
+  },
+  {
+    id: 'ruins',
+    name: '古遗迹',
+    desc: '残破的石柱间萦绕着古老的气息。',
+    monsters: ['skeleton', 'ghost', 'orc'],
+    boss: 'ruin_golem'
+  },
+  {
+    id: 'abyss',
+    name: '深渊入口',
+    desc: '黑暗仿佛有生命，正注视着你。',
+    monsters: ['ghost', 'orc', 'demon'],
+    boss: 'abyss_lord'
+  }
+];
+
+export const MONSTERS = {
+  slime:      { name: '史莱姆', hp: 22, atk: 4, gold: 3,  exp: 10 },
+  wolf:       { name: '野狼',   hp: 28, atk: 6, gold: 5,  exp: 14 },
+  goblin:     { name: '哥布林', hp: 32, atk: 7, gold: 7,  exp: 16 },
+  bat:        { name: '洞穴蝙蝠', hp: 26, atk: 5, gold: 4, exp: 12 },
+  skeleton:   { name: '骷髅',   hp: 38, atk: 8, gold: 8,  exp: 20 },
+  ghost:      { name: '幽灵',   hp: 34, atk: 9, gold: 9,  exp: 22 },
+  orc:        { name: '兽人',   hp: 46, atk: 11, gold: 12, exp: 26 },
+  demon:      { name: '恶魔',   hp: 55, atk: 14, gold: 16, exp: 32 },
+  bear_king:  { name: '熊王',   hp: 80, atk: 12, gold: 40, exp: 60 },
+  cave_guard: { name: '洞窟守卫', hp: 95, atk: 14, gold: 50, exp: 75 },
+  ruin_golem: { name: '遗迹巨像', hp: 110, atk: 16, gold: 60, exp: 90 },
+  abyss_lord: { name: '深渊领主', hp: 150, atk: 20, gold: 100, exp: 150 }
+};
+
+export const UPGRADES = [
+  {
+    id: 'atk',
+    name: '攻击 +4',
+    desc: '伤害永久提高'
+  },
+  {
+    id: 'hp',
+    name: '生命 +25',
+    desc: '上限提升并回复'
+  },
+  {
+    id: 'potion',
+    name: '药水 +1',
+    desc: '获得一瓶药水'
+  },
+  {
+    id: 'heal',
+    name: '回复 40',
+    desc: '立即恢复生命'
+  }
+];
+
+export const BASE_PLAYER = {
+  hp: 100,
+  maxHp: 100,
+  atk: 10,
+  level: 1,
+  exp: 0,
+  expNext: 20,
+  gold: 0,
+  potions: 2
+};
+
+export const SKILL_CD = 3;
+export const HEAL_AMOUNT = 30;
+
+export const WEAPONS = [
+  { name: '铁短剑', atk: 3 },
+  { name: '猎刀', atk: 4 },
+  { name: '十字剑', atk: 6 },
+  { name: '火焰之刃', atk: 9 },
+  { name: '暗影法杖', atk: 12 }
+];
+
+export const ARMORS = [
+  { name: '布甲', def: 2 },
+  { name: '皮甲', def: 4 },
+  { name: '锁子甲', def: 7 },
+  { name: '板甲', def: 10 }
+];
+
+export const SHOP_ITEMS = [
+  { id: 'potion', type: 'potion', name: '药水',     desc: '回复 30 生命', price: 10 },
+  { id: 'sword',  type: 'weapon', name: '铁短剑',   desc: '攻击 +3',     price: 20 },
+  { id: 'knife',  type: 'weapon', name: '猎刀',     desc: '攻击 +4',     price: 35 },
+  { id: 'cross',  type: 'weapon', name: '十字剑',   desc: '攻击 +6',     price: 60 },
+  { id: 'flame',  type: 'weapon', name: '火焰之刃', desc: '攻击 +9',     price: 100 },
+  { id: 'cloth',  type: 'armor',  name: '布甲',     desc: '防御 +2',     price: 15 },
+  { id: 'leather',type: 'armor',  name: '皮甲',     desc: '防御 +4',     price: 30 },
+  { id: 'chain',  type: 'armor',  name: '锁子甲',   desc: '防御 +7',     price: 55 },
+  { id: 'plate',  type: 'armor',  name: '板甲',     desc: '防御 +10',    price: 90 }
+];

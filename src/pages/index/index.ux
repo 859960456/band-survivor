@@ -1,0 +1,1634 @@
+<template>
+  <div class="page">
+    <!-- 首页 -->
+    <div if="{{phase === 'home'}}" class="screen">
+      <text class="title">暗渊行者</text>
+      <text class="subtitle">地牢走格子 · 文字肉鸽</text>
+      <text class="tip">滑动移动 · 遇怪战斗 · 下梯换层</text>
+      <div class="btn big-btn" @click="startGame">
+        <text class="btn-text">开始冒险</text>
+      </div>
+      <text class="best">最佳记录：第 {{best}} 层</text>
+    </div>
+
+    <!-- 地牢探索 -->
+    <div if="{{phase === 'grid'}}" class="screen">
+      <div class="hud">
+        <text class="hud-item">第{{floor}}层</text>
+        <text class="hud-item">Lv.{{level}}</text>
+        <text class="hud-item">金币{{gold}}</text>
+        <text class="hud-item">杀{{kills}}</text>
+      </div>
+      <div class="bar">
+        <div class="bar-fill hp-fill" style="width: {{hpPercent}}%;"></div>
+      </div>
+      <text class="hp-text">HP {{hp}}/{{maxHp}} · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}</text>
+      <text class="map-msg">{{lastLog}}</text>
+
+      <div class="map-container" @swipe="onMapSwipe" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
+           style="width: {{mapViewW * 18 + 8}}px; height: {{mapViewH * 20 + 8}}px;">
+        <div for="{{mapCells}}" class="cell {{$item.cls}}"
+             style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;">
+          <image if="{{$item.icon}}" class="cell-icon" src="{{$item.icon}}"></image>
+          <text if="{{$item.cls === 'player'}}" class="cell-text">我</text>
+        </div>
+      </div>
+
+      <text class="map-tip">滑动地图移动 · 撞怪进战斗</text>
+      <scroll class="action-scroll" scroll-y="true">
+        <div class="action-item grid-action" @click="openBag">
+          <text class="action-label">背包</text>
+          <text class="action-desc">查看装备与物品</text>
+        </div>
+        <div class="action-item grid-action" @click="openShop">
+          <text class="action-label">商店</text>
+          <text class="action-desc">花费金币购买补给</text>
+        </div>
+        <div class="action-item grid-action" @click="doRest">
+          <text class="action-label">休息</text>
+          <text class="action-desc">回复 25% 生命</text>
+        </div>
+        <div class="action-item grid-action {{potions <= 0 ? 'disabled' : ''}}" @click="usePotion">
+          <text class="action-label">使用药水</text>
+          <text class="action-desc">回复 30 生命 · 剩余 {{potions}}</text>
+        </div>
+      </scroll>
+    </div>
+
+    <!-- 奖励 / 死亡 -->
+    <div if="{{phase === 'reward'}}" class="overlay reward-overlay">
+      <text class="reward-title">升级！选择强化</text>
+      <div for="{{upgradeOptions}}" class="upgrade-option" @click="chooseUpgrade($item.id)">
+        <text class="option-name">{{$item.name}}</text>
+        <text class="option-desc">{{$item.desc}}</text>
+      </div>
+    </div>
+
+    <div if="{{phase === 'dead'}}" class="overlay dead-overlay">
+      <text class="dead-title">你倒下了</text>
+      <text class="dead-text">探索到第 {{floor}} 层</text>
+      <text class="dead-text">等级 Lv.{{level}} / 击杀 {{kills}}</text>
+      <text class="dead-text">最佳记录：第 {{best}} 层</text>
+      <div class="btn" @click="restart">
+        <text class="btn-text">再来一局</text>
+      </div>
+      <div class="btn" @click="goHome">
+        <text class="btn-text">返回首页</text>
+      </div>
+    </div>
+
+    <!-- 商店 -->
+    <div if="{{phase === 'shop'}}" class="overlay shop-overlay">
+      <text class="shop-title">旅行商店</text>
+      <text class="shop-gold">金币 {{gold}}</text>
+      <scroll class="shop-scroll" scroll-y="true">
+        <div for="{{shopItems}}" class="shop-item" @click="buyItem($item.id)">
+          <text class="shop-name">{{$item.name}}</text>
+          <text class="shop-desc">{{$item.desc}} · {{$item.price}}金</text>
+        </div>
+      </scroll>
+      <div class="btn shop-close" @click="closeShop">
+        <text class="btn-text">离开商店</text>
+      </div>
+    </div>
+
+    <!-- 背包 -->
+    <div if="{{phase === 'bag'}}" class="overlay bag-overlay">
+      <text class="bag-title">背包</text>
+      <text class="bag-line">武器：{{weaponName}} +{{weaponAtk}}</text>
+      <text class="bag-line">防具：{{armorName}} +{{armorDef}}</text>
+      <text class="bag-line">药水：{{potions}} 瓶</text>
+      <text class="bag-line">金币：{{gold}}</text>
+      <div class="btn" @click="usePotionFromBag">
+        <text class="btn-text">使用药水</text>
+      </div>
+      <div class="btn" @click="closeBag">
+        <text class="btn-text">关闭背包</text>
+      </div>
+    </div>
+
+    <!-- 战斗界面 -->
+    <div if="{{phase === 'battle'}}" class="screen">
+      <div class="hud">
+        <text class="hud-item">第{{floor}}层</text>
+        <text class="hud-item">Lv.{{level}}</text>
+        <text class="hud-item">金币{{gold}}</text>
+        <text class="hud-item">杀{{kills}}</text>
+      </div>
+      <div class="bar">
+        <div class="bar-fill hp-fill" style="width: {{hpPercent}}%;"></div>
+      </div>
+      <text class="hp-text">HP {{hp}}/{{maxHp}}</text>
+
+      <scroll class="battle-scroll" scroll-y="true">
+        <div class="monster-card">
+          <text class="monster-name">{{monsterName}}</text>
+          <text class="monster-hp-text">{{monsterHp}}/{{monsterMaxHp}}</text>
+          <div class="bar monster-bar">
+            <div class="bar-fill monster-fill" style="width: {{monsterHpPercent}}%;"></div>
+          </div>
+          <text class="monster-atk">攻击 {{monsterAtk}}</text>
+        </div>
+
+        <div class="log-box">
+          <text for="{{logLines}}" class="log-line">{{$item}}</text>
+        </div>
+      </scroll>
+
+      <div class="actions">
+        <div class="btn action-btn" @click="doAttack">
+          <text class="btn-text">攻击</text>
+          <text class="btn-sub">伤害 {{atk}}</text>
+        </div>
+        <div class="btn action-btn {{skillCd > 0 ? 'disabled' : ''}}" @click="doSkill">
+          <text class="btn-text">技能</text>
+          <text class="btn-sub">{{skillCd > 0 ? 'CD ' + skillCd : '2.5倍'}}</text>
+        </div>
+        <div class="btn action-btn {{potions <= 0 ? 'disabled' : ''}}" @click="doHeal">
+          <text class="btn-text">药水</text>
+          <text class="btn-sub">×{{potions}}</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import storage from '@system.storage';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT } from '../../common/game-data.js';
+
+const MAX_LOG = 3;
+const BOSS_EVERY = 5;
+
+export default {
+  private: {
+    phase: 'home',
+    best: 0,
+
+    floor: 0,
+    gold: 0,
+    kills: 0,
+
+    level: 1,
+    baseAtk: 10,
+    weaponAtk: 0,
+    weaponName: '无',
+    armorDef: 0,
+    armorName: '无',
+    atk: 10,
+    hp: 100,
+    maxHp: 100,
+    hpPercent: 100,
+    exp: 0,
+    expNext: 20,
+
+    potions: 2,
+
+    monsterAlive: false,
+    monsterName: '',
+    monsterHp: 0,
+    monsterMaxHp: 0,
+    monsterHpPercent: 0,
+    monsterAtk: 0,
+    monsterGold: 0,
+    monsterExp: 0,
+    isBoss: false,
+
+    skillCd: 0,
+    logLines: [],
+    lastLog: '',
+    upgradeOptions: [],
+    shopItems: [],
+
+    mapRows: [],
+    mapCells: [],
+    mapViewW: 6,
+    mapViewH: 10
+  },
+
+  onInit() {
+    this.shopItems = SHOP_ITEMS;
+    this._width = 6;
+    this._height = 10;
+    this._viewW = 8;
+    this._viewH = 12;
+    this._camR = 0;
+    this._camC = 0;
+    this._touchStartX = 0;
+    this._touchStartY = 0;
+    this._touchMoved = false;
+    var that = this;
+    storage.get({
+      key: 'BAND_SURVIVOR_BEST',
+      success: function(data) {
+        var n = parseInt(data, 10);
+        if (!isNaN(n) && n > 0) {
+          that.best = n;
+        }
+      }
+    });
+  },
+
+  startGame() {
+    this._resetRun();
+    this.phase = 'grid';
+    this._genFloor(1);
+    this._addLog('你踏入了第 1 层地牢');
+  },
+
+  restart() {
+    this.startGame();
+  },
+
+  goHome() {
+    this.phase = 'home';
+  },
+
+  _resetRun() {
+    this.floor = 0;
+    this.gold = 0;
+    this.kills = 0;
+    this.level = BASE_PLAYER.level;
+    this.baseAtk = BASE_PLAYER.atk;
+    this.weaponAtk = 0;
+    this.weaponName = '无';
+    this.armorDef = 0;
+    this.armorName = '无';
+    this.atk = BASE_PLAYER.atk;
+    this.hp = BASE_PLAYER.hp;
+    this.maxHp = BASE_PLAYER.maxHp;
+    this.hpPercent = 100;
+    this.exp = BASE_PLAYER.exp;
+    this.expNext = BASE_PLAYER.expNext;
+    this.potions = BASE_PLAYER.potions;
+    this.monsterAlive = false;
+    this.monsterName = '';
+    this.monsterHp = 0;
+    this.monsterMaxHp = 0;
+    this.monsterHpPercent = 0;
+    this.monsterAtk = 0;
+    this.monsterGold = 0;
+    this.monsterExp = 0;
+    this.isBoss = false;
+    this.skillCd = 0;
+    this.logLines = [];
+    this.lastLog = '';
+    this.upgradeOptions = [];
+    this.mapRows = [];
+    this.mapCells = [];
+    this._grid = [];
+    this._monsters = [];
+    this._items = [];
+    this._playerR = 0;
+    this._playerC = 0;
+    this._stairsR = 0;
+    this._stairsC = 0;
+    this._battleMonsterR = -1;
+    this._battleMonsterC = -1;
+  },
+
+  _addLog(text) {
+    var lines = this.logLines.slice(0, MAX_LOG - 1);
+    lines.unshift(text);
+    this.logLines = lines;
+    this.lastLog = text;
+  },
+
+  _updateHp() {
+    this.hpPercent = Math.max(0, Math.floor(this.hp / this.maxHp * 100));
+  },
+
+  _updateMonsterHp() {
+    this.monsterHpPercent = Math.max(0, Math.floor(this.monsterHp / this.monsterMaxHp * 100));
+  },
+
+  _areaByFloor(num) {
+    var index = Math.floor((num - 1) / BOSS_EVERY) % AREAS.length;
+    return AREAS[index];
+  },
+
+  _isBossFloor(num) {
+    return num % BOSS_EVERY === 0;
+  },
+
+  _randomMonsterForArea() {
+    var area = this._areaByFloor(this.floor);
+    var list = area.monsters;
+    return list[Math.floor(Math.random() * list.length)];
+  },
+
+  _monsterStats(id) {
+    var base = MONSTERS[id] || MONSTERS.slime;
+    var scale = 1 + this.floor * 0.06;
+    return {
+      name: base.name,
+      hp: Math.round(base.hp * scale),
+      atk: Math.round(base.atk + this.floor * 0.4),
+      gold: base.gold + this.floor * 2,
+      exp: base.exp + this.floor * 3
+    };
+  },
+
+  _genFloor(num) {
+    this.floor = num;
+    var sizes = [
+      [6, 8],
+      [7, 9],
+      [8, 10],
+      [9, 12],
+      [10, 14],
+      [12, 16],
+      [13, 18],
+      [14, 20]
+    ];
+    var idx = Math.min(Math.floor((num - 1) / 2), sizes.length - 1);
+    this._height = sizes[idx][0];
+    this._width = sizes[idx][1];
+    this._genMap();
+    this._renderMap();
+    if (this._isBossFloor(num)) {
+      this._addLog('第 ' + num + ' 层：BOSS 层！');
+    } else {
+      this._addLog('进入第 ' + num + ' 层');
+    }
+  },
+
+  _genMap() {
+    var h = this._height;
+    var w = this._width;
+    var grid = [];
+    for (var i = 0; i < h; i++) {
+      var row = [];
+      for (var j = 0; j < w; j++) {
+        row.push('#');
+      }
+      grid.push(row);
+    }
+
+    // 房间数随层数增加：前期 2 间，后期 6 间
+    var roomCount = Math.min(2 + Math.floor(this.floor / 3), 6);
+    var rooms = [];
+    var attempts = 100;
+    while (rooms.length < roomCount && attempts > 0) {
+      attempts--;
+      var rw = 3 + Math.floor(Math.random() * 2);
+      var rh = 3 + Math.floor(Math.random() * 2);
+      if (rw > w - 2) rw = w - 2;
+      if (rh > h - 2) rh = h - 2;
+      if (rw < 2) rw = 2;
+      if (rh < 2) rh = 2;
+
+      var maxX = w - rw - 1;
+      var maxY = h - rh - 1;
+      if (maxX < 1 || maxY < 1) {
+        continue;
+      }
+      var rx = 1 + Math.floor(Math.random() * maxX);
+      var ry = 1 + Math.floor(Math.random() * maxY);
+
+      var ok = true;
+      for (var k = 0; k < rooms.length; k++) {
+        var r = rooms[k];
+        if (rx < r.x + r.w + 1 && rx + rw + 1 > r.x &&
+            ry < r.y + r.h + 1 && ry + rh + 1 > r.y) {
+          ok = false;
+          break;
+        }
+      }
+      if (!ok) {
+        continue;
+      }
+      rooms.push({ x: rx, y: ry, w: rw, h: rh });
+    }
+
+    // 保底至少两个不重叠的房间
+    if (rooms.length < 2) {
+      var tryX = 1;
+      var tryY = 1;
+      if (rooms.length === 1) {
+        var only = rooms[0];
+        tryX = Math.max(1, w - only.w - 3);
+        tryY = Math.max(1, h - only.h - 3);
+      }
+      if (rooms.length === 0) {
+        rooms.push({ x: 1, y: 1, w: 3, h: 3 });
+      }
+      if (tryX < 1) tryX = 1;
+      if (tryY < 1) tryY = 1;
+      rooms.push({ x: tryX, y: tryY, w: 3, h: 3 });
+    }
+
+    // 挖房间
+    for (var i = 0; i < rooms.length; i++) {
+      var room = rooms[i];
+      for (var y = room.y; y < room.y + room.h; y++) {
+        for (var x = room.x; x < room.x + room.w; x++) {
+          grid[y][x] = '.';
+        }
+      }
+    }
+
+    // 走廊连接所有房间中心
+    for (var c = 0; c < rooms.length - 1; c++) {
+      var a = rooms[c];
+      var b = rooms[c + 1];
+      var ax = a.x + Math.floor(a.w / 2);
+      var ay = a.y + Math.floor(a.h / 2);
+      var bx = b.x + Math.floor(b.w / 2);
+      var by = b.y + Math.floor(b.h / 2);
+      var x = ax;
+      var y = ay;
+      while (x !== bx) {
+        grid[y][x] = '.';
+        x += bx > x ? 1 : -1;
+      }
+      while (y !== by) {
+        grid[y][x] = '.';
+        y += by > y ? 1 : -1;
+      }
+      grid[by][bx] = '.';
+    }
+
+    // 随机加一些走廊/小岔路
+    for (var extra = 0; extra < roomCount; extra++) {
+      var rIndex = Math.floor(Math.random() * rooms.length);
+      var base = rooms[rIndex];
+      var bx2 = base.x + Math.floor(base.w / 2);
+      var by2 = base.y + Math.floor(base.h / 2);
+      var dirX = Math.random() < 0.5 ? 1 : -1;
+      var dirY = Math.random() < 0.5 ? 1 : -1;
+      var lenX = 1 + Math.floor(Math.random() * 4);
+      var lenY = 1 + Math.floor(Math.random() * 4);
+      var x2 = bx2;
+      var y2 = by2;
+      for (var sx = 0; sx < lenX; sx++) {
+        if (x2 + dirX < 0 || x2 + dirX >= w) {
+          break;
+        }
+        x2 += dirX;
+        grid[y2][x2] = '.';
+      }
+      for (var sy = 0; sy < lenY; sy++) {
+        if (y2 + dirY < 0 || y2 + dirY >= h) {
+          break;
+        }
+        y2 += dirY;
+        grid[y2][x2] = '.';
+      }
+    }
+
+    this._grid = grid;
+    var first = rooms[0];
+    var last = rooms[rooms.length - 1];
+    // 避免出生点和楼梯同一个格子
+    if (last.x === first.x && last.y === first.y) {
+      last = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[0];
+    }
+    this._playerR = first.y + Math.floor(first.h / 2);
+    this._playerC = first.x + Math.floor(first.w / 2);
+    this._stairsR = last.y + Math.floor(last.h / 2);
+    this._stairsC = last.x + Math.floor(last.w / 2);
+    this._monsters = [];
+    this._items = [];
+
+    // 放怪：数量随层数增加，但每层都有解
+    var monsterCount = Math.min(2 + Math.floor(this.floor / 2), 6);
+    for (var m = 0; m < monsterCount; m++) {
+      var mp = this._randomFloorCell(true);
+      if (!mp) {
+        break;
+      }
+      var id = this._isBossFloor(this.floor) ? this._areaByFloor(this.floor).boss : this._randomMonsterForArea();
+      this._monsters.push({ id: id, row: mp.r, col: mp.c, alive: true });
+    }
+
+    // 放物品：1~3 个随机物品
+    var itemCount = 1 + Math.floor(Math.random() * 3);
+    for (var t = 0; t < itemCount; t++) {
+      var ip = this._randomFloorCell(true);
+      if (!ip) {
+        break;
+      }
+      var roll = Math.random();
+      var type = 'gold';
+      var icon = '$';
+      if (roll < 0.3) {
+        type = 'potion';
+        icon = '!';
+      } else if (roll < 0.5) {
+        type = 'weapon';
+        icon = '/';
+      } else if (roll < 0.65) {
+        type = 'armor';
+        icon = 'A';
+      }
+      this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
+    }
+
+    // 保证必有一瓶药水（提高可解性）
+    var hasPotion = false;
+    for (var p = 0; p < this._items.length; p++) {
+      if (this._items[p].type === 'potion') {
+        hasPotion = true;
+        break;
+      }
+    }
+    if (!hasPotion) {
+      var pp = this._randomFloorCell(true);
+      if (pp) {
+        this._items.push({ type: 'potion', row: pp.r, col: pp.c, icon: '!' });
+      }
+    }
+
+    this._updateCamera();
+  },
+
+  _randomFloorCell(avoidPlayer) {
+    var h = this._height;
+    var w = this._width;
+    for (var tries = 0; tries < 80; tries++) {
+      var r = Math.floor(Math.random() * h);
+      var c = Math.floor(Math.random() * w);
+      if (this._grid[r][c] !== '.') {
+        continue;
+      }
+      if (r === this._stairsR && c === this._stairsC) {
+        continue;
+      }
+      if (avoidPlayer && r === this._playerR && c === this._playerC) {
+        continue;
+      }
+      var occupied = false;
+      for (var i = 0; i < this._monsters.length; i++) {
+        if (this._monsters[i].row === r && this._monsters[i].col === c) {
+          occupied = true;
+          break;
+        }
+      }
+      if (!occupied) {
+        for (var j = 0; j < this._items.length; j++) {
+          if (this._items[j].row === r && this._items[j].col === c) {
+            occupied = true;
+            break;
+          }
+        }
+      }
+      if (!occupied) {
+        return { r: r, c: c };
+      }
+    }
+    return null;
+  },
+
+  _updateCamera() {
+    var viewH = Math.min(this._viewH, this._height);
+    var viewW = Math.min(this._viewW, this._width);
+    this._camR = Math.max(0, Math.min(this._playerR - Math.floor(viewH / 2), this._height - viewH));
+    this._camC = Math.max(0, Math.min(this._playerC - Math.floor(viewW / 2), this._width - viewW));
+  },
+
+  _renderMap() {
+    this._updateCamera();
+    var viewH = Math.min(this._viewH, this._height);
+    var viewW = Math.min(this._viewW, this._width);
+    this.mapViewH = viewH;
+    this.mapViewW = viewW;
+    var cells = [];
+    for (var vr = 0; vr < viewH; vr++) {
+      var r = this._camR + vr;
+      for (var vc = 0; vc < viewW; vc++) {
+        var c = this._camC + vc;
+        var cls = this._grid[r][c] === '#' ? 'wall' : 'floor';
+        if (r === this._playerR && c === this._playerC) {
+          cls = 'player';
+        } else if (r === this._stairsR && c === this._stairsC) {
+          cls = 'stairs';
+        } else {
+          var mon = this._monsterAt(r, c);
+          if (mon) {
+            cls = 'monster';
+          } else {
+            var item = this._itemAt(r, c);
+            if (item) {
+              cls = item.type;
+            }
+          }
+        }
+        var icon = '';
+        if (cls === 'player') {
+          icon = '';
+        } else if (cls === 'monster') {
+          icon = '/common/icons/monster.png';
+        } else if (cls === 'stairs') {
+          icon = '/common/icons/stairs.png';
+        } else if (cls === 'gold') {
+          icon = '/common/icons/gold.png';
+        } else if (cls === 'potion') {
+          icon = '/common/icons/potion.png';
+        } else if (cls === 'weapon') {
+          icon = '/common/icons/weapon.png';
+        } else if (cls === 'armor') {
+          icon = '/common/icons/armor.png';
+        }
+        cells.push({ r: vr, c: vc, cls: cls, icon: icon });
+      }
+    }
+    this.mapCells = cells;
+  },
+
+  _monsterAt(r, c) {
+    for (var i = 0; i < this._monsters.length; i++) {
+      if (this._monsters[i].alive && this._monsters[i].row === r && this._monsters[i].col === c) {
+        return this._monsters[i];
+      }
+    }
+    return null;
+  },
+
+  _itemAt(r, c) {
+    for (var i = 0; i < this._items.length; i++) {
+      if (this._items[i].row === r && this._items[i].col === c) {
+        return this._items[i];
+      }
+    }
+    return null;
+  },
+
+  onTouchStart(e) {
+    var t = e.touches && e.touches[0];
+    this._touchStartX = t ? (t.clientX != null ? t.clientX : t.pageX) : 0;
+    this._touchStartY = t ? (t.clientY != null ? t.clientY : t.pageY) : 0;
+    this._touchMoved = false;
+  },
+
+  onTouchMove(e) {
+    if (this.phase !== 'grid') {
+      return;
+    }
+    var touch = e.touches && e.touches[0];
+    if (!touch) {
+      return;
+    }
+    var tx = touch.clientX != null ? touch.clientX : touch.pageX;
+    var ty = touch.clientY != null ? touch.clientY : touch.pageY;
+    var dx = tx - this._touchStartX;
+    var dy = ty - this._touchStartY;
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+      return;
+    }
+    this._touchMoved = true;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      this._tryMove(0, dx > 0 ? 1 : -1);
+    } else {
+      this._tryMove(dy > 0 ? 1 : -1, 0);
+    }
+    // 重置起点，方便连续滑动
+    this._touchStartX = tx;
+    this._touchStartY = ty;
+  },
+
+  onTouchEnd(e) {
+    if (this._touchMoved) {
+      this._touchMoved = false;
+    }
+  },
+
+  onMapSwipe(e) {
+    if (this.phase !== 'grid') {
+      return;
+    }
+    var dir = e.direction;
+    if (dir === 'left') {
+      this._tryMove(0, -1);
+    } else if (dir === 'right') {
+      this._tryMove(0, 1);
+    } else if (dir === 'up') {
+      this._tryMove(-1, 0);
+    } else if (dir === 'down') {
+      this._tryMove(1, 0);
+    }
+  },
+
+  _tryMove(dr, dc) {
+    var nr = this._playerR + dr;
+    var nc = this._playerC + dc;
+    if (nr < 0 || nr >= this._height || nc < 0 || nc >= this._width) {
+      return;
+    }
+    if (this._grid[nr][nc] === '#') {
+      this._addLog('前方是墙');
+      return;
+    }
+
+    // 楼梯
+    if (nr === this._stairsR && nc === this._stairsC) {
+      this._genFloor(this.floor + 1);
+      return;
+    }
+
+    var mon = this._monsterAt(nr, nc);
+    if (mon) {
+      this._startBattle(mon);
+      return;
+    }
+
+    var item = this._itemAt(nr, nc);
+    if (item) {
+      this._pickItem(item);
+      this._removeItem(item);
+    }
+
+    this._playerR = nr;
+    this._playerC = nc;
+    this._renderMap();
+    this._monstersTurn();
+    this._afterMonstersTurn();
+  },
+
+  _pickItem(item) {
+    if (item.type === 'gold') {
+      var gold = 5 + Math.floor(Math.random() * 10);
+      this.gold += gold;
+      this._addLog('拾取 ' + gold + ' 金币');
+    } else if (item.type === 'potion') {
+      this.potions += 1;
+      this._addLog('拾取药水，现有 ' + this.potions + ' 瓶');
+    } else if (item.type === 'weapon') {
+      var weapon = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
+      if (weapon.atk > this.weaponAtk) {
+        this.weaponAtk = weapon.atk;
+        this.weaponName = weapon.name;
+        this.atk = this.baseAtk + this.weaponAtk;
+        this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
+      } else {
+        this._addLog('获得 ' + weapon.name + '，但不如当前武器');
+      }
+    } else if (item.type === 'armor') {
+      var armor = ARMORS[Math.floor(Math.random() * ARMORS.length)];
+      if (armor.def > this.armorDef) {
+        this.armorDef = armor.def;
+        this.armorName = armor.name;
+        this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
+      } else {
+        this._addLog('获得 ' + armor.name + '，但不如当前防具');
+      }
+    }
+  },
+
+  _removeItem(item) {
+    var idx = -1;
+    for (var i = 0; i < this._items.length; i++) {
+      if (this._items[i].row === item.row && this._items[i].col === item.col) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx >= 0) {
+      this._items.splice(idx, 1);
+    }
+  },
+
+  _startBattle(mon) {
+    this._battleMonsterR = mon.row;
+    this._battleMonsterC = mon.col;
+    this._spawnMonster(mon.id, false);
+  },
+
+  _spawnMonster(monsterId, isBoss) {
+    var stats = this._monsterStats(monsterId);
+    this.monsterAlive = true;
+    this.monsterName = stats.name;
+    this.monsterMaxHp = stats.hp;
+    this.monsterHp = stats.hp;
+    this.monsterHpPercent = 100;
+    this.monsterAtk = stats.atk;
+    this.monsterGold = stats.gold;
+    this.monsterExp = stats.exp;
+    this.isBoss = isBoss;
+    this.skillCd = 0;
+    this.phase = 'battle';
+    this._addLog('遭遇 ' + stats.name);
+  },
+
+  doAttack() {
+    if (this.phase !== 'battle' || !this.monsterAlive) {
+      return;
+    }
+    this._playerAction(1);
+  },
+
+  doSkill() {
+    if (this.phase !== 'battle' || !this.monsterAlive) {
+      return;
+    }
+    if (this.skillCd > 0) {
+      return;
+    }
+    this.skillCd = SKILL_CD;
+    this._playerAction(2.5);
+  },
+
+  doHeal() {
+    if (this.phase !== 'battle' || !this.monsterAlive) {
+      return;
+    }
+    if (this.potions <= 0 || this.hp >= this.maxHp) {
+      this._addLog('药水无效');
+      return;
+    }
+    this.potions -= 1;
+    this.hp = Math.min(this.maxHp, this.hp + HEAL_AMOUNT);
+    this._updateHp();
+    this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
+    this._monsterAttack();
+  },
+
+  _playerAction(multiplier) {
+    var dmg = Math.max(1, Math.round(this.atk * multiplier * (0.9 + Math.random() * 0.2)));
+    this.monsterHp -= dmg;
+    this._updateMonsterHp();
+    this._addLog('你造成 ' + dmg + ' 点伤害');
+
+    if (this.monsterHp <= 0) {
+      this.monsterHp = 0;
+      this._updateMonsterHp();
+      this.monsterAlive = false;
+      this._onMonsterDead();
+      return;
+    }
+
+    this._monsterAttack();
+  },
+
+  _monsterAttack() {
+    var dmg = Math.max(1, Math.round((this.monsterAtk - this.armorDef) * (0.85 + Math.random() * 0.3)));
+    this.hp -= dmg;
+    this._updateHp();
+    this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害');
+
+    if (this.hp <= 0) {
+      this.hp = 0;
+      this._updateHp();
+      this._die();
+    }
+  },
+
+  _onMonsterDead() {
+    this.kills += 1;
+    this.gold += this.monsterGold;
+    this.exp += this.monsterExp;
+    var rewardText = '击杀 ' + this.monsterName + '，获得 ' + this.monsterGold + ' 金币 / ' + this.monsterExp + ' 经验';
+    this._addLog(rewardText);
+    if (this.isBoss) {
+      this._addLog('BOSS 已被击败！');
+    }
+
+    // 从地图上移除怪物，玩家进入原怪物位置
+    for (var i = 0; i < this._monsters.length; i++) {
+      if (this._monsters[i].row === this._battleMonsterR && this._monsters[i].col === this._battleMonsterC) {
+        this._monsters.splice(i, 1);
+        break;
+      }
+    }
+    this._playerR = this._battleMonsterR;
+    this._playerC = this._battleMonsterC;
+
+    this._dropWeapon();
+    this._dropArmor();
+
+    if (this.exp >= this.expNext) {
+      this._openReward();
+    } else {
+      this.phase = 'grid';
+      this._renderMap();
+    }
+  },
+
+  _dropWeapon() {
+    if (Math.random() >= 0.35) {
+      return;
+    }
+    var weapon = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
+    if (weapon.atk > this.weaponAtk) {
+      this.weaponAtk = weapon.atk;
+      this.weaponName = weapon.name;
+      this.atk = this.baseAtk + this.weaponAtk;
+      this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
+    } else {
+      this._addLog('获得 ' + weapon.name + '，但不如当前武器');
+    }
+  },
+
+  _dropArmor() {
+    if (Math.random() >= 0.25) {
+      return;
+    }
+    var armor = ARMORS[Math.floor(Math.random() * ARMORS.length)];
+    if (armor.def > this.armorDef) {
+      this.armorDef = armor.def;
+      this.armorName = armor.name;
+      this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
+    } else {
+      this._addLog('获得 ' + armor.name + '，但不如当前防具');
+    }
+  },
+
+  _openReward() {
+    this.phase = 'reward';
+    var pool = UPGRADES.slice();
+    var options = [];
+    for (var i = 0; i < 3 && pool.length > 0; i++) {
+      var idx = Math.floor(Math.random() * pool.length);
+      options.push(pool.splice(idx, 1)[0]);
+    }
+    this.upgradeOptions = options;
+  },
+
+  chooseUpgrade(id) {
+    if (id === 'atk') {
+      this.baseAtk += 4;
+      this.atk = this.baseAtk + this.weaponAtk;
+    } else if (id === 'hp') {
+      this.maxHp += 25;
+      this.hp = Math.min(this.maxHp, this.hp + 25);
+    } else if (id === 'potion') {
+      this.potions += 1;
+    } else if (id === 'heal') {
+      this.hp = Math.min(this.maxHp, this.hp + 40);
+    }
+
+    this.level += 1;
+    this.exp -= this.expNext;
+    this.expNext = Math.floor(this.expNext * 1.35);
+    this._updateHp();
+    this.phase = 'grid';
+    this._renderMap();
+    this._addLog('升级到 Lv.' + this.level);
+  },
+
+  _monstersTurn() {
+    for (var i = 0; i < this._monsters.length; i++) {
+      var mon = this._monsters[i];
+      if (!mon.alive) {
+        continue;
+      }
+      var dr = this._playerR - mon.row;
+      var dc = this._playerC - mon.col;
+      if (Math.abs(dr) + Math.abs(dc) === 1) {
+        // 相邻攻击
+        var stats = this._monsterStats(mon.id);
+        var dmg = Math.max(1, Math.round((stats.atk - this.armorDef) * (0.85 + Math.random() * 0.3)));
+        this.hp -= dmg;
+        this._updateHp();
+        this._addLog(stats.name + ' 攻击你 ' + dmg);
+        if (this.hp <= 0) {
+          this.hp = 0;
+          this._updateHp();
+          this._die();
+          return;
+        }
+      } else {
+        this._moveMonster(mon, dr, dc);
+      }
+    }
+  },
+
+  _moveMonster(mon, dr, dc) {
+    var horizontal = Math.abs(dc) > Math.abs(dr);
+    var attempts = horizontal ? [[0, Math.sign(dc)], [Math.sign(dr), 0]] : [[Math.sign(dr), 0], [0, Math.sign(dc)]];
+    for (var a = 0; a < attempts.length; a++) {
+      var nr = mon.row + attempts[a][0];
+      var nc = mon.col + attempts[a][1];
+      if (nr < 0 || nr >= this._height || nc < 0 || nc >= this._width) {
+        continue;
+      }
+      if (this._grid[nr][nc] === '#') {
+        continue;
+      }
+      if (this._monsterAt(nr, nc) || this._itemAt(nr, nc)) {
+        continue;
+      }
+      if (nr === this._playerR && nc === this._playerC) {
+        continue;
+      }
+      mon.row = nr;
+      mon.col = nc;
+      break;
+    }
+  },
+
+  _afterMonstersTurn() {
+    if (this.phase === 'dead') {
+      return;
+    }
+    this._renderMap();
+  },
+
+  _die() {
+    this.phase = 'dead';
+    if (this.floor > this.best) {
+      this.best = this.floor;
+      storage.set({
+        key: 'BAND_SURVIVOR_BEST',
+        value: String(this.floor)
+      });
+    }
+  },
+
+  doRest() {
+    if (this.phase !== 'grid') {
+      return;
+    }
+    var heal = Math.round(this.maxHp * 0.25);
+    this.hp = Math.min(this.maxHp, this.hp + heal);
+    this._updateHp();
+    this._addLog('休息片刻，回复 ' + heal + ' 生命');
+    this._monstersTurn();
+    this._afterMonstersTurn();
+  },
+
+  usePotion() {
+    if (this.phase !== 'grid' || this.potions <= 0 || this.hp >= this.maxHp) {
+      return;
+    }
+    this.potions -= 1;
+    this.hp = Math.min(this.maxHp, this.hp + HEAL_AMOUNT);
+    this._updateHp();
+    this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
+    this._monstersTurn();
+    this._afterMonstersTurn();
+  },
+
+  openShop() {
+    if (this.phase !== 'grid') {
+      return;
+    }
+    this.phase = 'shop';
+  },
+
+  closeShop() {
+    this.phase = 'grid';
+    this._renderMap();
+  },
+
+  buyItem(id) {
+    var item = null;
+    for (var i = 0; i < this.shopItems.length; i++) {
+      if (this.shopItems[i].id === id) {
+        item = this.shopItems[i];
+        break;
+      }
+    }
+    if (!item) {
+      return;
+    }
+    if (this.gold < item.price) {
+      this._addLog('金币不足');
+      return;
+    }
+    if (item.type === 'potion') {
+      this.gold -= item.price;
+      this.potions += 1;
+      this._addLog('购买药水，剩余药水 ' + this.potions);
+    } else if (item.type === 'weapon') {
+      var weapon = null;
+      for (var j = 0; j < WEAPONS.length; j++) {
+        if (WEAPONS[j].name === item.name) {
+          weapon = WEAPONS[j];
+          break;
+        }
+      }
+      if (weapon && weapon.atk > this.weaponAtk) {
+        this.gold -= item.price;
+        this.weaponAtk = weapon.atk;
+        this.weaponName = weapon.name;
+        this.atk = this.baseAtk + this.weaponAtk;
+        this._addLog('购买武器 ' + weapon.name + '，攻击 +' + weapon.atk);
+      } else {
+        this._addLog('你已经拥有更好的武器');
+      }
+    } else if (item.type === 'armor') {
+      var armor = null;
+      for (var k = 0; k < ARMORS.length; k++) {
+        if (ARMORS[k].name === item.name) {
+          armor = ARMORS[k];
+          break;
+        }
+      }
+      if (armor && armor.def > this.armorDef) {
+        this.gold -= item.price;
+        this.armorDef = armor.def;
+        this.armorName = armor.name;
+        this._addLog('购买防具 ' + armor.name + '，防御 +' + armor.def);
+      } else {
+        this._addLog('你已经拥有更好的防具');
+      }
+    }
+  },
+
+  openBag() {
+    if (this.phase !== 'grid') {
+      return;
+    }
+    this.phase = 'bag';
+  },
+
+  closeBag() {
+    this.phase = 'grid';
+    this._renderMap();
+  },
+
+  usePotionFromBag() {
+    if (this.phase !== 'bag' || this.potions <= 0 || this.hp >= this.maxHp) {
+      return;
+    }
+    this.potions -= 1;
+    this.hp = Math.min(this.maxHp, this.hp + HEAL_AMOUNT);
+    this._updateHp();
+    this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
+  }
+};
+</script>
+
+<style>
+.page {
+  width: 100%;
+  height: 100%;
+  background-color: #0d0d0f;
+  position: relative;
+}
+
+.screen {
+  width: 212px;
+  height: 520px;
+  position: relative;
+  padding: 10px 10px 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  margin-top: 56px;
+  color: #f5f5f7;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #7aa2ff;
+  font-size: 14px;
+}
+
+.tip {
+  margin-top: 10px;
+  color: #777777;
+  font-size: 12px;
+}
+
+.big-btn {
+  margin-top: 26px;
+  width: 152px;
+  height: 42px;
+  background: linear-gradient(135deg, #3a5db8, #2a3f7f);
+  border-radius: 10px;
+}
+
+.btn {
+  width: 120px;
+  height: 36px;
+  margin-top: 10px;
+  border-radius: 8px;
+  background-color: #2a3f7f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-text {
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.btn-text.small {
+  font-size: 13px;
+}
+
+.btn-sub {
+  color: #b8c7ff;
+  font-size: 10px;
+  margin-top: 1px;
+}
+
+.disabled {
+  background-color: #333344;
+}
+
+.best {
+  position: absolute;
+  bottom: 76px;
+  color: #666677;
+  font-size: 12px;
+}
+
+.hud {
+  width: 192px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.hud-item {
+  color: #c8c8d0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bar {
+  width: 192px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 4px;
+  background-color: #2a2a30;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.2s ease;
+}
+
+.hp-fill {
+  background: linear-gradient(90deg, #2ed477, #35a86e);
+}
+
+.hp-text {
+  width: 192px;
+  margin-top: 3px;
+  color: #8fe6aa;
+  font-size: 10px;
+  text-align: left;
+}
+
+.map-msg {
+  width: 192px;
+  margin-top: 2px;
+  color: #8888aa;
+  font-size: 11px;
+  text-align: left;
+}
+
+.map-container {
+  width: 120px;
+  height: 215px;
+  margin-top: 8px;
+  padding: 4px;
+  background-color: #101016;
+  border: 1px solid #26262e;
+  border-radius: 8px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.cell {
+  position: absolute;
+  width: 18px;
+  height: 20px;
+  border-radius: 3px;
+}
+
+.wall {
+  background-color: #14141c;
+  background-image: url('/common/icons/wall.png');
+  background-size: 18px 20px;
+}
+
+.floor {
+  background-color: #34343e;
+  background-image: url('/common/icons/floor.png');
+  background-size: 18px 20px;
+}
+
+.player {
+  background-color: #3aa0ff;
+  border-radius: 50%;
+}
+
+.monster {
+  background-color: #ff5a4e;
+  border-radius: 50%;
+}
+
+.stairs {
+  background-color: #ffd75e;
+  border-radius: 3px;
+}
+
+.gold {
+  background-color: #ffcc55;
+  border-radius: 50%;
+}
+
+.potion {
+  background-color: #ff7aa8;
+  border-radius: 50%;
+}
+
+.weapon {
+  background-color: #b8b8c8;
+}
+
+.armor {
+  background-color: #6ab0ff;
+}
+
+.cell-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 20px;
+}
+
+.cell-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  background-color: #000000;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 2px;
+}
+
+.action-scroll {
+  width: 192px;
+  height: 150px;
+  margin-top: auto;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.action-item {
+  width: 192px;
+  height: 34px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  background-color: #20242f;
+  border: 1px solid #2d3240;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-action {
+  background-color: #22273a;
+}
+
+.action-label {
+  color: #e8e8f0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.action-desc {
+  color: #7d8496;
+  font-size: 9px;
+  margin-top: 1px;
+}
+
+.map-tip {
+  margin-top: 6px;
+  color: #6a6a7a;
+  font-size: 10px;
+}
+
+.grid-actions {
+  width: 192px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grid-btn {
+  width: 44px;
+  height: 40px;
+  margin-top: 0;
+}
+
+.battle-scroll {
+  width: 192px;
+  height: 300px;
+  margin-top: 10px;
+}
+
+.monster-card {
+  width: 192px;
+  background-color: #1a1416;
+  border: 1px solid #30262a;
+  border-radius: 12px;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.monster-name {
+  color: #ff7b6b;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.monster-hp-text {
+  margin-top: 6px;
+  color: #ffaa88;
+  font-size: 14px;
+}
+
+.monster-bar {
+  width: 144px;
+  margin-top: 6px;
+}
+
+.monster-fill {
+  background: linear-gradient(90deg, #e05a4e, #c23b2f);
+}
+
+.monster-atk {
+  margin-top: 6px;
+  color: #9999a3;
+  font-size: 11px;
+}
+
+.log-box {
+  margin-top: 12px;
+  width: 192px;
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.log-line {
+  color: #8a8a94;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.actions {
+  margin-top: 12px;
+  width: 192px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.action-btn {
+  width: 60px;
+  height: 52px;
+  margin-top: 0;
+}
+
+.reward-overlay,
+.dead-overlay,
+.shop-overlay,
+.bag-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 212px;
+  height: 520px;
+  background-color: rgba(8, 8, 10, 0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60px;
+  z-index: 10;
+}
+
+.reward-title {
+  color: #ffd75e;
+  font-size: 20px;
+  margin-bottom: 24px;
+}
+
+.upgrade-option {
+  width: 176px;
+  height: 66px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background-color: #202741;
+  border: 1px solid #34405f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.option-name {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.option-desc {
+  color: #a8b7ff;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.dead-title {
+  color: #ff5e5e;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.dead-text {
+  color: #bbbbbb;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.shop-overlay {
+  padding-top: 40px;
+}
+
+.shop-title {
+  color: #ffd75e;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.shop-gold {
+  color: #e8d68a;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.shop-scroll {
+  width: 192px;
+  height: 300px;
+}
+
+.shop-item {
+  width: 192px;
+  height: 48px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background-color: #22273a;
+  border: 1px solid #34405f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.shop-name {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.shop-desc {
+  color: #8994b6;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.shop-close {
+  margin-top: 20px;
+  width: 152px;
+}
+
+.bag-overlay {
+  padding-top: 50px;
+}
+
+.bag-title {
+  color: #7aa2ff;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 24px;
+}
+
+.bag-line {
+  color: #e8e8f0;
+  font-size: 14px;
+  margin-top: 12px;
+}
+</style>
