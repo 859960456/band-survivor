@@ -755,6 +755,7 @@ export default {
       fullVision: this._fullVision,
       forgeBonus: this._forgeBonus,
       luck: this._luck,
+      shieldReflect: this._shieldReflect,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -905,6 +906,7 @@ export default {
         that._fullVision = !!s.fullVision;
         that._forgeBonus = s.forgeBonus || 0;
         that._luck = s.luck || 0;
+        that._shieldReflect = s.shieldReflect || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1022,6 +1024,7 @@ export default {
     this._fullVision = false;
     this._forgeBonus = 0;
     this._luck = 0;
+    this._shieldReflect = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2180,6 +2183,19 @@ export default {
     }
     var absorbed = Math.min(this._shield, dmg);
     this._shield -= absorbed;
+    if (absorbed > 0 && this._shieldReflect > 0 && this.monsterAlive) {
+      var reflectDmg = Math.max(1, Math.round(absorbed * this._shieldReflect));
+      this.monsterHp -= reflectDmg;
+      this._updateMonsterHp();
+      this._addLog('护盾反弹 ' + reflectDmg + ' 伤害');
+      if (this.monsterHp <= 0) {
+        this.monsterHp = 0;
+        this._updateMonsterHp();
+        this.monsterAlive = false;
+        this._onMonsterDead();
+        return;
+      }
+    }
     dmg -= absorbed;
     this.hp -= dmg;
     this._damageTaken += dmg;
@@ -2937,6 +2953,8 @@ export default {
       this.expMul += 0.15;
     } else if (id === 'luck') {
       this._luck += 1;
+    } else if (id === 'shieldReflect') {
+      this._shieldReflect += 0.5;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
