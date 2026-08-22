@@ -187,6 +187,7 @@
 
 <script>
 import storage from '@system.storage';
+import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT } from '../../common/game-data.js';
 
 const MAX_LOG = 3;
@@ -446,6 +447,12 @@ export default {
     lines.unshift(text);
     this.logLines = lines;
     this.lastLog = text;
+  },
+
+  _vibrate(duration) {
+    try {
+      vibrator.vibrate({ duration: duration || 40 });
+    } catch (e) {}
   },
 
   _updateHp() {
@@ -905,6 +912,7 @@ export default {
   },
 
   _pickItem(item) {
+    this._vibrate(30);
     if (item.type === 'gold') {
       var gold = 5 + Math.floor(Math.random() * 10);
       this.gold += gold;
@@ -1023,6 +1031,7 @@ export default {
     var dmg = Math.max(1, Math.round((this.monsterAtk - this.armorDef) * (0.85 + Math.random() * 0.3)));
     this.hp -= dmg;
     this._updateHp();
+    this._vibrate(60);
     this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害');
 
     if (this.hp <= 0) {
@@ -1034,6 +1043,7 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    this._vibrate(120);
     this.gold += this.monsterGold;
     this.exp += this.monsterExp;
     this._updateExp();
@@ -1118,6 +1128,7 @@ export default {
     }
 
     this.level += 1;
+    this._vibrate(160);
     this.exp -= this.expNext;
     this.expNext = Math.floor(this.expNext * 1.35);
     this._updateExp();
@@ -1187,6 +1198,7 @@ export default {
 
   _die() {
     this.phase = 'dead';
+    this._vibrate(200);
     this._clearSave();
     if (this.floor > this.best) {
       this.best = this.floor;
