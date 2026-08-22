@@ -747,6 +747,7 @@ export default {
       critCombo: this._critCombo,
       soulOnKillChance: this._soulOnKillChance,
       stairVision: this._stairVision,
+      startCombo: this._startCombo,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -889,6 +890,7 @@ export default {
         that._critCombo = s.critCombo || 0;
         that._soulOnKillChance = s.soulOnKillChance || 0;
         that._stairVision = !!s.stairVision;
+        that._startCombo = s.startCombo || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -997,6 +999,7 @@ export default {
     this._critCombo = 0;
     this._soulOnKillChance = 0;
     this._stairVision = false;
+    this._startCombo = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1942,7 +1945,7 @@ export default {
     this.monsterExp = stats.exp;
     this.isBoss = isBoss;
     this.skillCd = 0;
-    this.combo = 0;
+    this.combo = this._startCombo || 0;
     this._isElite = false;
     this._bossEnraged = false;
     this._resolveUsed = false;
@@ -2853,6 +2856,8 @@ export default {
       this._soulOnKillChance += 0.2;
     } else if (id === 'stairvision') {
       this._stairVision = true;
+    } else if (id === 'startCombo') {
+      this._startCombo += 2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
