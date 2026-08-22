@@ -422,6 +422,8 @@ export default {
     achievementCount: 0,
     achievementTotal: 0,
     achievementList: [],
+    codexList: [],
+    talentList: [],
     title: '初行者',
     soul: 0,
     bestWeaponAtk: 0,
