@@ -6,7 +6,7 @@ export const AREAS = [
     id: 'forest',
     name: '迷雾森林',
     desc: '树木遮天蔽日，远处传来低沉的咆哮声。',
-    monsters: ['slime', 'wolf', 'goblin', 'mushroom', 'boar'],
+    monsters: ['slime', 'wolf', 'goblin', 'mushroom', 'boar', 'treant'],
     boss: 'bear_king',
     effect: { hp: 0.9, atk: 0.95, gold: 1.1, exp: 1.0 },
     effDesc: '林间走兽更脆弱，但金币更多'
@@ -15,7 +15,7 @@ export const AREAS = [
     id: 'cave',
     name: '幽暗洞穴',
     desc: '洞壁潮湿，脚下的碎石发出细碎的声响。',
-    monsters: ['bat', 'skeleton', 'goblin', 'spider'],
+    monsters: ['bat', 'skeleton', 'goblin', 'spider', 'cave_rat'],
     boss: 'cave_guard',
     effect: { hp: 1.15, atk: 1.05, gold: 1.0, exp: 1.15 },
     effDesc: '洞穴生物更坚韧，经验更多'
@@ -24,7 +24,7 @@ export const AREAS = [
     id: 'ruins',
     name: '古遗迹',
     desc: '残破的石柱间萦绕着古老的气息。',
-    monsters: ['skeleton', 'ghost', 'orc', 'wraith'],
+    monsters: ['skeleton', 'ghost', 'orc', 'wraith', 'cursed_knight'],
     boss: 'ruin_golem',
     effect: { hp: 1.1, atk: 1.15, gold: 1.2, exp: 1.2 },
     effDesc: '遗物守卫攻高防厚，奖励丰厚'
@@ -33,7 +33,7 @@ export const AREAS = [
     id: 'abyss',
     name: '深渊入口',
     desc: '黑暗仿佛有生命，正注视着你。',
-    monsters: ['ghost', 'orc', 'demon', 'imp'],
+    monsters: ['ghost', 'orc', 'demon', 'imp', 'void_walker'],
     boss: 'abyss_lord',
     effect: { hp: 1.25, atk: 1.3, gold: 1.35, exp: 1.35 },
     effDesc: '深渊之力侵蚀，敌人极强，回报极高'
@@ -42,7 +42,7 @@ export const AREAS = [
     id: 'tundra',
     name: '极寒雪原',
     desc: '风雪呼啸，白骨在冰原上若隐若现。',
-    monsters: ['wolf', 'skeleton', 'wraith', 'yeti'],
+    monsters: ['wolf', 'skeleton', 'wraith', 'yeti', 'frost_wolf'],
     boss: 'frost_king',
     effect: { hp: 1.3, atk: 1.15, gold: 1.4, exp: 1.4 },
     effDesc: '雪原生物坚韧且凶猛，回报极高'
@@ -51,7 +51,7 @@ export const AREAS = [
     id: 'lava',
     name: '熔岩炼狱',
     desc: '灼热空气扭曲视线，岩浆在脚下翻滚。',
-    monsters: ['imp', 'demon', 'lava_golem', 'fire_imp'],
+    monsters: ['imp', 'demon', 'lava_golem', 'fire_imp', 'magma_spider'],
     boss: 'inferno_lord',
     effect: { hp: 1.4, atk: 1.35, gold: 1.5, exp: 1.5 },
     effDesc: '炼狱生物攻击骇人，奖励极为丰厚'
@@ -81,7 +81,13 @@ export const MONSTERS = {
   frost_king: { name: '霜冻王',   hp: 180, atk: 24, gold: 130, exp: 200 },
   lava_golem: { name: '熔岩巨像', hp: 64, atk: 17, gold: 20, exp: 42 },
   fire_imp:   { name: '炎魔',     hp: 54, atk: 15, gold: 16, exp: 34 },
-  inferno_lord: { name: '炼狱领主', hp: 210, atk: 28, gold: 160, exp: 260 }
+  inferno_lord: { name: '炼狱领主', hp: 210, atk: 28, gold: 160, exp: 260 },
+  treant:       { name: '树人',     hp: 44, atk: 8,  gold: 8,  exp: 20 },
+  cave_rat:     { name: '洞穴鼠',   hp: 30, atk: 7,  gold: 6,  exp: 16 },
+  cursed_knight:{ name: '受诅骑士', hp: 52, atk: 13, gold: 14, exp: 30 },
+  void_walker:  { name: '虚空行者', hp: 62, atk: 16, gold: 18, exp: 38 },
+  frost_wolf:   { name: '冰原狼',   hp: 56, atk: 15, gold: 17, exp: 36 },
+  magma_spider: { name: '熔岩蛛',   hp: 60, atk: 17, gold: 19, exp: 40 }
 };
 
 export const UPGRADES = [
