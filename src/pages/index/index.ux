@@ -382,6 +382,7 @@
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES } from '../../common/game-data.js';
+import { computeMonsterStats, difficultyMul, randInt } from '../../common/game-core.js';
 
 const MAX_LOG = 6;
 const BOSS_EVERY = 5;
@@ -980,32 +981,13 @@ export default {
   },
 
   _difficultyMul() {
-    if (this.challengeMode) {
-      var base = this.difficulty === 0 ? { hp: 0.9, atk: 0.95, exp: 1.1, gold: 1.1 } : (this.difficulty === 2 ? { hp: 1.45, atk: 1.3, exp: 1.35, gold: 1.25 } : { hp: 1.1, atk: 1.1, exp: 1.2, gold: 1.15 });
-      return base;
-    }
-    if (this.difficulty === 0) {
-      return { hp: 0.8, atk: 0.85, exp: 1.0, gold: 1.0 };
-    }
-    if (this.difficulty === 2) {
-      return { hp: 1.35, atk: 1.2, exp: 1.25, gold: 1.15 };
-    }
-    return { hp: 1.0, atk: 1.0, exp: 1.0, gold: 1.0 };
+    return difficultyMul(this.difficulty, this.challengeMode);
   },
 
   _monsterStats(id) {
     var base = MONSTERS[id] || MONSTERS.slime;
-    var mul = this._difficultyMul();
     var area = this._areaByFloor(this.floor);
-    var ae = area.effect || { hp: 1, atk: 1, gold: 1, exp: 1 };
-    var scale = 1 + this.floor * (this.endless ? 0.09 : 0.06);
-    return {
-      name: base.name,
-      hp: Math.round(base.hp * scale * mul.hp * ae.hp),
-      atk: Math.round((base.atk + this.floor * 0.4) * mul.atk * ae.atk),
-      gold: Math.round((base.gold + this.floor * 2) * mul.gold * ae.gold),
-      exp: Math.round((base.exp + this.floor * 3) * mul.exp * ae.exp)
-    };
+    return computeMonsterStats(base, this.floor, this._difficultyMul(), this.endless, area.effect);
   },
 
   _genFloor(num) {

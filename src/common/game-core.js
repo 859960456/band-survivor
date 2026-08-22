@@ -1,0 +1,28 @@
+// 纯计算逻辑模块（不依赖组件状态，便于复用与测试）
+
+export function difficultyMul(difficulty, challengeMode) {
+  if (challengeMode) {
+    if (difficulty === 0) { return { hp: 0.9, atk: 0.95, exp: 1.1, gold: 1.1 }; }
+    if (difficulty === 2) { return { hp: 1.45, atk: 1.3, exp: 1.35, gold: 1.25 }; }
+    return { hp: 1.1, atk: 1.1, exp: 1.2, gold: 1.15 };
+  }
+  if (difficulty === 0) { return { hp: 0.8, atk: 0.85, exp: 1.0, gold: 1.0 }; }
+  if (difficulty === 2) { return { hp: 1.35, atk: 1.2, exp: 1.25, gold: 1.15 }; }
+  return { hp: 1.0, atk: 1.0, exp: 1.0, gold: 1.0 };
+}
+
+export function computeMonsterStats(base, floor, mul, endless, areaEffect) {
+  var ae = areaEffect || { hp: 1, atk: 1, gold: 1, exp: 1 };
+  var scale = 1 + floor * (endless ? 0.09 : 0.06);
+  return {
+    name: base.name,
+    hp: Math.round(base.hp * scale * mul.hp * ae.hp),
+    atk: Math.round((base.atk + floor * 0.4) * mul.atk * ae.atk),
+    gold: Math.round((base.gold + floor * 2) * mul.gold * ae.gold),
+    exp: Math.round((base.exp + floor * 3) * mul.exp * ae.exp)
+  };
+}
+
+export function randInt(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
