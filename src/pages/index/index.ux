@@ -717,6 +717,7 @@ export default {
       skillPowerAdd: this._skillPowerAdd,
       freezeChance: this._freezeChance,
       blockChance: this._blockChance,
+      barrier: this._barrier,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -829,6 +830,7 @@ export default {
         that._skillPowerAdd = s.skillPowerAdd || 0;
         that._freezeChance = s.freezeChance || 0;
         that._blockChance = s.blockChance || 0;
+        that._barrier = s.barrier || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -905,6 +907,7 @@ export default {
     this._skillPowerAdd = 0;
     this._freezeChance = 0;
     this._blockChance = 0;
+    this._barrier = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1070,6 +1073,9 @@ export default {
     this.floor = num;
     this._checkAchievements();
     this._advanceDaily(this.dailyType === 'floor' ? 1 : 0);
+    if (this._barrier > 0 && num > 1) {
+      this._shield += this._barrier;
+    }
     var sizes = [
       [6, 8],
       [7, 9],
@@ -2586,6 +2592,8 @@ export default {
       this._freezeChance += 0.15;
     } else if (id === 'block') {
       this._blockChance += 0.2;
+    } else if (id === 'barrier') {
+      this._barrier += 8;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;

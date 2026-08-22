@@ -116,7 +116,8 @@ export const UPGRADES = [
   { id: 'loot',    name: '敛财',         desc: '每击杀额外 +3 金币',      rarity: 'rare'   },
   { id: 'skillpower', name: '熟练',       desc: '技能伤害 +0.5 倍',        rarity: 'epic'   },
   { id: 'freeze',   name: '冰冻',         desc: '攻击有几率削弱怪物攻击', rarity: 'rare'   },
-  { id: 'block',   name: '格挡',         desc: '受击有几率减半伤害',      rarity: 'rare'   }
+  { id: 'block',   name: '格挡',         desc: '受击有几率减半伤害',      rarity: 'rare'   },
+  { id: 'barrier', name: '壁垒',         desc: '每层开始获得 8 护盾',      rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {
