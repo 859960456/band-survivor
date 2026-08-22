@@ -174,3 +174,9 @@ export const TALENTS = [
   { id: 't_lifesteal',name: '嗜血', desc: '吸血 +1',         stat: 'lifesteal',  value: 1 },
   { id: 't_burn',     name: '焚心', desc: '点燃几率 +5%',    stat: 'burnChance', value: 0.05 }
 ];
+
+export const CLASSES = [
+  { id: 'warrior', name: '战士', desc: '高血高攻', hp: 125, atk: 12, potions: 2, dodge: 0,  crit: 0 },
+  { id: 'ranger',  name: '游侠', desc: '高闪避',   hp: 95,  atk: 11, potions: 3, dodge: 6,  crit: 0 },
+  { id: 'mage',    name: '法师', desc: '高暴击',   hp: 85,  atk: 13, potions: 2, dodge: 0,  crit: 0.15 }
+];

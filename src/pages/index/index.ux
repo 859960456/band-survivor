@@ -10,6 +10,11 @@
         <div class="diff-btn {{difficulty === 1 ? 'active' : ''}}" @click="setDifficulty(1)">普通</div>
         <div class="diff-btn {{difficulty === 2 ? 'active' : ''}}" @click="setDifficulty(2)">困难</div>
       </div>
+      <div class="diff-row">
+        <div class="diff-btn {{charClass === 'warrior' ? 'active' : ''}}" @click="setClass('warrior')">战士</div>
+        <div class="diff-btn {{charClass === 'ranger' ? 'active' : ''}}" @click="setClass('ranger')">游侠</div>
+        <div class="diff-btn {{charClass === 'mage' ? 'active' : ''}}" @click="setClass('mage')">法师</div>
+      </div>
       <div class="btn big-btn {{endless ? 'active-toggle' : ''}}" @click="toggleEndless">
         <text class="btn-text">无尽模式：{{endless ? '开' : '关'}}</text>
       </div>
@@ -337,7 +342,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES } from '../../common/game-data.js';
 
 const MAX_LOG = 6;
 const BOSS_EVERY = 5;
@@ -347,6 +352,8 @@ export default {
     phase: 'home',
     best: 0,
     difficulty: 1,
+    charClass: 'warrior',
+    classLabel: '战士',
     endless: false,
     challengeMode: false,
     hasSave: false,
@@ -457,6 +464,15 @@ export default {
       success: function(data) {
         if (data === '1') {
           that.challengeMode = true;
+        }
+      }
+    });
+    storage.get({
+      key: 'BAND_SURVIVOR_CLASS',
+      success: function(data) {
+        if (data) {
+          that.charClass = data;
+          that._updateClassLabel();
         }
       }
     });
@@ -596,6 +612,15 @@ export default {
       armorDef: this.armorDef,
       armorName: this.armorName,
       atk: this.atk,
+      critChance: this.critChance,
+      critMult: this.critMult,
+      lifesteal: this.lifesteal,
+      goldMul: this.goldMul,
+      expMul: this.expMul,
+      skillCdMax: this.skillCdMax,
+      burnChance: this.burnChance,
+      dodge: this.dodge,
+      skillName: this.skillName,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -651,6 +676,15 @@ export default {
         that.armorDef = s.armorDef || 0;
         that.armorName = s.armorName || '无';
         that.atk = s.atk || BASE_PLAYER.atk;
+        that.critChance = s.critChance || 0;
+        that.critMult = s.critMult || 2;
+        that.lifesteal = s.lifesteal || 0;
+        that.goldMul = s.goldMul || 1;
+        that.expMul = s.expMul || 1;
+        that.skillCdMax = s.skillCdMax || SKILL_CD;
+        that.burnChance = s.burnChance || 0;
+        that.dodge = s.dodge || 0;
+        that.skillName = s.skillName || that._skillName();
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -755,12 +789,15 @@ export default {
     this._stairsC = 0;
     this._battleMonsterR = -1;
     this._battleMonsterC = -1;
-    // 应用永久强化
-    this.baseAtk = BASE_PLAYER.atk + this.metaAtk;
+    // 应用职业与永久强化
+    var cb = this._classBase();
+    this.baseAtk = cb.atk + this.metaAtk;
     this.atk = this.baseAtk + this.weaponAtk;
-    this.maxHp = BASE_PLAYER.maxHp + this.metaHp;
+    this.maxHp = cb.hp + this.metaHp;
     this.hp = this.maxHp;
-    this.potions = BASE_PLAYER.potions + this.metaPotion;
+    this.potions = cb.potions + this.metaPotion;
+    this.dodge = cb.dodge;
+    this.critChance = cb.crit;
     this._updateHp();
     this._updateExp();
   },
@@ -2219,6 +2256,39 @@ export default {
     this.metaAtk += 2;
     this._saveMeta();
     this._updateMetaList();
+  },
+
+  _updateClassLabel() {
+    for (var i = 0; i < CLASSES.length; i++) {
+      if (CLASSES[i].id === this.charClass) {
+        this.classLabel = CLASSES[i].name;
+        return;
+      }
+    }
+    this.classLabel = '战士';
+  },
+
+  _classBase() {
+    for (var i = 0; i < CLASSES.length; i++) {
+      if (CLASSES[i].id === this.charClass) {
+        return CLASSES[i];
+      }
+    }
+    return CLASSES[0];
+  },
+
+  setClass(id) {
+    var ok = false;
+    for (var i = 0; i < CLASSES.length; i++) {
+      if (CLASSES[i].id === id) {
+        this.charClass = id;
+        this._updateClassLabel();
+        storage.set({ key: 'BAND_SURVIVOR_CLASS', value: id });
+        ok = true;
+        break;
+      }
+    }
+    return ok;
   },
 
   _saveSettings() {
