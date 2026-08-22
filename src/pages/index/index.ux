@@ -711,6 +711,7 @@ export default {
       thorns: this._thorns,
       killHeal: this._killHeal,
       goldSteal: this._goldSteal,
+      skillPowerAdd: this._skillPowerAdd,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -820,6 +821,7 @@ export default {
         that._thorns = s.thorns || 0;
         that._killHeal = s.killHeal || 0;
         that._goldSteal = s.goldSteal || 0;
+        that._skillPowerAdd = s.skillPowerAdd || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -893,6 +895,7 @@ export default {
     this._thorns = 0;
     this._killHeal = 0;
     this._goldSteal = 0;
+    this._skillPowerAdd = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1815,7 +1818,7 @@ export default {
   },
 
   _skillMult() {
-    return skillMult(this.weaponAtk);
+    return skillMult(this.weaponAtk) + this._skillPowerAdd;
   },
 
   doSkill() {
@@ -2509,6 +2512,8 @@ export default {
       this._killHeal += 5;
     } else if (id === 'loot') {
       this._goldSteal += 3;
+    } else if (id === 'skillpower') {
+      this._skillPowerAdd += 0.5;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
