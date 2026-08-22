@@ -493,6 +493,7 @@ export default {
     monsterAlive: false,
     monsterName: '',
     monsterSkillHint: '',
+    _portalNext: false,
     monsterHp: 0,
     monsterMaxHp: 0,
     monsterHpPercent: 0,
@@ -926,6 +927,7 @@ export default {
     this.monsterAlive = false;
     this.monsterName = '';
     this.monsterId = '';
+    this._portalNext = false;
     this.monsterHp = 0;
     this.monsterMaxHp = 0;
     this.monsterHpPercent = 0;
@@ -1317,12 +1319,15 @@ export default {
       } else if (roll < 0.96) {
         type = 'chest';
         icon = '◈';
-      } else if (roll < 0.98) {
+      } else if (roll < 0.97) {
         type = 'altar';
         icon = '▲';
-      } else if (roll < 0.99) {
+      } else if (roll < 0.985) {
         type = 'rune';
         icon = '◆';
+      } else if (roll < 0.99) {
+        type = 'portal';
+        icon = '◎';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -1472,6 +1477,8 @@ export default {
           icon = '';
         } else if (cls === 'rune') {
           icon = '';
+        } else if (cls === 'portal') {
+          icon = '';
         }
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
       }
@@ -1619,6 +1626,11 @@ export default {
       this._playerC = nc;
       this._pickItem(item);
       this._removeItem(item);
+      if (this._portalNext) {
+        this._portalNext = false;
+        this._genFloor(this.floor + 1);
+        return;
+      }
       if (this.phase !== 'grid') {
         return;
       }
@@ -1681,6 +1693,9 @@ export default {
       }
     } else if (item.type === 'challenge') {
       this._startChallenge();
+    } else if (item.type === 'portal') {
+      this._portalNext = true;
+      this._addLog('进入传送门，即将跃升一层');
     } else if (item.type === 'rune') {
       this.talentPoints += 1;
       this._addLog('参悟符文，天赋点 +1');
@@ -3565,6 +3580,11 @@ export default {
   width: 18px;
   height: 20px;
   border-radius: 3px;
+}
+
+.portal {
+  background-color: #c04fd0;
+  border-radius: 50%;
 }
 
 .rune {
