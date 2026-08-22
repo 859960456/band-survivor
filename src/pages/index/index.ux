@@ -4,7 +4,7 @@
     <div if="{{phase === 'home'}}" class="screen">
       <text class="title">暗渊行者</text>
       <text class="subtitle">地牢走格子 · 文字肉鸽</text>
-      <text class="tip">滑动移动 · 遇怪战斗 · 下梯换层</text>
+      <text class="tip">每日任务：{{dailyLabel}}（{{dailyProgress}}/{{dailyTarget}}）</text>
       <div class="diff-row">
         <div class="diff-btn {{difficulty === 0 ? 'active' : ''}}" @click="setDifficulty(0)">简单</div>
         <div class="diff-btn {{difficulty === 1 ? 'active' : ''}}" @click="setDifficulty(1)">普通</div>
@@ -33,6 +33,9 @@
       </div>
       <div class="btn" @click="openCodex">
         <text class="btn-text">图鉴 {{codexCount}}/{{codexTotal}}</text>
+      </div>
+      <div if="{{dailyDone}}" class="btn big-btn" @click="claimDailyTask">
+        <text class="btn-text">领取每日任务奖励（灵魂+10）</text>
       </div>
       <div if="{{canClaimDaily}}" class="btn big-btn" @click="claimDaily">
         <text class="btn-text">每日签到（灵魂+8）</text>
@@ -462,6 +465,11 @@ export default {
     _damageDealt: 0,
     _comboMaxAdd: 0,
     challengeMod: '',
+    dailyType: 'kill',
+    dailyTarget: 5,
+    dailyProgress: 0,
+    dailyDone: false,
+    dailyLabel: '击杀 5 个怪物',
     _damageTaken: 0,
     _maxCombo: 0,
     _bossEnraged: false,
@@ -524,6 +532,7 @@ export default {
     this._touchStartY = 0;
     this._touchMoved = false;
     this._checkDaily();
+    this._initDailyTask();
     var that = this;
     storage.get({
       key: 'BAND_SURVIVOR_CHALLENGE',
@@ -1029,6 +1038,7 @@ export default {
   _genFloor(num) {
     this.floor = num;
     this._checkAchievements();
+    this._advanceDaily(this.dailyType === 'floor' ? 1 : 0);
     var sizes = [
       [6, 8],
       [7, 9],
@@ -1939,6 +1949,7 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    this._advanceDaily(this.dailyType === 'kill' ? 1 : 0);
     this.materials += 1 + Math.floor(Math.random() * 2);
     if (this.isBoss) {
       this.materials += 5;
@@ -2636,6 +2647,87 @@ export default {
 
   closeAchievements() {
     this.phase = 'home';
+  },
+
+  _initDailyTask() {
+    var that = this;
+    storage.get({
+      key: 'BAND_SURVIVOR_DAILYTASK',
+      success: function(data) {
+        try {
+          var d = JSON.parse(data);
+          if (d && d.date === that._todayStr()) {
+            that.dailyType = d.type;
+            that.dailyTarget = d.target;
+            that.dailyProgress = d.progress || 0;
+            that.dailyDone = d.done || false;
+            that._refreshDailyLabel();
+            return;
+          }
+        } catch (e) {}
+        that._newDailyTask();
+      },
+      fail: function() {
+        that._newDailyTask();
+      }
+    });
+  },
+
+  _newDailyTask() {
+    var types = ['kill', 'floor'];
+    this.dailyType = types[Math.floor(Math.random() * types.length)];
+    if (this.dailyType === 'kill') {
+      this.dailyTarget = 5;
+      this.dailyLabel = '击杀 5 个怪物';
+    } else {
+      this.dailyTarget = 3;
+      this.dailyLabel = '到达第 3 层';
+    }
+    this.dailyProgress = 0;
+    this.dailyDone = false;
+    storage.set({
+      key: 'BAND_SURVIVOR_DAILYTASK',
+      value: JSON.stringify({ date: this._todayStr(), type: this.dailyType, target: this.dailyTarget, progress: this.dailyProgress, done: this.dailyDone })
+    });
+  },
+
+  _refreshDailyLabel() {
+    if (this.dailyType === 'kill') {
+      this.dailyLabel = '击杀 5 个怪物';
+    } else {
+      this.dailyLabel = '到达第 3 层';
+    }
+  },
+
+  _advanceDaily(amount) {
+    if (this.dailyDone) {
+      return;
+    }
+    this.dailyProgress += amount || 1;
+    if (this.dailyProgress >= this.dailyTarget) {
+      this.dailyProgress = this.dailyTarget;
+      this.dailyDone = true;
+    }
+    storage.set({
+      key: 'BAND_SURVIVOR_DAILYTASK',
+      value: JSON.stringify({ date: this._todayStr(), type: this.dailyType, target: this.dailyTarget, progress: this.dailyProgress, done: this.dailyDone })
+    });
+  },
+
+  claimDailyTask() {
+    if (!this.dailyDone) {
+      this._addLog('任务未完成');
+      return;
+    }
+    this.soul += 10;
+    this.dailyDone = false;
+    this.dailyProgress = 0;
+    this._saveMeta();
+    this._addLog('每日任务完成，灵魂 +10');
+    storage.set({
+      key: 'BAND_SURVIVOR_DAILYTASK',
+      value: JSON.stringify({ date: this._todayStr(), type: this.dailyType, target: this.dailyTarget, progress: 0, done: false })
+    });
   },
 
   _todayStr() {
