@@ -728,6 +728,7 @@ export default {
       startHaste: this._startHaste,
       materialBonus: this._materialBonus,
       healBoost: this._healBoost,
+      intimidate: this._intimidate,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -851,6 +852,7 @@ export default {
         that._startHaste = s.startHaste || 0;
         that._materialBonus = s.materialBonus || 0;
         that._healBoost = s.healBoost || 0;
+        that._intimidate = !!s.intimidate;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -938,6 +940,7 @@ export default {
     this._startHaste = 0;
     this._materialBonus = 0;
     this._healBoost = 0;
+    this._intimidate = false;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1871,6 +1874,9 @@ export default {
     if (this._startHaste > 0) {
       this._hasteCharges += this._startHaste;
     }
+    if (this._intimidate) {
+      this.monsterAtk = Math.max(1, Math.round(this.monsterAtk * 0.8));
+    }
     this.phase = 'battle';
     this._addLog('遭遇 ' + stats.name);
   },
@@ -2665,6 +2671,8 @@ export default {
       this._materialBonus += 1;
     } else if (id === 'healboost') {
       this._healBoost += 10;
+    } else if (id === 'intimidate') {
+      this._intimidate = true;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
