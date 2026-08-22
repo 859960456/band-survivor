@@ -712,6 +712,7 @@ export default {
       killHeal: this._killHeal,
       goldSteal: this._goldSteal,
       skillPowerAdd: this._skillPowerAdd,
+      freezeChance: this._freezeChance,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -822,6 +823,7 @@ export default {
         that._killHeal = s.killHeal || 0;
         that._goldSteal = s.goldSteal || 0;
         that._skillPowerAdd = s.skillPowerAdd || 0;
+        that._freezeChance = s.freezeChance || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -896,6 +898,7 @@ export default {
     this._killHeal = 0;
     this._goldSteal = 0;
     this._skillPowerAdd = 0;
+    this._freezeChance = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1885,6 +1888,10 @@ export default {
     } else {
       this._addLog('你造成 ' + dmg + ' 点伤害');
     }
+    if (this._freezeChance > 0 && Math.random() < this._freezeChance) {
+      this.monsterAtk = Math.max(1, Math.round(this.monsterAtk * 0.8));
+      this._addLog('冰冻削弱了怪物攻击！');
+    }
     if (this.lifesteal > 0) {
       var heal = Math.min(this.maxHp - this.hp, this.lifesteal);
       if (heal > 0) {
@@ -2514,6 +2521,8 @@ export default {
       this._goldSteal += 3;
     } else if (id === 'skillpower') {
       this._skillPowerAdd += 0.5;
+    } else if (id === 'freeze') {
+      this._freezeChance += 0.15;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;

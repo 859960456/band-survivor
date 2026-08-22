@@ -108,7 +108,8 @@ export const UPGRADES = [
   { id: 'thorns',  name: '荆棘',         desc: '受击反弹 3 伤害',        rarity: 'rare'   },
   { id: 'holy',    name: '神圣',         desc: '击杀回复 5 生命',        rarity: 'epic'   },
   { id: 'loot',    name: '敛财',         desc: '每击杀额外 +3 金币',      rarity: 'rare'   },
-  { id: 'skillpower', name: '熟练',       desc: '技能伤害 +0.5 倍',        rarity: 'epic'   }
+  { id: 'skillpower', name: '熟练',       desc: '技能伤害 +0.5 倍',        rarity: 'epic'   },
+  { id: 'freeze',   name: '冰冻',         desc: '攻击有几率削弱怪物攻击', rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
