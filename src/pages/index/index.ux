@@ -16,7 +16,7 @@
     </div>
 
     <!-- 地牢探索 -->
-    <div if="{{phase === 'grid'}}" class="screen grid-screen">
+    <div if="{{phase === 'grid' || phase === 'pause'}}" class="screen grid-screen">
       <!-- 经验条：全宽顶到胶囊上缘，由设备裁剪成弧形 -->
       <div class="exp-bar">
         <div class="exp-fill" style="width: {{expPercent}}%;"></div>
@@ -65,6 +65,10 @@
           <text class="menu-label">药水</text>
           <text class="menu-sub">剩 {{potions}}</text>
         </div>
+        <div class="menu-item" @click="openPause">
+          <text class="menu-label">暂停</text>
+          <text class="menu-sub">菜单/设置</text>
+        </div>
       </scroll>
     </div>
 
@@ -74,6 +78,21 @@
       <div for="{{upgradeOptions}}" class="upgrade-option" @click="chooseUpgrade($item.id)">
         <text class="option-name">{{$item.name}}</text>
         <text class="option-desc">{{$item.desc}}</text>
+      </div>
+    </div>
+
+    <!-- 暂停 -->
+    <div if="{{phase === 'pause'}}" class="overlay dead-overlay">
+      <text class="dead-title">已暂停</text>
+      <text class="dead-text">第 {{floor}} 层 · Lv.{{level}}</text>
+      <div class="btn" @click="closePause">
+        <text class="btn-text">继续冒险</text>
+      </div>
+      <div class="btn" @click="goHome">
+        <text class="btn-text">返回首页</text>
+      </div>
+      <div class="btn" @click="endRun">
+        <text class="btn-text">结束本局</text>
       </div>
     </div>
 
@@ -1200,6 +1219,26 @@ export default {
     this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
     this._monstersTurn();
     this._afterMonstersTurn();
+  },
+
+  openPause() {
+    if (this.phase !== 'grid') {
+      return;
+    }
+    this.phase = 'pause';
+  },
+
+  closePause() {
+    if (this.phase !== 'pause') {
+      return;
+    }
+    this.phase = 'grid';
+    this._renderMap();
+  },
+
+  endRun() {
+    this._clearSave();
+    this.phase = 'home';
   },
 
   openShop() {
