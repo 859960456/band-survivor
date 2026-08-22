@@ -3127,15 +3127,7 @@ export default {
   },
 
   _discoverMonster(id) {
-    if (!id || this.codex.indexOf(id) >= 0) {
-      return;
-    }
-    this.codex.push(id);
-    storage.set({
-      key: 'BAND_SURVIVOR_CODEX',
-      value: JSON.stringify(this.codex)
-    });
-    this._updateCodexCount();
+    GameProgress.discoverMonster(this, id);
   },
 
   openCodex() {
@@ -3148,39 +3140,15 @@ export default {
   },
 
   _updateAchievementCount() {
-    this.achievementTotal = ACHIEVEMENTS.length;
-    this.achievementCount = this.unlockedAchievements.length;
-    this.achievementList = ACHIEVEMENTS.map(function(a) {
-      return { id: a.id, name: a.name, desc: a.desc, done: this.unlockedAchievements.indexOf(a.id) >= 0 };
-    }.bind(this));
-    if (this.achievementCount >= 6) {
-      this.title = '传说';
-    } else if (this.achievementCount >= 3) {
-      this.title = '精英';
-    } else if (this.achievementCount >= 1) {
-      this.title = '勇者';
-    } else {
-      this.title = '初行者';
-    }
+    GameProgress.updateAchievementCount(this);
   },
 
   _unlockAchievement(id) {
-    if (this.unlockedAchievements.indexOf(id) >= 0) {
-      return;
-    }
-    this.unlockedAchievements.push(id);
-    storage.set({
-      key: 'BAND_SURVIVOR_ACH',
-      value: JSON.stringify(this.unlockedAchievements)
-    });
-    this.soul += 5;
-    this._saveMeta();
-    this._updateAchievementCount();
-    this._addLog('成就达成：' + this._achievementName(id) + '（灵魂 +5）');
+    GameProgress.unlockAchievement(this, id);
   },
 
   _achievementName(id) {
-    return achievementName(ACHIEVEMENTS, id);
+    return GameProgress.achievementName(ACHIEVEMENTS, id);
   },
 
   _checkAchievements() {
@@ -3207,27 +3175,7 @@ export default {
   },
 
   _initDailyTask() {
-    var that = this;
-    storage.get({
-      key: 'BAND_SURVIVOR_DAILYTASK',
-      success: function(data) {
-        try {
-          var d = JSON.parse(data);
-          if (d && d.date === that._todayStr()) {
-            that.dailyType = d.type;
-            that.dailyTarget = d.target;
-            that.dailyProgress = d.progress || 0;
-            that.dailyDone = d.done || false;
-            that._refreshDailyLabel();
-            return;
-          }
-        } catch (e) {}
-        that._newDailyTask();
-      },
-      fail: function() {
-        that._newDailyTask();
-      }
-    });
+    GameProgress.initDailyTask(this);
   },
 
   _newDailyTask() {
@@ -3267,34 +3215,11 @@ export default {
   },
 
   _advanceDaily(amount) {
-    if (this.dailyDone) {
-      return;
-    }
-    this.dailyProgress += amount || 1;
-    if (this.dailyProgress >= this.dailyTarget) {
-      this.dailyProgress = this.dailyTarget;
-      this.dailyDone = true;
-    }
-    storage.set({
-      key: 'BAND_SURVIVOR_DAILYTASK',
-      value: JSON.stringify({ date: this._todayStr(), type: this.dailyType, target: this.dailyTarget, progress: this.dailyProgress, done: this.dailyDone })
-    });
+    GameProgress.advanceDaily(this, amount || 1);
   },
 
   claimDailyTask() {
-    if (!this.dailyDone) {
-      this._addLog('任务未完成');
-      return;
-    }
-    this.soul += 10;
-    this.dailyDone = false;
-    this.dailyProgress = 0;
-    this._saveMeta();
-    this._addLog('每日任务完成，灵魂 +10');
-    storage.set({
-      key: 'BAND_SURVIVOR_DAILYTASK',
-      value: JSON.stringify({ date: this._todayStr(), type: this.dailyType, target: this.dailyTarget, progress: 0, done: false })
-    });
+    GameProgress.claimDailyTask(this);
   },
 
   _todayStr() {
@@ -3303,25 +3228,11 @@ export default {
   },
 
   _checkDaily() {
-    var that = this;
-    storage.get({
-      key: 'BAND_SURVIVOR_DAILY',
-      success: function(data) {
-        that.canClaimDaily = data !== that._todayStr();
-      }
-    });
+    GameProgress.checkDaily(this);
   },
 
   claimDaily() {
-    if (!this.canClaimDaily) {
-      this._addLog('今日已领取');
-      return;
-    }
-    this.soul += 8;
-    this.canClaimDaily = false;
-    storage.set({ key: 'BAND_SURVIVOR_DAILY', value: this._todayStr() });
-    this._saveMeta();
-    this._addLog('每日签到：灵魂 +8');
+    GameProgress.claimDaily(this);
   },
 
   _saveMeta() {
