@@ -6,28 +6,28 @@ export const AREAS = [
     id: 'forest',
     name: '迷雾森林',
     desc: '树木遮天蔽日，远处传来低沉的咆哮声。',
-    monsters: ['slime', 'wolf', 'goblin'],
+    monsters: ['slime', 'wolf', 'goblin', 'mushroom', 'boar'],
     boss: 'bear_king'
   },
   {
     id: 'cave',
     name: '幽暗洞穴',
     desc: '洞壁潮湿，脚下的碎石发出细碎的声响。',
-    monsters: ['bat', 'skeleton', 'goblin'],
+    monsters: ['bat', 'skeleton', 'goblin', 'spider'],
     boss: 'cave_guard'
   },
   {
     id: 'ruins',
     name: '古遗迹',
     desc: '残破的石柱间萦绕着古老的气息。',
-    monsters: ['skeleton', 'ghost', 'orc'],
+    monsters: ['skeleton', 'ghost', 'orc', 'wraith'],
     boss: 'ruin_golem'
   },
   {
     id: 'abyss',
     name: '深渊入口',
     desc: '黑暗仿佛有生命，正注视着你。',
-    monsters: ['ghost', 'orc', 'demon'],
+    monsters: ['ghost', 'orc', 'demon', 'imp'],
     boss: 'abyss_lord'
   }
 ];
@@ -44,7 +44,12 @@ export const MONSTERS = {
   bear_king:  { name: '熊王',   hp: 80, atk: 12, gold: 40, exp: 60 },
   cave_guard: { name: '洞窟守卫', hp: 95, atk: 14, gold: 50, exp: 75 },
   ruin_golem: { name: '遗迹巨像', hp: 110, atk: 16, gold: 60, exp: 90 },
-  abyss_lord: { name: '深渊领主', hp: 150, atk: 20, gold: 100, exp: 150 }
+  abyss_lord: { name: '深渊领主', hp: 150, atk: 20, gold: 100, exp: 150 },
+  mushroom:   { name: '毒菇怪',   hp: 24, atk: 5,  gold: 4,  exp: 12 },
+  boar:       { name: '野猪',     hp: 40, atk: 9,  gold: 9,  exp: 22 },
+  spider:     { name: '洞穴蜘蛛', hp: 34, atk: 8,  gold: 7,  exp: 19 },
+  wraith:     { name: '怨灵',     hp: 42, atk: 11, gold: 11, exp: 26 },
+  imp:        { name: '小恶魔',   hp: 50, atk: 13, gold: 14, exp: 30 }
 };
 
 export const UPGRADES = [
@@ -87,14 +92,20 @@ export const WEAPONS = [
   { name: '猎刀', atk: 4 },
   { name: '十字剑', atk: 6 },
   { name: '火焰之刃', atk: 9 },
-  { name: '暗影法杖', atk: 12 }
+  { name: '暗影法杖', atk: 12 },
+  { name: '短弓', atk: 4 },
+  { name: '战锤', atk: 7 },
+  { name: '冰霜法杖', atk: 10 },
+  { name: '圣剑', atk: 14 }
 ];
 
 export const ARMORS = [
   { name: '布甲', def: 2 },
   { name: '皮甲', def: 4 },
   { name: '锁子甲', def: 7 },
-  { name: '板甲', def: 10 }
+  { name: '板甲', def: 10 },
+  { name: '鳞甲', def: 8 },
+  { name: '秘银甲', def: 12 }
 ];
 
 export const SHOP_ITEMS = [
