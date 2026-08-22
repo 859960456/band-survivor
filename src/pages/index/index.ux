@@ -882,6 +882,9 @@ export default {
       } else if (roll < 0.78) {
         type = 'event';
         icon = '?';
+      } else if (roll < 0.95) {
+        type = 'trap';
+        icon = '^';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -999,6 +1002,8 @@ export default {
         } else if (cls === 'armor') {
           icon = '/common/icons/armor.png';
         } else if (cls === 'event') {
+          icon = '';
+        } else if (cls === 'trap') {
           icon = '';
         }
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
@@ -1178,6 +1183,17 @@ export default {
         this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
       } else {
         this._addLog('获得 ' + weapon.name + '，但不如当前武器');
+      }
+    } else if (item.type === 'trap') {
+      var tdmg = Math.max(3, Math.round(6 + this.floor * 0.6));
+      this.hp -= tdmg;
+      this._updateHp();
+      this._vibrate(60);
+      this._addLog('踩中陷阱，受到 ' + tdmg + ' 伤害');
+      if (this.hp <= 0) {
+        this.hp = 0;
+        this._updateHp();
+        this._die();
       }
     } else if (item.type === 'event') {
       this._openEvent();
@@ -2030,6 +2046,11 @@ export default {
   position: absolute;
   width: 18px;
   height: 20px;
+  border-radius: 3px;
+}
+
+.trap {
+  background-color: #b86a4e;
   border-radius: 3px;
 }
 
