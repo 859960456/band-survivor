@@ -382,7 +382,7 @@
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES } from '../../common/game-data.js';
-import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey } from '../../common/game-core.js';
+import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor } from '../../common/game-core.js';
 
 const MAX_LOG = 6;
 const BOSS_EVERY = 5;
@@ -1536,20 +1536,11 @@ export default {
   },
 
   _rollWeapon() {
-    var base = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
-    var q = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
-    var affix = WEAPON_AFFIXES[Math.floor(Math.random() * WEAPON_AFFIXES.length)];
-    var atk = Math.round(base.atk * q.mult) + affix.atk;
-    return { name: q.name + '·' + base.name + '(' + affix.name + ')', atk: atk, q: q };
+    return rollWeapon(WEAPONS, QUALITIES, WEAPON_AFFIXES);
   },
 
   _rollArmor() {
-    var base = ARMORS[Math.floor(Math.random() * ARMORS.length)];
-    var q = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
-    var affix = ARMOR_AFFIXES[Math.floor(Math.random() * ARMOR_AFFIXES.length)];
-    var def = Math.round(base.def * q.mult) + affix.def;
-    var dodge = Math.round(q.mult * 3);
-    return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, dodge: dodge, q: q };
+    return rollArmor(ARMORS, QUALITIES, ARMOR_AFFIXES);
   },
 
   _pickItem(item) {

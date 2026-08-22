@@ -71,3 +71,20 @@ export function classById(classes, id) {
 export function bestKey(difficulty) {
   return 'BAND_SURVIVOR_BEST_' + difficulty;
 }
+
+export function rollWeapon(weapons, qualities, affixes) {
+  var base = weapons[Math.floor(Math.random() * weapons.length)];
+  var q = qualities[Math.floor(Math.random() * qualities.length)];
+  var affix = affixes[Math.floor(Math.random() * affixes.length)];
+  var atk = Math.round(base.atk * q.mult) + affix.atk;
+  return { name: q.name + '·' + base.name + '(' + affix.name + ')', atk: atk, q: q };
+}
+
+export function rollArmor(armors, qualities, affixes) {
+  var base = armors[Math.floor(Math.random() * armors.length)];
+  var q = qualities[Math.floor(Math.random() * qualities.length)];
+  var affix = affixes[Math.floor(Math.random() * affixes.length)];
+  var def = Math.round(base.def * q.mult) + affix.def;
+  var dodge = Math.round(q.mult * 3);
+  return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, dodge: dodge, q: q };
+}
