@@ -7,28 +7,36 @@ export const AREAS = [
     name: '迷雾森林',
     desc: '树木遮天蔽日，远处传来低沉的咆哮声。',
     monsters: ['slime', 'wolf', 'goblin', 'mushroom', 'boar'],
-    boss: 'bear_king'
+    boss: 'bear_king',
+    effect: { hp: 0.9, atk: 0.95, gold: 1.1, exp: 1.0 },
+    effDesc: '林间走兽更脆弱，但金币更多'
   },
   {
     id: 'cave',
     name: '幽暗洞穴',
     desc: '洞壁潮湿，脚下的碎石发出细碎的声响。',
     monsters: ['bat', 'skeleton', 'goblin', 'spider'],
-    boss: 'cave_guard'
+    boss: 'cave_guard',
+    effect: { hp: 1.15, atk: 1.05, gold: 1.0, exp: 1.15 },
+    effDesc: '洞穴生物更坚韧，经验更多'
   },
   {
     id: 'ruins',
     name: '古遗迹',
     desc: '残破的石柱间萦绕着古老的气息。',
     monsters: ['skeleton', 'ghost', 'orc', 'wraith'],
-    boss: 'ruin_golem'
+    boss: 'ruin_golem',
+    effect: { hp: 1.1, atk: 1.15, gold: 1.2, exp: 1.2 },
+    effDesc: '遗物守卫攻高防厚，奖励丰厚'
   },
   {
     id: 'abyss',
     name: '深渊入口',
     desc: '黑暗仿佛有生命，正注视着你。',
     monsters: ['ghost', 'orc', 'demon', 'imp'],
-    boss: 'abyss_lord'
+    boss: 'abyss_lord',
+    effect: { hp: 1.25, atk: 1.3, gold: 1.35, exp: 1.35 },
+    effDesc: '深渊之力侵蚀，敌人极强，回报极高'
   }
 ];
 

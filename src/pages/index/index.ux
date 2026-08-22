@@ -323,6 +323,8 @@ export default {
     lastLog: '',
     upgradeOptions: [],
     shopItems: [],
+    areaName: '',
+    areaEff: '',
 
     mapRows: [],
     mapCells: [],
@@ -332,6 +334,8 @@ export default {
 
   onInit() {
     this.shopItems = SHOP_ITEMS;
+    this.areaName = '';
+    this.areaEff = '';
     this._width = 6;
     this._height = 10;
     this._viewW = 10;
@@ -675,13 +679,15 @@ export default {
   _monsterStats(id) {
     var base = MONSTERS[id] || MONSTERS.slime;
     var mul = this._difficultyMul();
+    var area = this._areaByFloor(this.floor);
+    var ae = area.effect || { hp: 1, atk: 1, gold: 1, exp: 1 };
     var scale = 1 + this.floor * 0.06;
     return {
       name: base.name,
-      hp: Math.round(base.hp * scale * mul.hp),
-      atk: Math.round((base.atk + this.floor * 0.4) * mul.atk),
-      gold: Math.round((base.gold + this.floor * 2) * mul.gold),
-      exp: Math.round((base.exp + this.floor * 3) * mul.exp)
+      hp: Math.round(base.hp * scale * mul.hp * ae.hp),
+      atk: Math.round((base.atk + this.floor * 0.4) * mul.atk * ae.atk),
+      gold: Math.round((base.gold + this.floor * 2) * mul.gold * ae.gold),
+      exp: Math.round((base.exp + this.floor * 3) * mul.exp * ae.exp)
     };
   },
 
@@ -703,10 +709,16 @@ export default {
     this._width = sizes[idx][1];
     this._genMap();
     this._renderMap();
+    var area = this._areaByFloor(num);
+    this.areaName = area.name;
+    this.areaEff = area.effDesc || '';
     if (this._isBossFloor(num)) {
-      this._addLog('第 ' + num + ' 层：BOSS 层！');
+      this._addLog('第 ' + num + ' 层：' + area.name + ' BOSS 层！');
     } else {
-      this._addLog('进入第 ' + num + ' 层');
+      this._addLog('进入 ' + area.name + ' · ' + this.floor);
+      if (area.effDesc) {
+        this._addLog(area.effDesc);
+      }
     }
   },
 
