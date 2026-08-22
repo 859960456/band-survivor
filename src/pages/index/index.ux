@@ -1815,6 +1815,11 @@ export default {
       this.monsterAtk = Math.round(this.monsterAtk * 1.2);
       this._addLog('兽人狂暴了！');
     }
+    if (this.monsterId === 'goblin' && Math.random() < 0.2 && this.gold > 0) {
+      var steal = Math.min(this.gold, Math.max(1, Math.round(this.gold * 0.1)));
+      this.gold -= steal;
+      this._addLog('哥布林偷走了 ' + steal + ' 金币');
+    }
     if (this.monsterId === 'yeti' && Math.random() < 0.3) {
       var cold = Math.max(2, Math.round(dmg * 0.4));
       this.hp -= cold;
