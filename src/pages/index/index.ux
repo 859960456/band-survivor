@@ -13,9 +13,8 @@
 
     <!-- 地牢探索 -->
     <div if="{{phase === 'grid'}}" class="screen grid-screen">
-      <!-- 顶部贴合胶囊边缘的条 -->
-      <div class="top-bar">
-        <image class="top-bar-bg" src="/common/topbar.png"></image>
+      <!-- 顶部状态栏：全宽顶到胶囊上缘，由设备裁剪贴合弧形 -->
+      <div class="status-bar">
         <div class="hud">
           <text class="hud-item">第{{floor}}层</text>
           <text class="hud-item">Lv.{{level}}</text>
@@ -23,7 +22,12 @@
           <text class="hud-item">杀{{kills}}</text>
         </div>
       </div>
-      <div class="bar">
+      <!-- 经验条 -->
+      <div class="exp-bar">
+        <div class="exp-fill" style="width: {{expPercent}}%;"></div>
+      </div>
+      <!-- 血条 -->
+      <div class="bar grid-bar">
         <div class="bar-fill hp-fill" style="width: {{hpPercent}}%;"></div>
       </div>
       <text class="hp-text">HP {{hp}}/{{maxHp}} · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}</text>
@@ -187,6 +191,7 @@ export default {
     hp: 100,
     maxHp: 100,
     hpPercent: 100,
+    expPercent: 0,
     exp: 0,
     expNext: 20,
 
@@ -266,6 +271,7 @@ export default {
     this.hp = BASE_PLAYER.hp;
     this.maxHp = BASE_PLAYER.maxHp;
     this.hpPercent = 100;
+    this.expPercent = 0;
     this.exp = BASE_PLAYER.exp;
     this.expNext = BASE_PLAYER.expNext;
     this.potions = BASE_PLAYER.potions;
@@ -304,6 +310,10 @@ export default {
 
   _updateHp() {
     this.hpPercent = Math.max(0, Math.floor(this.hp / this.maxHp * 100));
+  },
+
+  _updateExp() {
+    this.expPercent = Math.max(0, Math.min(100, Math.floor(this.exp / this.expNext * 100)));
   },
 
   _updateMonsterHp() {
@@ -885,6 +895,7 @@ export default {
     this.kills += 1;
     this.gold += this.monsterGold;
     this.exp += this.monsterExp;
+    this._updateExp();
     var rewardText = '击杀 ' + this.monsterName + '，获得 ' + this.monsterGold + ' 金币 / ' + this.monsterExp + ' 经验';
     this._addLog(rewardText);
     if (this.isBoss) {
@@ -968,6 +979,7 @@ export default {
     this.level += 1;
     this.exp -= this.expNext;
     this.expNext = Math.floor(this.expNext * 1.35);
+    this._updateExp();
     this._updateHp();
     this.phase = 'grid';
     this._renderMap();
@@ -1248,32 +1260,35 @@ export default {
   font-size: 12px;
 }
 
-.top-bar {
-  position: relative;
+.status-bar {
   width: 100%;
-  height: 64px;
-  padding-top: 34px;
+  padding-top: 30px;
+  padding-bottom: 4px;
+  background-color: #1b2030;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.top-bar-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 212px;
-  height: 64px;
-}
-
 .hud {
-  position: relative;
-  z-index: 1;
   width: 192px;
   display: flex;
   justify-content: space-between;
   margin-top: 0;
+}
+
+/* 经验条 */
+.exp-bar {
+  width: 100%;
+  height: 6px;
+  background-color: #20242f;
+  overflow: hidden;
+}
+
+.exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7aa2ff, #4a6fd0);
 }
 
 .hud-item {
@@ -1289,6 +1304,11 @@ export default {
   border-radius: 4px;
   background-color: #2a2a30;
   overflow: hidden;
+}
+
+/* 网格屏血条全宽，与状态栏/经验条对齐贴合 */
+.grid-bar {
+  width: 100%;
 }
 
 .bar-fill {
