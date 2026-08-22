@@ -15,6 +15,7 @@
     <div if="{{phase === 'grid'}}" class="screen grid-screen">
       <!-- 顶部贴合胶囊边缘的条 -->
       <div class="top-bar">
+        <image class="top-bar-bg" src="/common/topbar.png"></image>
         <div class="hud">
           <text class="hud-item">第{{floor}}层</text>
           <text class="hud-item">Lv.{{level}}</text>
@@ -1248,13 +1249,9 @@ export default {
 }
 
 .top-bar {
+  position: relative;
   width: 100%;
   height: 64px;
-  /* 用弧形 PNG 作为背景，避免依赖 CSS 圆角支持，四角透明、上缘弧形贴合胶囊 */
-  background-image: url('/common/topbar.png');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: center top;
   padding-top: 34px;
   box-sizing: border-box;
   display: flex;
@@ -1262,7 +1259,17 @@ export default {
   align-items: center;
 }
 
+.top-bar-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 212px;
+  height: 64px;
+}
+
 .hud {
+  position: relative;
+  z-index: 1;
   width: 192px;
   display: flex;
   justify-content: space-between;
