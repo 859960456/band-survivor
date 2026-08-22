@@ -131,7 +131,8 @@ export const UPGRADES = [
   { id: 'healboost', name: '疗愈',       desc: '药水回复 +10',            rarity: 'common' },
   { id: 'intimidate', name: '威吓',      desc: '战斗开始降低敌攻 20%',    rarity: 'epic'   },
   { id: 'resolve',  name: '坚毅',       desc: '低血时复苏一次 +20',      rarity: 'epic'   },
-  { id: 'stun',    name: '电击',         desc: '攻击有几率眩晕怪物',      rarity: 'rare'   }
+  { id: 'stun',    name: '电击',         desc: '攻击有几率眩晕怪物',      rarity: 'rare'   },
+  { id: 'execute', name: '处决',         desc: '对低血怪物伤害 +50%',     rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {

@@ -731,6 +731,7 @@ export default {
       intimidate: this._intimidate,
       resolve: this._resolve,
       stunChance: this._stunChance,
+      execute: this._execute,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -857,6 +858,7 @@ export default {
         that._intimidate = !!s.intimidate;
         that._resolve = !!s.resolve;
         that._stunChance = s.stunChance || 0;
+        that._execute = !!s.execute;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -949,6 +951,7 @@ export default {
     this._resolveUsed = false;
     this._stunned = false;
     this._stunChance = 0;
+    this._execute = false;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1975,6 +1978,9 @@ export default {
       var missing = 1 - this.hp / this.maxHp;
       dmg = Math.max(1, Math.round(dmg * (1 + missing * 0.3)));
     }
+    if (this._execute && this.monsterHp < this.monsterMaxHp * 0.3) {
+      dmg = Math.max(1, Math.round(dmg * 1.5));
+    }
     this._damageDealt += dmg;
     this.monsterHp -= dmg;
     this._updateMonsterHp();
@@ -2702,6 +2708,8 @@ export default {
       this._resolve = true;
     } else if (id === 'stun') {
       this._stunChance += 0.15;
+    } else if (id === 'execute') {
+      this._execute = true;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
