@@ -1249,12 +1249,13 @@ export default {
 
 .top-bar {
   width: 100%;
+  height: 64px;
+  /* 用弧形 PNG 作为背景，避免依赖 CSS 圆角支持，四角透明、上缘弧形贴合胶囊 */
+  background-image: url('/common/topbar.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center top;
   padding-top: 34px;
-  padding-bottom: 8px;
-  background-color: #16161e;
-  /* 上圆角取屏宽的一半(212/2=106)，让上缘成为一条完整弧线贴合胶囊 */
-  border-top-left-radius: 106px;
-  border-top-right-radius: 106px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
