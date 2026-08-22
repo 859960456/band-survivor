@@ -710,6 +710,7 @@ export default {
       regen: this._regen,
       thorns: this._thorns,
       killHeal: this._killHeal,
+      goldSteal: this._goldSteal,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -818,6 +819,7 @@ export default {
         that._regen = s.regen || 0;
         that._thorns = s.thorns || 0;
         that._killHeal = s.killHeal || 0;
+        that._goldSteal = s.goldSteal || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -890,6 +892,7 @@ export default {
     this._regen = 0;
     this._thorns = 0;
     this._killHeal = 0;
+    this._goldSteal = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -2044,7 +2047,7 @@ export default {
       }
     }
     this._vibrate(120);
-    this.gold += Math.round(this.monsterGold * this.goldMul);
+    this.gold += Math.round(this.monsterGold * this.goldMul) + this._goldSteal;
     this.exp += Math.round(this.monsterExp * this.expMul);
     this._updateExp();
     var rewardText = '击杀 ' + this.monsterName + '，获得 ' + this.monsterGold + ' 金币 / ' + this.monsterExp + ' 经验';
@@ -2504,6 +2507,8 @@ export default {
       this._thorns += 3;
     } else if (id === 'holy') {
       this._killHeal += 5;
+    } else if (id === 'loot') {
+      this._goldSteal += 3;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
