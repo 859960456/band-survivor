@@ -732,6 +732,7 @@ export default {
       resolve: this._resolve,
       stunChance: this._stunChance,
       execute: this._execute,
+      craftDiscount: this._craftDiscount,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -859,6 +860,7 @@ export default {
         that._resolve = !!s.resolve;
         that._stunChance = s.stunChance || 0;
         that._execute = !!s.execute;
+        that._craftDiscount = s.craftDiscount || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -952,6 +954,7 @@ export default {
     this._stunned = false;
     this._stunChance = 0;
     this._execute = false;
+    this._craftDiscount = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2710,6 +2713,8 @@ export default {
       this._stunChance += 0.15;
     } else if (id === 'execute') {
       this._execute = true;
+    } else if (id === 'artisan') {
+      this._craftDiscount += 0.2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
@@ -3289,11 +3294,12 @@ export default {
   },
 
   craftItem() {
-    if (this.phase !== 'shop' || this.materials < 3 || this.gold < 20) {
+    var craftCost = Math.round(20 * (1 - this._craftDiscount));
+    if (this.phase !== 'shop' || this.materials < 3 || this.gold < craftCost) {
       return;
     }
     this.materials -= 3;
-    this.gold -= 20;
+    this.gold -= craftCost;
     if (Math.random() < 0.5) {
       this._equipRolled(this._rollWeapon());
     } else {
@@ -3314,10 +3320,11 @@ export default {
   },
 
   gambleEquip() {
-    if (this.phase !== 'shop' || this.gold < 40) {
+    var gambleCost = Math.round(40 * (1 - this._craftDiscount));
+    if (this.phase !== 'shop' || this.gold < gambleCost) {
       return;
     }
-    this.gold -= 40;
+    this.gold -= gambleCost;
     // 保底高品质：直接取最高两档品质
     var weapon = this._rollWeapon();
     var armor = this._rollArmor();
