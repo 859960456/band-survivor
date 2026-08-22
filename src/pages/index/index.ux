@@ -2986,6 +2986,8 @@ export default {
       this._stunChance += 0.15;
     } else if (id === 'block2') {
       this._blockChance += 0.2;
+    } else if (id === 'clean2') {
+      this._cleanChance += 0.25;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
