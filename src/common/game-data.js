@@ -173,7 +173,11 @@ export const ACHIEVEMENTS = [
   { id: 'level_10',     name: '战意昂扬',   desc: '等级达到 10' },
   { id: 'boss_slayer',  name: '屠戮首领',   desc: '击败 1 个 BOSS' },
   { id: 'rich',         name: '腰缠万贯',   desc: '持有 100 金币' },
-  { id: 'potion_master',name: '药剂师',     desc: '同时持有 3 瓶药水' }
+  { id: 'potion_master',name: '药剂师',     desc: '同时持有 3 瓶药水' },
+  { id: 'kill_50',    name: '万夫莫敌',   desc: '击杀 50 个怪物' },
+  { id: 'floor_15',   name: '深渊行者',   desc: '到达第 15 层' },
+  { id: 'rich_500',   name: '富可敌国',   desc: '持有 500 金币' },
+  { id: 'boss_5',     name: '屠龙者',     desc: '击败 5 个 BOSS' }
 ];
 
 export const RELICS = [

@@ -2345,6 +2345,10 @@ export default {
     if (this.bossKills >= 1) { this._unlockAchievement('boss_slayer'); }
     if (this.gold >= 100) { this._unlockAchievement('rich'); }
     if (this.potions >= 3) { this._unlockAchievement('potion_master'); }
+    if (this.kills >= 50) { this._unlockAchievement('kill_50'); }
+    if (this.floor >= 15) { this._unlockAchievement('floor_15'); }
+    if (this.gold >= 500) { this._unlockAchievement('rich_500'); }
+    if (this.bossKills >= 5) { this._unlockAchievement('boss_5'); }
   },
 
   openAchievements() {
