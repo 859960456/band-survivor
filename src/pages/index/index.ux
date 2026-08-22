@@ -713,6 +713,7 @@ export default {
       goldSteal: this._goldSteal,
       skillPowerAdd: this._skillPowerAdd,
       freezeChance: this._freezeChance,
+      blockChance: this._blockChance,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -824,6 +825,7 @@ export default {
         that._goldSteal = s.goldSteal || 0;
         that._skillPowerAdd = s.skillPowerAdd || 0;
         that._freezeChance = s.freezeChance || 0;
+        that._blockChance = s.blockChance || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -899,6 +901,7 @@ export default {
     this._goldSteal = 0;
     this._skillPowerAdd = 0;
     this._freezeChance = 0;
+    this._blockChance = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1922,6 +1925,12 @@ export default {
       return;
     }
     var dmg = Math.max(1, Math.round((this.monsterAtk - this.armorDef) * (0.85 + Math.random() * 0.3)));
+    var blocked = false;
+    if (this._blockChance > 0 && Math.random() < this._blockChance) {
+      dmg = Math.max(1, Math.round(dmg * 0.5));
+      blocked = true;
+      this._addLog('你格挡了部分伤害');
+    }
     var absorbed = Math.min(this._shield, dmg);
     this._shield -= absorbed;
     dmg -= absorbed;
@@ -2523,6 +2532,8 @@ export default {
       this._skillPowerAdd += 0.5;
     } else if (id === 'freeze') {
       this._freezeChance += 0.15;
+    } else if (id === 'block') {
+      this._blockChance += 0.2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
