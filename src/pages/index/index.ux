@@ -730,6 +730,7 @@ export default {
       healBoost: this._healBoost,
       intimidate: this._intimidate,
       resolve: this._resolve,
+      stunChance: this._stunChance,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -855,6 +856,7 @@ export default {
         that._healBoost = s.healBoost || 0;
         that._intimidate = !!s.intimidate;
         that._resolve = !!s.resolve;
+        that._stunChance = s.stunChance || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -945,6 +947,9 @@ export default {
     this._intimidate = false;
     this._resolve = false;
     this._resolveUsed = false;
+    this._stunned = false;
+    this._stunChance = 0;
+    this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1982,6 +1987,10 @@ export default {
       this.monsterAtk = Math.max(1, Math.round(this.monsterAtk * 0.8));
       this._addLog('冰冻削弱了怪物攻击！');
     }
+    if (this._stunChance > 0 && Math.random() < this._stunChance) {
+      this._stunned = true;
+      this._addLog('怪物被电击眩晕了！');
+    }
     if (this.lifesteal > 0) {
       var heal = Math.min(this.maxHp - this.hp, this.lifesteal);
       if (heal > 0) {
@@ -2002,6 +2011,11 @@ export default {
   },
 
   _monsterAttack() {
+    if (this._stunned) {
+      this._stunned = false;
+      this._addLog('怪物眩晕中，无法行动');
+      return;
+    }
     if (this.isBoss && !this._bossEnraged && this.monsterHp < this.monsterMaxHp * 0.5) {
       this._bossEnraged = true;
       this._addLog(this.monsterName + ' 狂暴了！攻击大幅提升');
@@ -2686,6 +2700,8 @@ export default {
       this._intimidate = true;
     } else if (id === 'resolve') {
       this._resolve = true;
+    } else if (id === 'stun') {
+      this._stunChance += 0.15;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
