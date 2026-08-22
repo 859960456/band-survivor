@@ -99,6 +99,16 @@
       <div class="btn" @click="endRun">
         <text class="btn-text">结束本局</text>
       </div>
+      <div class="settings">
+        <div class="setting-row" @click="toggleVibrate">
+          <text class="setting-label">震动</text>
+          <text class="setting-value">{{vibrateOn ? '开' : '关'}}</text>
+        </div>
+        <div class="setting-row" @click="cycleSensitivity">
+          <text class="setting-label">灵敏度</text>
+          <text class="setting-value">{{sensLabel}}</text>
+        </div>
+      </div>
     </div>
 
     <div if="{{phase === 'dead'}}" class="overlay dead-overlay">
@@ -206,6 +216,9 @@ export default {
     hasSave: false,
     saveFloor: 0,
     saveLevel: 0,
+    vibrateOn: true,
+    sensitivity: 1,
+    sensLabel: '中',
 
     floor: 0,
     gold: 0,
@@ -278,6 +291,21 @@ export default {
       },
       fail: function() {
         that._loadBest();
+      }
+    });
+    storage.get({
+      key: 'BAND_SURVIVOR_SET',
+      success: function(data) {
+        try {
+          var s = JSON.parse(data);
+          if (s && typeof s.vibrate === 'boolean') {
+            that.vibrateOn = s.vibrate;
+          }
+          if (s && typeof s.sensitivity === 'number') {
+            that.sensitivity = s.sensitivity;
+            that._updateSensLabel();
+          }
+        } catch (e) {}
       }
     });
     storage.get({
@@ -503,6 +531,9 @@ export default {
   },
 
   _vibrate(duration) {
+    if (!this.vibrateOn) {
+      return;
+    }
     try {
       vibrator.vibrate({ duration: duration || 40 });
     } catch (e) {}
@@ -903,7 +934,7 @@ export default {
     var ty = touch.clientY != null ? touch.clientY : touch.pageY;
     var dx = tx - this._touchStartX;
     var dy = ty - this._touchStartY;
-    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+    if (Math.abs(dx) < this._moveThreshold() && Math.abs(dy) < this._moveThreshold()) {
       return;
     }
     this._touchMoved = true;
@@ -1342,6 +1373,32 @@ export default {
     this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
     this._monstersTurn();
     this._afterMonstersTurn();
+  },
+
+  _saveSettings() {
+    storage.set({
+      key: 'BAND_SURVIVOR_SET',
+      value: JSON.stringify({ vibrate: this.vibrateOn, sensitivity: this.sensitivity })
+    });
+  },
+
+  _updateSensLabel() {
+    this.sensLabel = this.sensitivity === 0 ? '低' : (this.sensitivity === 2 ? '高' : '中');
+  },
+
+  toggleVibrate() {
+    this.vibrateOn = !this.vibrateOn;
+    this._saveSettings();
+  },
+
+  cycleSensitivity() {
+    this.sensitivity = (this.sensitivity + 1) % 3;
+    this._updateSensLabel();
+    this._saveSettings();
+  },
+
+  _moveThreshold() {
+    return this.sensitivity === 0 ? 20 : (this.sensitivity === 2 ? 6 : 12);
   },
 
   openPause() {
@@ -1933,6 +1990,35 @@ export default {
   color: #a8b7ff;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.settings {
+  margin-top: 16px;
+  width: 176px;
+}
+
+.setting-row {
+  width: 176px;
+  height: 36px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background-color: #22273a;
+  border: 1px solid #2d3240;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.setting-label {
+  color: #e8e8f0;
+  font-size: 13px;
+}
+
+.setting-value {
+  color: #7aa2ff;
+  font-size: 13px;
 }
 
 .dead-title {
