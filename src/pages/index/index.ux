@@ -1956,6 +1956,18 @@ export default {
       { title: '陷阱房', desc: '脚下传来机关声。', options: [
         { label: '小心通过', effect: 'trap' },
         { label: '绕道', effect: 'none' }
+      ] },
+      { title: '流浪铁匠', desc: '铁匠愿为你加固武器。', options: [
+        { label: '打磨(+3攻,50金)', cost: 50, buff: 'atk' },
+        { label: '拒绝', effect: 'none' }
+      ] },
+      { title: '盔甲匠', desc: '盔甲匠可加固你的护甲。', options: [
+        { label: '加固(+3防,40金)', cost: 40, buff: 'def' },
+        { label: '拒绝', effect: 'none' }
+      ] },
+      { title: '神秘井', desc: '井水泛起奇异微光。', options: [
+        { label: '饮下', effect: 'well' },
+        { label: '离开', effect: 'none' }
       ] }
     ];
     var e = events[Math.floor(Math.random() * events.length)];
@@ -1982,6 +1994,23 @@ export default {
         this.hp = Math.max(1, this.hp + opt.value);
         this._updateHp();
         this._addLog(opt.value < 0 ? '你付出了代价' : '你恢复了生命');
+      } else if (opt.cost && opt.buff === 'atk') {
+        if (this.gold >= 50) {
+          this.gold -= 50;
+          this.baseAtk += 3;
+          this.atk = this.baseAtk + this.weaponAtk;
+          this._addLog('铁匠打磨，攻击 +3');
+        } else {
+          this._addLog('金币不足');
+        }
+      } else if (opt.cost && opt.buff === 'def') {
+        if (this.gold >= 40) {
+          this.gold -= 40;
+          this.armorDef += 3;
+          this._addLog('盔甲加固，防御 +3');
+        } else {
+          this._addLog('金币不足');
+        }
       } else if (opt.cost) {
         if (this.gold >= opt.cost) {
           this.gold -= opt.cost;
@@ -2004,6 +2033,20 @@ export default {
         } else {
           this.gold += 20;
           this._addLog('幸运符：获得 20 金币');
+        }
+      } else if (opt.effect === 'well') {
+        var wr = Math.random();
+        if (wr < 0.4) {
+          this.hp = Math.min(this.maxHp, this.hp + 20);
+          this._updateHp();
+          this._addLog('井水回复生命');
+        } else if (wr < 0.7) {
+          this.gold += 25;
+          this._addLog('井中涌出金币 +25');
+        } else {
+          this.baseAtk += 2;
+          this.atk = this.baseAtk + this.weaponAtk;
+          this._addLog('井水赐予力量，攻击 +2');
         }
       } else if (opt.effect === 'trap') {
         var trapDmg = Math.max(3, Math.round(8 + this.floor * 0.6));
