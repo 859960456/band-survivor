@@ -295,6 +295,9 @@ export default {
     goldMul: 1,
     expMul: 1,
     skillCdMax: SKILL_CD,
+    burnChance: 0,
+    _burnTurns: 0,
+    _burnPower: 0,
     hp: 100,
     maxHp: 100,
     hpPercent: 100,
@@ -546,6 +549,9 @@ export default {
     this.goldMul = 1;
     this.expMul = 1;
     this.skillCdMax = SKILL_CD;
+    this.burnChance = 0;
+    this._burnTurns = 0;
+    this._burnPower = 0;
     this.hp = BASE_PLAYER.hp;
     this.maxHp = BASE_PLAYER.maxHp;
     this.hpPercent = 100;
@@ -1290,6 +1296,24 @@ export default {
   },
 
   _playerAction(multiplier) {
+    if (this._burnTurns > 0) {
+      this.monsterHp -= this._burnPower;
+      this._updateMonsterHp();
+      this._addLog('灼烧造成 ' + this._burnPower + ' 伤害');
+      this._burnTurns--;
+      if (this.monsterHp <= 0) {
+        this.monsterHp = 0;
+        this._updateMonsterHp();
+        this.monsterAlive = false;
+        this._onMonsterDead();
+        return;
+      }
+    }
+    if (!this._burnTurns && this.burnChance > 0 && Math.random() < this.burnChance) {
+      this._burnTurns = 3;
+      this._burnPower = Math.max(2, Math.round(this.atk * 0.25));
+      this._addLog('怪物被点燃了');
+    }
     var isCrit = Math.random() < this.critChance;
     var dmg = Math.max(1, Math.round(this.atk * multiplier * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
     this.monsterHp -= dmg;
@@ -1487,6 +1511,8 @@ export default {
       this.critMult += 0.3;
     } else if (id === 'lifesteal') {
       this.lifesteal += 2;
+    } else if (id === 'burn') {
+      this.burnChance += 0.1;
     } else if (id === 'cd') {
       this.skillCdMax = Math.max(1, this.skillCdMax - 0.3);
     } else if (id === 'omni') {

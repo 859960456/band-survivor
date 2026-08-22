@@ -63,6 +63,7 @@ export const UPGRADES = [
   { id: 'crit',    name: '暴击 +8%',     desc: '攻击有几率暴击',      rarity: 'rare'   },
   { id: 'critdmg', name: '暴伤 +30%',    desc: '提升暴击伤害',        rarity: 'rare'   },
   { id: 'lifesteal', name: '吸血 +2',    desc: '攻击时回复生命',      rarity: 'rare'   },
+  { id: 'burn',    name: '焚灼',         desc: '攻击有几率点燃怪物',  rarity: 'rare'   },
   { id: 'cd',      name: '冷却 -0.3s',   desc: '技能冷却缩短',        rarity: 'epic'   },
   { id: 'omni',    name: '全能 +5%',     desc: '攻击+2 并小幅强化',   rarity: 'epic'   }
 ];
