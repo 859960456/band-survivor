@@ -80,7 +80,7 @@
     <!-- 奖励 / 死亡 -->
     <div if="{{phase === 'reward'}}" class="overlay reward-overlay">
       <text class="reward-title">升级！选择强化</text>
-      <div for="{{upgradeOptions}}" class="upgrade-option" @click="chooseUpgrade($item.id)">
+      <div for="{{upgradeOptions}}" class="upgrade-option rarity-{{$item.rarity || 'common'}}" @click="chooseUpgrade($item.id)">
         <text class="option-name">{{$item.name}}</text>
         <text class="option-desc">{{$item.desc}}</text>
       </div>
@@ -193,7 +193,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR } from '../../common/game-data.js';
 
 const MAX_LOG = 3;
 const BOSS_EVERY = 5;
@@ -218,6 +218,12 @@ export default {
     armorDef: 0,
     armorName: '无',
     atk: 10,
+    critChance: 0,
+    critMult: 2,
+    lifesteal: 0,
+    goldMul: 1,
+    expMul: 1,
+    skillCdMax: SKILL_CD,
     hp: 100,
     maxHp: 100,
     hpPercent: 100,
@@ -419,6 +425,12 @@ export default {
     this.armorDef = 0;
     this.armorName = '无';
     this.atk = BASE_PLAYER.atk;
+    this.critChance = 0;
+    this.critMult = 2;
+    this.lifesteal = 0;
+    this.goldMul = 1;
+    this.expMul = 1;
+    this.skillCdMax = SKILL_CD;
     this.hp = BASE_PLAYER.hp;
     this.maxHp = BASE_PLAYER.maxHp;
     this.hpPercent = 100;
@@ -1043,7 +1055,7 @@ export default {
     if (this.skillCd > 0) {
       return;
     }
-    this.skillCd = SKILL_CD;
+    this.skillCd = this.skillCdMax;
     this._playerAction(2.5);
   },
 
@@ -1063,10 +1075,22 @@ export default {
   },
 
   _playerAction(multiplier) {
-    var dmg = Math.max(1, Math.round(this.atk * multiplier * (0.9 + Math.random() * 0.2)));
+    var isCrit = Math.random() < this.critChance;
+    var dmg = Math.max(1, Math.round(this.atk * multiplier * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
     this.monsterHp -= dmg;
     this._updateMonsterHp();
-    this._addLog('你造成 ' + dmg + ' 点伤害');
+    if (isCrit) {
+      this._addLog('你造成 ' + dmg + ' 点暴击伤害！');
+    } else {
+      this._addLog('你造成 ' + dmg + ' 点伤害');
+    }
+    if (this.lifesteal > 0) {
+      var heal = Math.min(this.maxHp - this.hp, this.lifesteal);
+      if (heal > 0) {
+        this.hp += heal;
+        this._updateHp();
+      }
+    }
 
     if (this.monsterHp <= 0) {
       this.monsterHp = 0;
@@ -1096,8 +1120,8 @@ export default {
   _onMonsterDead() {
     this.kills += 1;
     this._vibrate(120);
-    this.gold += this.monsterGold;
-    this.exp += this.monsterExp;
+    this.gold += Math.round(this.monsterGold * this.goldMul);
+    this.exp += Math.round(this.monsterExp * this.expMul);
     this._updateExp();
     var rewardText = '击杀 ' + this.monsterName + '，获得 ' + this.monsterGold + ' 金币 / ' + this.monsterExp + ' 经验';
     this._addLog(rewardText);
@@ -1177,6 +1201,25 @@ export default {
       this.potions += 1;
     } else if (id === 'heal') {
       this.hp = Math.min(this.maxHp, this.hp + 40);
+    } else if (id === 'gold') {
+      this.gold += 15;
+    } else if (id === 'goldmul') {
+      this.goldMul += 0.15;
+    } else if (id === 'expmul') {
+      this.expMul += 0.15;
+    } else if (id === 'crit') {
+      this.critChance += 0.08;
+    } else if (id === 'critdmg') {
+      this.critMult += 0.3;
+    } else if (id === 'lifesteal') {
+      this.lifesteal += 2;
+    } else if (id === 'cd') {
+      this.skillCdMax = Math.max(1, this.skillCdMax - 0.3);
+    } else if (id === 'omni') {
+      this.baseAtk += 2;
+      this.atk = this.baseAtk + this.weaponAtk;
+      this.goldMul += 0.05;
+      this.expMul += 0.05;
     }
 
     this.level += 1;
@@ -1853,6 +1896,15 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.upgrade-option.rarity-rare {
+  border-color: #7aa2ff;
+}
+
+.upgrade-option.rarity-epic {
+  border-color: #ffd75e;
+  background-color: #2a2741;
 }
 
 .option-name {

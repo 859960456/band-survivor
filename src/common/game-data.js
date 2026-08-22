@@ -48,27 +48,25 @@ export const MONSTERS = {
 };
 
 export const UPGRADES = [
-  {
-    id: 'atk',
-    name: '攻击 +4',
-    desc: '伤害永久提高'
-  },
-  {
-    id: 'hp',
-    name: '生命 +25',
-    desc: '上限提升并回复'
-  },
-  {
-    id: 'potion',
-    name: '药水 +1',
-    desc: '获得一瓶药水'
-  },
-  {
-    id: 'heal',
-    name: '回复 40',
-    desc: '立即恢复生命'
-  }
+  { id: 'atk',     name: '攻击 +4',      desc: '伤害永久提高',        rarity: 'common' },
+  { id: 'hp',      name: '生命 +25',     desc: '上限提升并回复',      rarity: 'common' },
+  { id: 'potion',  name: '药水 +1',      desc: '获得一瓶药水',        rarity: 'common' },
+  { id: 'heal',    name: '回复 40',      desc: '立即恢复生命',        rarity: 'common' },
+  { id: 'gold',    name: '金币 +15',     desc: '立即获得金币',        rarity: 'common' },
+  { id: 'goldmul', name: '财运 +15%',    desc: '金币获取提高',        rarity: 'rare'   },
+  { id: 'expmul',  name: '悟性 +15%',    desc: '经验获取提高',        rarity: 'rare'   },
+  { id: 'crit',    name: '暴击 +8%',     desc: '攻击有几率暴击',      rarity: 'rare'   },
+  { id: 'critdmg', name: '暴伤 +30%',    desc: '提升暴击伤害',        rarity: 'rare'   },
+  { id: 'lifesteal', name: '吸血 +2',    desc: '攻击时回复生命',      rarity: 'rare'   },
+  { id: 'cd',      name: '冷却 -0.3s',   desc: '技能冷却缩短',        rarity: 'epic'   },
+  { id: 'omni',    name: '全能 +5%',     desc: '攻击+2 并小幅强化',   rarity: 'epic'   }
 ];
+
+export const RARITY_COLOR = {
+  common: '#c8c8d0',
+  rare: '#7aa2ff',
+  epic: '#ffd75e'
+};
 
 export const BASE_PLAYER = {
   hp: 100,
