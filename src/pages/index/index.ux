@@ -1821,6 +1821,24 @@ export default {
       this.monsterAtk = Math.round(this.monsterAtk * 1.2);
       this._addLog('兽人狂暴了！');
     }
+    if (this.monsterId === 'wolf' && Math.random() < 0.15) {
+      var extra = Math.max(1, Math.round(dmg * 0.6));
+      this.hp -= extra;
+      this._damageTaken += extra;
+      this._updateHp();
+      this._addLog('狼群突袭！追加 ' + extra + ' 伤害');
+      if (this.hp <= 0) {
+        this.hp = 0;
+        this._updateHp();
+        this._die();
+      }
+    }
+    if (this.monsterId === 'bat' && Math.random() < 0.2) {
+      var leech = Math.max(1, Math.round(dmg * 0.4));
+      this.monsterHp = Math.min(this.monsterMaxHp, this.monsterHp + leech);
+      this._updateMonsterHp();
+      this._addLog('蝙蝠吸血 +' + leech);
+    }
     if (this.monsterId === 'goblin' && Math.random() < 0.2 && this.gold > 0) {
       var steal = Math.min(this.gold, Math.max(1, Math.round(this.gold * 0.1)));
       this.gold -= steal;
