@@ -718,6 +718,7 @@ export default {
       freezeChance: this._freezeChance,
       blockChance: this._blockChance,
       barrier: this._barrier,
+      berserk: this._berserk,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -831,6 +832,7 @@ export default {
         that._freezeChance = s.freezeChance || 0;
         that._blockChance = s.blockChance || 0;
         that._barrier = s.barrier || 0;
+        that._berserk = !!s.berserk;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -908,6 +910,7 @@ export default {
     this._freezeChance = 0;
     this._blockChance = 0;
     this._barrier = 0;
+    this._berserk = false;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1913,6 +1916,10 @@ export default {
     var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6 + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
     var dmg = Math.max(1, Math.round(this.atk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
+    if (this._berserk && this.maxHp > 0) {
+      var missing = 1 - this.hp / this.maxHp;
+      dmg = Math.max(1, Math.round(dmg * (1 + missing * 0.3)));
+    }
     this._damageDealt += dmg;
     this.monsterHp -= dmg;
     this._updateMonsterHp();
@@ -2594,6 +2601,8 @@ export default {
       this._blockChance += 0.2;
     } else if (id === 'barrier') {
       this._barrier += 8;
+    } else if (id === 'berserk') {
+      this._berserk = true;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
