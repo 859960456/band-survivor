@@ -382,7 +382,7 @@
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES } from '../../common/game-data.js';
-import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount } from '../../common/game-core.js';
+import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel } from '../../common/game-core.js';
 
 const MAX_LOG = 6;
 const BOSS_EVERY = 5;
@@ -1678,14 +1678,11 @@ export default {
   },
 
   _skillName() {
-    if (this.weaponAtk >= 14) { return '圣光斩'; }
-    if (this.weaponAtk >= 10) { return '烈焰斩'; }
-    if (this.weaponAtk >= 6) { return '剑气'; }
-    return '重击';
+    return skillName(this.weaponAtk);
   },
 
   _skillMult() {
-    return 2.5 + Math.min(1.5, this.weaponAtk * 0.04);
+    return skillMult(this.weaponAtk);
   },
 
   doSkill() {
@@ -2452,7 +2449,7 @@ export default {
   },
 
   _updateSensLabel() {
-    this.sensLabel = this.sensitivity === 0 ? '低' : (this.sensitivity === 2 ? '高' : '中');
+    this.sensLabel = sensLabel(this.sensitivity);
   },
 
   toggleVibrate() {
@@ -2467,7 +2464,7 @@ export default {
   },
 
   _moveThreshold() {
-    return this.sensitivity === 0 ? 20 : (this.sensitivity === 2 ? 6 : 12);
+    return moveThreshold(this.sensitivity);
   },
 
   openPause() {

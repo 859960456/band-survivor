@@ -39,3 +39,22 @@ export function isBossFloor(floor, every) {
 export function healAmount(maxHp, baseHeal) {
   return baseHeal + Math.round(maxHp * 0.05);
 }
+
+export function skillName(weaponAtk) {
+  if (weaponAtk >= 14) { return '圣光斩'; }
+  if (weaponAtk >= 10) { return '烈焰斩'; }
+  if (weaponAtk >= 6) { return '剑气'; }
+  return '重击';
+}
+
+export function skillMult(weaponAtk) {
+  return 2.5 + Math.min(1.5, weaponAtk * 0.04);
+}
+
+export function moveThreshold(sensitivity) {
+  return sensitivity === 0 ? 20 : (sensitivity === 2 ? 6 : 12);
+}
+
+export function sensLabel(sensitivity) {
+  return sensitivity === 0 ? '低' : (sensitivity === 2 ? '高' : '中');
+}
