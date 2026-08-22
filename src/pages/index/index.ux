@@ -2978,6 +2978,8 @@ export default {
       this._shieldGainAmt += 4;
     } else if (id === 'burn2') {
       this.burnChance += 0.05;
+    } else if (id === 'thunder2') {
+      this._thunderChance += 0.2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;

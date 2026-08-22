@@ -167,7 +167,8 @@ export const UPGRADES = [
   { id: 'dodge2',  name: '闪避大师', desc: '闪避 +3%',                 rarity: 'rare'   },
   { id: 'thorns2', name: '荆棘大师', desc: '反伤 +3',                  rarity: 'rare'   },
   { id: 'shieldgain2', name: '护体大师', desc: '护盾获得 +4',           rarity: 'rare'   },
-  { id: 'burn2',   name: '燃血大师', desc: '点燃几率 +5%',             rarity: 'rare'   }
+  { id: 'burn2',   name: '燃血大师', desc: '点燃几率 +5%',             rarity: 'rare'   },
+  { id: 'thunder2', name: '雷神',      desc: '雷击几率 +20%',            rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
