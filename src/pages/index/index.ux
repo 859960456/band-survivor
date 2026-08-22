@@ -221,6 +221,12 @@
       <div class="btn" @click="openHelp">
         <text class="btn-text">操作说明</text>
       </div>
+      <div class="btn" @click="_saveBackup">
+        <text class="btn-text">备份存档</text>
+      </div>
+      <div class="btn" @click="_restoreBackup">
+        <text class="btn-text">恢复备份</text>
+      </div>
       <div class="settings">
         <div class="setting-row" @click="toggleVibrate">
           <text class="setting-label">震动</text>
@@ -603,11 +609,8 @@ export default {
     this._continueRun();
   },
 
-  _saveRun() {
-    if (this.phase !== 'grid' || !this._grid || this._grid.length === 0) {
-      return;
-    }
-    var data = {
+  _serializeRun() {
+    return {
       floor: this.floor,
       gold: this.gold,
       kills: this.kills,
@@ -648,13 +651,48 @@ export default {
       monsters: this._monsters,
       items: this._items
     };
+  },
+
+  _saveRun() {
+    if (this.phase !== 'grid' || !this._grid || this._grid.length === 0) {
+      return;
+    }
     storage.set({
       key: 'BAND_SURVIVOR_SAVE',
-      value: JSON.stringify(data)
+      value: JSON.stringify(this._serializeRun())
     });
     this.hasSave = true;
     this.saveFloor = this.floor;
     this.saveLevel = this.level;
+  },
+
+  _saveBackup() {
+    if (this.phase !== 'grid' || !this._grid || this._grid.length === 0) {
+      return;
+    }
+    storage.set({
+      key: 'BAND_SURVIVOR_SAVE_2',
+      value: JSON.stringify(this._serializeRun())
+    });
+    this._addLog('已备份存档');
+  },
+
+  _restoreBackup() {
+    var that = this;
+    storage.get({
+      key: 'BAND_SURVIVOR_SAVE_2',
+      success: function(data) {
+        if (!data) {
+          that._addLog('暂无备份存档');
+          return;
+        }
+        storage.set({
+          key: 'BAND_SURVIVOR_SAVE',
+          value: data
+        });
+        that._continueRun();
+      }
+    });
   },
 
   _continueRun() {
