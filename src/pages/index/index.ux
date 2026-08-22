@@ -854,6 +854,7 @@ export default {
     this._hasteCharges = 0;
     this._damageDealt = 0;
     this._damageTaken = 0;
+    this._isElite = false;
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
     this._bossEnraged = false;
@@ -1656,6 +1657,7 @@ export default {
     this.isBoss = false;
     this.skillCd = 0;
     this.combo = 0;
+    this._isElite = true;
     this.phase = 'battle';
     this._addLog('遭遇精英 ' + elite.name);
   },
@@ -1680,6 +1682,7 @@ export default {
     this.isBoss = isBoss;
     this.skillCd = 0;
     this.combo = 0;
+    this._isElite = false;
     this._bossEnraged = false;
     this.phase = 'battle';
     this._addLog('遭遇 ' + stats.name);
@@ -1853,6 +1856,13 @@ export default {
   _onMonsterDead() {
     this.kills += 1;
     this.materials += 1 + Math.floor(Math.random() * 2);
+    if (this.isBoss) {
+      this.materials += 5;
+      this._addLog('BOSS 战利品：材料 +5');
+    } else if (this._isElite) {
+      this.materials += 3;
+      this._addLog('精英战利品：材料 +3');
+    }
     this._discoverMonster(this.monsterId);
     if (this.isBoss) {
       this.bossKills += 1;
