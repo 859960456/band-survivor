@@ -2377,6 +2377,9 @@ export default {
     if (this.relicCodex.indexOf(id) < 0) {
       this.relicCodex.push(id);
       this._saveMeta();
+      if (this.relicCodex.length >= this.relicTotal && this.relicTotal > 0) {
+        this._unlockAchievement('relic_master');
+      }
     }
     if (relic.stat === 'atk') {
       this.baseAtk += relic.value;
@@ -3059,6 +3062,9 @@ export default {
     if (this.equipCodex.indexOf(baseName) < 0) {
       this.equipCodex.push(baseName);
       this._saveMeta();
+      if (this.equipCodex.length >= this.equipTotal && this.equipTotal > 0) {
+        this._unlockAchievement('equip_master');
+      }
     }
   },
 
