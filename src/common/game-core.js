@@ -78,7 +78,7 @@ export function rollWeapon(weapons, qualities, affixes, floor) {
   var q = qualities[qIndex];
   var affix = affixes[Math.floor(Math.random() * affixes.length)];
   var atk = Math.round(base.atk * q.mult) + affix.atk;
-  return { name: q.name + '·' + base.name + '(' + affix.name + ')', atk: atk, q: q };
+  return { name: q.name + '·' + base.name + '(' + affix.name + ')', atk: atk, q: q, baseName: base.name };
 }
 
 export function rollArmor(armors, qualities, affixes, floor) {
@@ -88,7 +88,7 @@ export function rollArmor(armors, qualities, affixes, floor) {
   var affix = affixes[Math.floor(Math.random() * affixes.length)];
   var def = Math.round(base.def * q.mult) + affix.def;
   var dodge = Math.round(q.mult * 3);
-  return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, dodge: dodge, q: q };
+  return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, dodge: dodge, q: q, baseName: base.name };
 }
 
 export function randPick(arr) {

@@ -337,6 +337,7 @@
         </div>
       </div>
       <text class="bag-line">历史最佳：武+{{bestWeaponAtk}} / 防+{{bestArmorDef}} · 遗物图鉴 {{relicCodex.length}}/{{relicTotal}}</text>
+      <text class="bag-line">装备图鉴 {{equipCodex.length}}/{{equipTotal}}</text>
       <text class="bag-line">金币 {{gold}} · 闪{{dodge}}% · {{skillName}}</text>
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
@@ -426,6 +427,8 @@ export default {
     bestArmorDef: 0,
     relicCodex: [],
     relicTotal: 0,
+    equipCodex: [],
+    equipTotal: 0,
     canClaimDaily: false,
     metaHp: 0,
     metaPotion: 0,
@@ -521,6 +524,7 @@ export default {
   onInit() {
     this.shopItems = SHOP_ITEMS;
     this.relicTotal = RELICS.length;
+    this.equipTotal = WEAPONS.length + ARMORS.length;
     this.areaName = '';
     this.areaEff = '';
     this._width = 6;
@@ -601,6 +605,7 @@ export default {
             that.bestWeaponAtk = m.bestWeaponAtk || 0;
             that.bestArmorDef = m.bestArmorDef || 0;
             that.relicCodex = m.relicCodex || [];
+            that.equipCodex = m.equipCodex || [];
           }
         } catch (e) {}
       }
@@ -1611,11 +1616,15 @@ export default {
   },
 
   _rollWeapon() {
-    return rollWeapon(WEAPONS, QUALITIES, WEAPON_AFFIXES, this.floor);
+    var w = rollWeapon(WEAPONS, QUALITIES, WEAPON_AFFIXES, this.floor);
+    this._recordEquip(w.baseName);
+    return w;
   },
 
   _rollArmor() {
-    return rollArmor(ARMORS, QUALITIES, ARMOR_AFFIXES, this.floor);
+    var a = rollArmor(ARMORS, QUALITIES, ARMOR_AFFIXES, this.floor);
+    this._recordEquip(a.baseName);
+    return a;
   },
 
   _pickItem(item) {
@@ -2781,7 +2790,7 @@ export default {
   _saveMeta() {
     storage.set({
       key: 'BAND_SURVIVOR_META',
-      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef, relicCodex: this.relicCodex })
+      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef, relicCodex: this.relicCodex, equipCodex: this.equipCodex })
     });
   },
 
@@ -3041,6 +3050,16 @@ export default {
       this._equipRolledArmor(armor);
     }
     this._updateUpgradeCosts();
+  },
+
+  _recordEquip(baseName) {
+    if (!baseName) {
+      return;
+    }
+    if (this.equipCodex.indexOf(baseName) < 0) {
+      this.equipCodex.push(baseName);
+      this._saveMeta();
+    }
   },
 
   _recordBest() {
