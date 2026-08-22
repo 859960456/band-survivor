@@ -1819,6 +1819,17 @@ export default {
       this.monsterAtk = Math.round(this.monsterAtk * 1.2);
       this._addLog('兽人狂暴了！');
     }
+    if (this.monsterId === 'yeti' && Math.random() < 0.3) {
+      var cold = Math.max(2, Math.round(dmg * 0.4));
+      this.hp -= cold;
+      this._updateHp();
+      this._addLog('雪怪的寒气造成额外 ' + cold + ' 伤害');
+      if (this.hp <= 0) {
+        this.hp = 0;
+        this._updateHp();
+        this._die();
+      }
+    }
 
     if (this.hp <= 0) {
       this.hp = 0;
@@ -1932,6 +1943,18 @@ export default {
       { title: '行脚商人', desc: '商人在兜售补给。', options: [
         { label: '买药水(-15金)', cost: 15, potion: 1 },
         { label: '无视', effect: 'none' }
+      ] },
+      { title: '幸运符', desc: '一枚散发微光的符咒。', options: [
+        { label: '拾取', effect: 'buff', value: 'luck' },
+        { label: '离开', effect: 'none' }
+      ] },
+      { title: '温暖温泉', desc: '热气腾腾的泉水。', options: [
+        { label: '泡澡', effect: 'hp', value: 25 },
+        { label: '离开', effect: 'none' }
+      ] },
+      { title: '陷阱房', desc: '脚下传来机关声。', options: [
+        { label: '小心通过', effect: 'trap' },
+        { label: '绕道', effect: 'none' }
       ] }
     ];
     var e = events[Math.floor(Math.random() * events.length)];
@@ -1967,6 +1990,29 @@ export default {
           }
         } else {
           this._addLog('金币不足');
+        }
+      } else if (opt.effect === 'buff') {
+        var roll = Math.random();
+        if (roll < 0.4) {
+          this.baseAtk += 2;
+          this.atk = this.baseAtk + this.weaponAtk;
+          this._addLog('幸运符：攻击 +2');
+        } else if (roll < 0.7) {
+          this.critChance += 0.05;
+          this._addLog('幸运符：暴击 +5%');
+        } else {
+          this.gold += 20;
+          this._addLog('幸运符：获得 20 金币');
+        }
+      } else if (opt.effect === 'trap') {
+        var trapDmg = Math.max(3, Math.round(8 + this.floor * 0.6));
+        this.hp -= trapDmg;
+        this._updateHp();
+        this._addLog('机关触发，受到 ' + trapDmg + ' 伤害');
+        if (this.hp <= 0) {
+          this.hp = 0;
+          this._updateHp();
+          this._die();
         }
       }
     }
