@@ -1264,12 +1264,15 @@ export default {
       } else if (roll < 0.90) {
         type = 'trap';
         icon = '^';
-      } else if (roll < 0.97) {
+      } else if (roll < 0.94) {
         type = 'poison';
         icon = '~';
-      } else if (roll < 0.99) {
+      } else if (roll < 0.97) {
         type = 'challenge';
         icon = '★';
+      } else if (roll < 0.99) {
+        type = 'chest';
+        icon = '◈';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -1396,6 +1399,8 @@ export default {
         } else if (cls === 'poison') {
           icon = '';
         } else if (cls === 'challenge') {
+          icon = '';
+        } else if (cls === 'chest') {
           icon = '';
         }
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
@@ -1597,6 +1602,20 @@ export default {
       }
     } else if (item.type === 'challenge') {
       this._startChallenge();
+    } else if (item.type === 'chest') {
+      var cr = Math.random();
+      this._vibrate(60);
+      if (cr < 0.4) {
+        this.gold += 30;
+        this._addLog('宝箱开启：30 金币');
+      } else if (cr < 0.7) {
+        this.potions += 1;
+        this._addLog('宝箱开启：药水 +1');
+      } else if (cr < 0.9) {
+        this._equipRolled(this._rollWeapon());
+      } else {
+        this._equipRolledArmor(this._rollArmor());
+      }
     } else if (item.type === 'poison') {
       this._poisonTurns = 3;
       this._poisonDmg = Math.max(2, Math.round(3 + this.floor * 0.5));
@@ -3182,6 +3201,11 @@ export default {
   width: 18px;
   height: 20px;
   border-radius: 3px;
+}
+
+.chest {
+  background-color: #d9a441;
+  border-radius: 6px;
 }
 
 .challenge {
