@@ -291,11 +291,39 @@
     <!-- 背包 -->
     <div if="{{phase === 'bag'}}" class="overlay bag-overlay">
       <text class="bag-title">背包</text>
-      <text class="bag-line">武器：{{weaponName}} +{{weaponAtk}} · {{skillName}}</text>
-      <text class="bag-line">防具：{{armorName}} +{{armorDef}} · 闪{{dodge}}%</text>
-      <text class="bag-line">药水：{{potions}} 瓶</text>
-      <text class="bag-line">金币：{{gold}} · 材料：{{materials}}</text>
-      <text class="bag-line" if="{{relics.length}}">遗物：{{relics.length}} 件</text>
+      <div class="bag-grid">
+        <div class="bag-slot">
+          <text class="bag-slot-label">武器</text>
+          <text class="bag-slot-value">+{{weaponAtk}}</text>
+          <text class="bag-slot-sub">{{weaponName}}</text>
+        </div>
+        <div class="bag-slot">
+          <text class="bag-slot-label">防具</text>
+          <text class="bag-slot-value">+{{armorDef}}</text>
+          <text class="bag-slot-sub">{{armorName}}</text>
+        </div>
+        <div class="bag-slot">
+          <text class="bag-slot-label">药水</text>
+          <text class="bag-slot-value">×{{potions}}</text>
+          <text class="bag-slot-sub">回复</text>
+        </div>
+        <div class="bag-slot">
+          <text class="bag-slot-label">材料</text>
+          <text class="bag-slot-value">×{{materials}}</text>
+          <text class="bag-slot-sub">打造</text>
+        </div>
+        <div class="bag-slot">
+          <text class="bag-slot-label">遗物</text>
+          <text class="bag-slot-value">×{{relics.length}}</text>
+          <text class="bag-slot-sub">被动</text>
+        </div>
+        <div class="bag-slot">
+          <text class="bag-slot-label">天赋点</text>
+          <text class="bag-slot-value">×{{talentPoints}}</text>
+          <text class="bag-slot-sub">强化</text>
+        </div>
+      </div>
+      <text class="bag-line">金币 {{gold}} · 闪{{dodge}}% · {{skillName}}</text>
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
       </div>
@@ -3252,6 +3280,44 @@ export default {
 
 .bag-overlay {
   padding-top: 50px;
+}
+
+.bag-grid {
+  width: 192px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.bag-slot {
+  width: 60px;
+  height: 70px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background-color: #22273a;
+  border: 1px solid #2d3240;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bag-slot-label {
+  color: #8890a3;
+  font-size: 11px;
+}
+
+.bag-slot-value {
+  color: #e8e8f0;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.bag-slot-sub {
+  color: #7d8496;
+  font-size: 9px;
+  margin-top: 2px;
 }
 
 .bag-title {
