@@ -152,7 +152,8 @@ export const UPGRADES = [
   { id: 'levelShield', name: '升级护体', desc: '升级时获得护盾',          rarity: 'rare'   },
   { id: 'warcry', name: '战吼',      desc: '战斗开始攻击 +3',          rarity: 'rare'   },
   { id: 'startShield', name: '开局护盾', desc: '战斗开始获得 10 护盾',    rarity: 'common' },
-  { id: 'fullvision', name: '全知',     desc: '全图视野不再迷雾',        rarity: 'epic'   }
+  { id: 'fullvision', name: '全知',     desc: '全图视野不再迷雾',        rarity: 'epic'   },
+  { id: 'forgeMaster', name: '大师锻造', desc: '强化装备加成 +1',        rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {
