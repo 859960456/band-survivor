@@ -2082,6 +2082,14 @@ export default {
       { title: '军械库', desc: '尘封的武器架上还有装备。', options: [
         { label: '挑武器', effect: 'gearWeapon' },
         { label: '挑防具', effect: 'gearArmor' }
+      ] },
+      { title: '赌局', desc: '一个神秘人想和你赌一把。', options: [
+        { label: '下注50金', effect: 'gamble', value: 50 },
+        { label: '离开', effect: 'none' }
+      ] },
+      { title: '收藏家', desc: '收藏家愿意出高价收药水。', options: [
+        { label: '卖1药水(+25金)', effect: 'tradePotion', value: 25 },
+        { label: '离开', effect: 'none' }
       ] }
     ];
     var e = events[Math.floor(Math.random() * events.length)];
@@ -2147,6 +2155,24 @@ export default {
         } else {
           this.gold += 20;
           this._addLog('幸运符：获得 20 金币');
+        }
+      } else if (opt.effect === 'gamble') {
+        if (this.gold < opt.value) {
+          this._addLog('金币不足');
+        } else if (Math.random() < 0.5) {
+          this.gold += opt.value;
+          this._addLog('赌局获胜 +' + opt.value + ' 金币');
+        } else {
+          this.gold -= opt.value;
+          this._addLog('赌局失败，失去 ' + opt.value + ' 金币');
+        }
+      } else if (opt.effect === 'tradePotion') {
+        if (this.potions >= 1) {
+          this.potions -= 1;
+          this.gold += opt.value;
+          this._addLog('售出药水 +' + opt.value + ' 金币');
+        } else {
+          this._addLog('没有药水可卖');
         }
       } else if (opt.effect === 'heal50') {
         this.hp = Math.min(this.maxHp, this.hp + 50);
