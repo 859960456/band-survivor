@@ -1253,6 +1253,7 @@ export default {
         this._addLog(area.effDesc);
       }
     }
+    this._saveRun();
   },
 
   _genMap() {
@@ -1647,7 +1648,6 @@ export default {
     }
     this.mapCells = cells;
     this._updateExplorePercent();
-    this._saveRun();
   },
 
   _monsterAt(r, c) {
@@ -2412,6 +2412,7 @@ export default {
     } else {
       this.phase = 'grid';
       this._renderMap();
+      this._saveRun();
     }
   },
 
@@ -2449,6 +2450,7 @@ export default {
   closeTutorial() {
     this.phase = 'grid';
     this._renderMap();
+    this._saveRun();
   },
 
   _openEvent() {
@@ -3030,6 +3032,7 @@ export default {
     this._checkAchievements();
     this.phase = 'grid';
     this._renderMap();
+    this._saveRun();
     this._addLog('升级到 Lv.' + this.level);
   },
 
@@ -3100,6 +3103,7 @@ export default {
       return;
     }
     this._renderMap();
+    this._saveRun();
   },
 
   _die() {
@@ -3150,6 +3154,7 @@ export default {
     this._addLog('休息片刻，回复 ' + heal + ' 生命');
     this._monstersTurn();
     this._afterMonstersTurn();
+    this._saveRun();
   },
 
   usePotion() {
@@ -3173,6 +3178,7 @@ export default {
     this._addLog('使用药水，回复 ' + healAmt + ' 生命' + (this._potionShield > 0 ? '，获得护盾' : ''));
     this._monstersTurn();
     this._afterMonstersTurn();
+    this._saveRun();
   },
 
   _updateCodexCount() {
@@ -3537,6 +3543,7 @@ export default {
     }
     this.phase = 'grid';
     this._renderMap();
+    this._saveRun();
   },
 
   endRun() {
@@ -3711,6 +3718,7 @@ export default {
   closeShop() {
     this.phase = 'grid';
     this._renderMap();
+    this._saveRun();
   },
 
   buyItem(id) {
@@ -3779,6 +3787,7 @@ export default {
   closeBag() {
     this.phase = 'grid';
     this._renderMap();
+    this._saveRun();
   },
 
   usePotionFromBag() {
