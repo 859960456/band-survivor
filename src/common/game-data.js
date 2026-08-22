@@ -123,7 +123,8 @@ export const UPGRADES = [
   { id: 'vision',   name: '远见',         desc: '探索视野 +1 格',          rarity: 'rare'   },
   { id: 'combocap', name: '连环',         desc: '连击上限 +0.2',           rarity: 'rare'   },
   { id: 'treasure', name: '寻宝',         desc: '每层物品 +1',             rarity: 'rare'   },
-  { id: 'vigor',   name: '活力',         desc: '每层回复 8 生命',          rarity: 'common' }
+  { id: 'vigor',   name: '活力',         desc: '每层回复 8 生命',          rarity: 'common' },
+  { id: 'ironhide', name: '铁肤',         desc: '固定减伤 +2',             rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
