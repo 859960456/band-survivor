@@ -740,6 +740,7 @@ export default {
       shieldGainChance: this._shieldGainChance,
       shieldGainAmt: this._shieldGainAmt,
       critGold: this._critGold,
+      comboOnHit: this._comboOnHit,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -875,6 +876,7 @@ export default {
         that._shieldGainChance = s.shieldGainChance || 0;
         that._shieldGainAmt = s.shieldGainAmt || 0;
         that._critGold = s.critGold || 0;
+        that._comboOnHit = s.comboOnHit || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -976,6 +978,7 @@ export default {
     this._shieldGainChance = 0;
     this._shieldGainAmt = 0;
     this._critGold = 0;
+    this._comboOnHit = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2103,6 +2106,9 @@ export default {
     this._updateHp();
     this._vibrate(60);
     this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害' + (absorbed > 0 ? '（护盾吸收 ' + absorbed + '）' : ''));
+    if (this._comboOnHit > 0 && Math.random() < this._comboOnHit) {
+      this.combo += 1;
+    }
     if (this._shieldGainChance > 0 && Math.random() < this._shieldGainChance) {
       this._shield += this._shieldGainAmt;
       this._addLog('守护获得护盾 +' + this._shieldGainAmt);
@@ -2789,6 +2795,8 @@ export default {
       this._shieldGainAmt += 4;
     } else if (id === 'critgold') {
       this._critGold += 5;
+    } else if (id === 'comboHit') {
+      this._comboOnHit += 0.2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
