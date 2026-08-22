@@ -150,7 +150,8 @@ export const UPGRADES = [
   { id: 'startCombo', name: '先声',   desc: '战斗开始 +2 连击',          rarity: 'rare'   },
   { id: 'comboHeal', name: '连击治愈', desc: '连击里程碑回复生命',        rarity: 'rare'   },
   { id: 'levelShield', name: '升级护体', desc: '升级时获得护盾',          rarity: 'rare'   },
-  { id: 'warcry', name: '战吼',      desc: '战斗开始攻击 +3',          rarity: 'rare'   }
+  { id: 'warcry', name: '战吼',      desc: '战斗开始攻击 +3',          rarity: 'rare'   },
+  { id: 'startShield', name: '开局护盾', desc: '战斗开始获得 10 护盾',    rarity: 'common' }
 ];
 
 export const RARITY_COLOR = {

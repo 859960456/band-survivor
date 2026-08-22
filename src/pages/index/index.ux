@@ -751,6 +751,7 @@ export default {
       comboHeal: this._comboHeal,
       levelShield: this._levelShield,
       warcry: this._warcry,
+      startShield: this._startShield,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -897,6 +898,7 @@ export default {
         that._comboHeal = s.comboHeal || 0;
         that._levelShield = s.levelShield || 0;
         that._warcry = s.warcry || 0;
+        that._startShield = s.startShield || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1010,6 +1012,7 @@ export default {
     this._levelShield = 0;
     this._warcry = 0;
     this._battleAtkBonus = 0;
+    this._startShield = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1956,6 +1959,9 @@ export default {
     this.isBoss = isBoss;
     this.skillCd = 0;
     this._battleAtkBonus = this._warcry || 0;
+    if (this._startShield > 0) {
+      this._shield += this._startShield;
+    }
     this.combo = this._startCombo || 0;
     this._isElite = false;
     this._bossEnraged = false;
@@ -2896,6 +2902,8 @@ export default {
       this._levelShield += 10;
     } else if (id === 'warcry') {
       this._warcry += 3;
+    } else if (id === 'startShield') {
+      this._startShield += 10;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
