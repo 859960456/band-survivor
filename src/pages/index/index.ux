@@ -243,7 +243,8 @@
       <text class="dead-title">你倒下了</text>
       <text class="dead-text">探索到第 {{floor}} 层</text>
       <text class="dead-text">等级 Lv.{{level}} / 击杀 {{kills}}</text>
-      <text class="dead-text">遗物 {{relics.length}} · 材料 {{materials}}</text>
+      <text class="dead-text">造成 {{_damageDealt}} 伤害 · 承受 {{_damageTaken}}</text>
+      <text class="dead-text">最大连击 {{_maxCombo}} · 遗物 {{relics.length}}</text>
       <text class="dead-text">最佳记录：第 {{best}} 层</text>
       <div class="btn" @click="restart">
         <text class="btn-text">再来一局</text>
@@ -446,6 +447,9 @@ export default {
     _poisonTurns: 0,
     _shield: 0,
     _hasteCharges: 0,
+    _damageDealt: 0,
+    _damageTaken: 0,
+    _maxCombo: 0,
     _bossEnraged: false,
     _poisonDmg: 0,
     _burnTurns: 0,
@@ -834,6 +838,9 @@ export default {
     this._poisonTurns = 0;
     this._shield = 0;
     this._hasteCharges = 0;
+    this._damageDealt = 0;
+    this._damageTaken = 0;
+    this._maxCombo = 0;
     this._bossEnraged = false;
     this._poisonDmg = 0;
     this._burnTurns = 0;
@@ -1726,9 +1733,11 @@ export default {
       this._addLog('怪物被点燃了');
     }
     this.combo += 1;
+    this._maxCombo = Math.max(this._maxCombo, this.combo);
     var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6);
     var isCrit = Math.random() < this.critChance;
     var dmg = Math.max(1, Math.round(this.atk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
+    this._damageDealt += dmg;
     this.monsterHp -= dmg;
     this._updateMonsterHp();
     if (isCrit) {
@@ -1770,6 +1779,7 @@ export default {
     this._shield -= absorbed;
     dmg -= absorbed;
     this.hp -= dmg;
+    this._damageTaken += dmg;
     this._updateHp();
     this._vibrate(60);
     this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害' + (absorbed > 0 ? '（护盾吸收 ' + absorbed + '）' : ''));
