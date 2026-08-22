@@ -874,6 +874,10 @@ export default {
     } catch (e) {}
   },
 
+  _healAmount() {
+    return HEAL_AMOUNT + Math.round(this.maxHp * 0.05);
+  },
+
   _updateHp() {
     this.hpPercent = Math.max(0, Math.floor(this.hp / this.maxHp * 100));
   },
@@ -1640,9 +1644,10 @@ export default {
       return;
     }
     this.potions -= 1;
-    this.hp = Math.min(this.maxHp, this.hp + HEAL_AMOUNT);
+    var healAmt = this._healAmount();
+    this.hp = Math.min(this.maxHp, this.hp + healAmt);
     this._updateHp();
-    this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
+    this._addLog('使用药水，回复 ' + healAmt + ' 生命');
     this._monsterAttack();
   },
 
@@ -2138,9 +2143,10 @@ export default {
       return;
     }
     this.potions -= 1;
-    this.hp = Math.min(this.maxHp, this.hp + HEAL_AMOUNT);
+    var healAmt = this._healAmount();
+    this.hp = Math.min(this.maxHp, this.hp + healAmt);
     this._updateHp();
-    this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
+    this._addLog('使用药水，回复 ' + healAmt + ' 生命');
     this._monstersTurn();
     this._afterMonstersTurn();
   },
@@ -2557,9 +2563,10 @@ export default {
       return;
     }
     this.potions -= 1;
-    this.hp = Math.min(this.maxHp, this.hp + HEAL_AMOUNT);
+    var healAmt = this._healAmount();
+    this.hp = Math.min(this.maxHp, this.hp + healAmt);
     this._updateHp();
-    this._addLog('使用药水，回复 ' + HEAL_AMOUNT + ' 生命');
+    this._addLog('使用药水，回复 ' + healAmt + ' 生命');
   }
 };
 </script>
