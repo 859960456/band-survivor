@@ -2235,6 +2235,23 @@ export default {
         this._die();
       }
     }
+    if (this.monsterId === 'abyss_lord' && Math.random() < 0.25) {
+      var voidDmg = Math.max(3, Math.round(dmg * 0.5));
+      this.hp -= voidDmg;
+      this._damageTaken += voidDmg;
+      this._updateHp();
+      this._addLog('深渊领主侵蚀造成额外 ' + voidDmg + ' 伤害');
+      if (this.hp <= 0) {
+        this.hp = 0;
+        this._updateHp();
+        this._die();
+      }
+    }
+    if (this.monsterId === 'ruin_golem' && Math.random() < 0.25) {
+      this.monsterHp = Math.min(this.monsterMaxHp, this.monsterHp + Math.round(dmg * 0.4));
+      this._updateMonsterHp();
+      this._addLog('遗迹巨像汲取石甲回复');
+    }
     if (this.monsterId === 'frost_king' && Math.random() < 0.25) {
       var freeze = Math.max(3, Math.round(dmg * 0.5));
       this.hp -= freeze;
