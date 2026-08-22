@@ -1820,6 +1820,17 @@ export default {
         this._die();
       }
     }
+    if ((this.monsterId === 'fire_imp' || this.monsterId === 'lava_golem' || this.monsterId === 'inferno_lord') && Math.random() < 0.3) {
+      var burn = Math.max(2, Math.round(dmg * 0.5));
+      this.hp -= burn;
+      this._updateHp();
+      this._addLog('灼热气息造成额外 ' + burn + ' 伤害');
+      if (this.hp <= 0) {
+        this.hp = 0;
+        this._updateHp();
+        this._die();
+      }
+    }
 
     if (this.hp <= 0) {
       this.hp = 0;
