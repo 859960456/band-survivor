@@ -8,6 +8,10 @@
       <div class="btn big-btn" @click="startGame">
         <text class="btn-text">开始冒险</text>
       </div>
+      <div if="{{hasSave}}" class="btn big-btn" @click="continueGame">
+        <text class="btn-text">继续冒险</text>
+        <text class="btn-sub">第{{saveFloor}}层 · Lv.{{saveLevel}}</text>
+      </div>
       <text class="best">最佳记录：第 {{best}} 层</text>
     </div>
 
@@ -173,6 +177,9 @@ export default {
   private: {
     phase: 'home',
     best: 0,
+    hasSave: false,
+    saveFloor: 0,
+    saveLevel: 0,
 
     floor: 0,
     gold: 0,
@@ -237,6 +244,19 @@ export default {
         }
       }
     });
+    storage.get({
+      key: 'BAND_SURVIVOR_SAVE',
+      success: function(data) {
+        try {
+          var s = JSON.parse(data);
+          if (s && s.grid && s.grid.length > 0) {
+            that.hasSave = true;
+            that.saveFloor = s.floor || 0;
+            that.saveLevel = s.level || 1;
+          }
+        } catch (e) {}
+      }
+    });
   },
 
   startGame() {
@@ -244,6 +264,7 @@ export default {
     this.phase = 'grid';
     this._genFloor(1);
     this._addLog('你踏入了第 1 层地牢');
+    this._saveRun();
   },
 
   restart() {
@@ -252,6 +273,109 @@ export default {
 
   goHome() {
     this.phase = 'home';
+  },
+
+  continueGame() {
+    this._continueRun();
+  },
+
+  _saveRun() {
+    if (this.phase !== 'grid' || !this._grid || this._grid.length === 0) {
+      return;
+    }
+    var data = {
+      floor: this.floor,
+      gold: this.gold,
+      kills: this.kills,
+      level: this.level,
+      baseAtk: this.baseAtk,
+      weaponAtk: this.weaponAtk,
+      weaponName: this.weaponName,
+      armorDef: this.armorDef,
+      armorName: this.armorName,
+      atk: this.atk,
+      hp: this.hp,
+      maxHp: this.maxHp,
+      exp: this.exp,
+      expNext: this.expNext,
+      potions: this.potions,
+      mh: this._height,
+      mw: this._width,
+      pr: this._playerR,
+      pc: this._playerC,
+      sr: this._stairsR,
+      sc: this._stairsC,
+      grid: this._grid,
+      monsters: this._monsters,
+      items: this._items
+    };
+    storage.set({
+      key: 'BAND_SURVIVOR_SAVE',
+      value: JSON.stringify(data)
+    });
+    this.hasSave = true;
+    this.saveFloor = this.floor;
+    this.saveLevel = this.level;
+  },
+
+  _continueRun() {
+    var that = this;
+    storage.get({
+      key: 'BAND_SURVIVOR_SAVE',
+      success: function(data) {
+        var s;
+        try {
+          s = JSON.parse(data);
+        } catch (e) {
+          return;
+        }
+        if (!s || !s.grid || s.grid.length === 0) {
+          that.hasSave = false;
+          return;
+        }
+        that._resetRun();
+        that.floor = s.floor || 1;
+        that.gold = s.gold || 0;
+        that.kills = s.kills || 0;
+        that.level = s.level || 1;
+        that.baseAtk = s.baseAtk || BASE_PLAYER.atk;
+        that.weaponAtk = s.weaponAtk || 0;
+        that.weaponName = s.weaponName || '无';
+        that.armorDef = s.armorDef || 0;
+        that.armorName = s.armorName || '无';
+        that.atk = s.atk || BASE_PLAYER.atk;
+        that.hp = s.hp || BASE_PLAYER.hp;
+        that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
+        that.exp = s.exp || 0;
+        that.expNext = s.expNext || BASE_PLAYER.expNext;
+        that.potions = s.potions || BASE_PLAYER.potions;
+        that._height = s.mh || 10;
+        that._width = s.mw || 6;
+        that._grid = s.grid || [];
+        that._monsters = s.monsters || [];
+        that._items = s.items || [];
+        that._playerR = s.pr || 0;
+        that._playerC = s.pc || 0;
+        that._stairsR = s.sr || 0;
+        that._stairsC = s.sc || 0;
+        that._updateHp();
+        that._updateExp();
+        that.phase = 'grid';
+        that._renderMap();
+        that._addLog('继续冒险 · 第 ' + that.floor + ' 层');
+        that._saveRun();
+      }
+    });
+  },
+
+  _clearSave() {
+    storage.set({
+      key: 'BAND_SURVIVOR_SAVE',
+      value: ''
+    });
+    this.hasSave = false;
+    this.saveFloor = 0;
+    this.saveLevel = 0;
   },
 
   _resetRun() {
@@ -649,6 +773,7 @@ export default {
       }
     }
     this.mapCells = cells;
+    this._saveRun();
   },
 
   _monsterAt(r, c) {
@@ -1043,6 +1168,7 @@ export default {
 
   _die() {
     this.phase = 'dead';
+    this._clearSave();
     if (this.floor > this.best) {
       this.best = this.floor;
       storage.set({
