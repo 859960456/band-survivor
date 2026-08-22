@@ -113,6 +113,21 @@
       </div>
     </div>
 
+    <!-- 天赋 -->
+    <div if="{{phase === 'talents'}}" class="overlay dead-overlay">
+      <text class="dead-title">天赋</text>
+      <text class="dead-text">可用点数：{{talentPoints}}</text>
+      <scroll class="shop-scroll" scroll-y="true">
+        <div for="{{talentList}}" class="ach-item {{$item.bought ? 'done' : ''}}" @click="buyTalent($item.id)">
+          <text class="ach-name">{{$item.name}}</text>
+          <text class="ach-desc">{{$item.desc}}</text>
+        </div>
+      </scroll>
+      <div class="btn" @click="closeTalents">
+        <text class="btn-text">关闭</text>
+      </div>
+    </div>
+
     <!-- 图鉴 -->
     <div if="{{phase === 'codex'}}" class="overlay dead-overlay">
       <text class="dead-title">怪物图鉴</text>
@@ -153,6 +168,9 @@
       </div>
       <div class="btn" @click="endRun">
         <text class="btn-text">结束本局</text>
+      </div>
+      <div class="btn" @click="openTalents">
+        <text class="btn-text">天赋（{{talentPoints}}点）</text>
       </div>
       <div class="settings">
         <div class="setting-row" @click="toggleVibrate">
@@ -267,7 +285,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS } from '../../common/game-data.js';
 
 const MAX_LOG = 3;
 const BOSS_EVERY = 5;
@@ -348,6 +366,8 @@ export default {
     codexTotal: 0,
     codexCount: 0,
     relics: [],
+    talentPoints: 0,
+    talents: [],
 
     mapRows: [],
     mapCells: [],
@@ -497,6 +517,8 @@ export default {
       grid: this._grid,
       visited: this._visited,
       relics: this.relics,
+      talentPoints: this.talentPoints,
+      talents: this.talents,
       monsters: this._monsters,
       items: this._items
     };
@@ -545,6 +567,8 @@ export default {
         that._grid = s.grid || [];
         that._visited = s.visited || [];
         that.relics = s.relics || [];
+        that.talentPoints = s.talentPoints || 0;
+        that.talents = s.talents || [];
         that._monsters = s.monsters || [];
         that._items = s.items || [];
         that._playerR = s.pr || 0;
@@ -603,6 +627,8 @@ export default {
     this.exp = BASE_PLAYER.exp;
     this.expNext = BASE_PLAYER.expNext;
     this.relics = [];
+    this.talentPoints = 0;
+    this.talents = [];
     this.potions = BASE_PLAYER.potions;
     this.monsterAlive = false;
     this.monsterName = '';
@@ -1552,6 +1578,65 @@ export default {
     this._renderMap();
   },
 
+  _updateTalentList() {
+    this.talentList = TALENTS.map(function(t) {
+      return { id: t.id, name: t.name, desc: t.desc, bought: this.talents.indexOf(t.id) >= 0 };
+    }.bind(this));
+  },
+
+  _applyTalent(t) {
+    if (t.stat === 'atk') {
+      this.baseAtk += t.value;
+      this.atk = this.baseAtk + this.weaponAtk;
+    } else if (t.stat === 'hp') {
+      this.maxHp += t.value;
+    } else if (t.stat === 'goldMul') {
+      this.goldMul += t.value;
+    } else if (t.stat === 'expMul') {
+      this.expMul += t.value;
+    } else if (t.stat === 'lifesteal') {
+      this.lifesteal += t.value;
+    } else if (t.stat === 'burnChance') {
+      this.burnChance += t.value;
+    }
+  },
+
+  openTalents() {
+    this._updateTalentList();
+    this._lastPhase = this.phase;
+    this.phase = 'talents';
+  },
+
+  closeTalents() {
+    if (this.phase === 'talents') {
+      this.phase = this._lastPhase || 'grid';
+      if (this.phase === 'grid') {
+        this._renderMap();
+      }
+    }
+  },
+
+  buyTalent(id) {
+    if (this.phase !== 'talents' || this.talentPoints <= 0 || this.talents.indexOf(id) >= 0) {
+      return;
+    }
+    var t = null;
+    for (var i = 0; i < TALENTS.length; i++) {
+      if (TALENTS[i].id === id) {
+        t = TALENTS[i];
+        break;
+      }
+    }
+    if (!t) {
+      return;
+    }
+    this.talentPoints -= 1;
+    this.talents.push(id);
+    this._applyTalent(t);
+    this._updateTalentList();
+    this._addLog('习得天赋 ' + t.name);
+  },
+
   _gainRelic(id) {
     var relic = null;
     for (var i = 0; i < RELICS.length; i++) {
@@ -1628,6 +1713,7 @@ export default {
     }
 
     this.level += 1;
+    this.talentPoints += 1;
     this._vibrate(160);
     this.exp -= this.expNext;
     this.expNext = Math.floor(this.expNext * 1.35);

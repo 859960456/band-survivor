@@ -165,3 +165,12 @@ export const RELICS = [
   { id: 'wisdom',   name: '智慧之书', desc: '经验获取 +10%', stat: 'expMul',  value: 0.1 },
   { id: 'swift',    name: '疾风靴',   desc: '技能冷却 -0.4s', stat: 'cd',     value: 0.4 }
 ];
+
+export const TALENTS = [
+  { id: 't_atk',      name: '武力', desc: '攻击 +2',        stat: 'atk',        value: 2 },
+  { id: 't_hp',       name: '强健', desc: '生命上限 +15',    stat: 'hp',         value: 15 },
+  { id: 't_gold',     name: '敛财', desc: '金币获取 +5%',    stat: 'goldMul',    value: 0.05 },
+  { id: 't_exp',      name: '求知', desc: '经验获取 +5%',    stat: 'expMul',     value: 0.05 },
+  { id: 't_lifesteal',name: '嗜血', desc: '吸血 +1',         stat: 'lifesteal',  value: 1 },
+  { id: 't_burn',     name: '焚心', desc: '点燃几率 +5%',    stat: 'burnChance', value: 0.05 }
+];
