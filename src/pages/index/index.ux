@@ -25,32 +25,36 @@
       <text class="hp-text">HP {{hp}}/{{maxHp}} · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}</text>
       <text class="map-msg">{{lastLog}}</text>
 
-      <div class="map-container" @swipe="onMapSwipe" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
-           style="width: {{mapViewW * 18 + 8}}px; height: {{mapViewH * 20 + 8}}px;">
-        <div for="{{mapCells}}" class="cell {{$item.cls}}"
-             style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;">
-          <image if="{{$item.icon}}" class="cell-icon" src="{{$item.icon}}"></image>
-          <text if="{{$item.cls === 'player'}}" class="cell-text">我</text>
+      <div class="map-area">
+        <div class="map-container" @swipe="onMapSwipe" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
+             style="width: {{mapViewW * 18 + 8}}px; height: {{mapViewH * 20 + 8}}px;">
+          <div for="{{mapCells}}" class="cell {{$item.cls}}"
+               style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;">
+            <image if="{{$item.icon}}" class="cell-icon" src="{{$item.icon}}"></image>
+            <text if="{{$item.cls === 'player'}}" class="cell-text">我</text>
+          </div>
         </div>
       </div>
 
       <text class="map-tip">滑动地图移动 · 撞怪进战斗</text>
-      <scroll class="action-scroll" scroll-y="true">
-        <div class="action-item grid-action" @click="openBag">
-          <text class="action-label">背包</text>
-          <text class="action-desc">查看装备与物品</text>
+
+      <!-- 底部可滚动菜单栏 -->
+      <scroll class="menu-scroll" scroll-x="true">
+        <div class="menu-item" @click="openBag">
+          <text class="menu-label">背包</text>
+          <text class="menu-sub">装备物品</text>
         </div>
-        <div class="action-item grid-action" @click="openShop">
-          <text class="action-label">商店</text>
-          <text class="action-desc">花费金币购买补给</text>
+        <div class="menu-item" @click="openShop">
+          <text class="menu-label">商店</text>
+          <text class="menu-sub">补给强化</text>
         </div>
-        <div class="action-item grid-action" @click="doRest">
-          <text class="action-label">休息</text>
-          <text class="action-desc">回复 25% 生命</text>
+        <div class="menu-item" @click="doRest">
+          <text class="menu-label">休息</text>
+          <text class="menu-sub">回复25%</text>
         </div>
-        <div class="action-item grid-action {{potions <= 0 ? 'disabled' : ''}}" @click="usePotion">
-          <text class="action-label">使用药水</text>
-          <text class="action-desc">回复 30 生命 · 剩余 {{potions}}</text>
+        <div class="menu-item {{potions <= 0 ? 'disabled' : ''}}" @click="usePotion">
+          <text class="menu-label">药水</text>
+          <text class="menu-sub">剩 {{potions}}</text>
         </div>
       </scroll>
     </div>
@@ -210,8 +214,8 @@ export default {
     this.shopItems = SHOP_ITEMS;
     this._width = 6;
     this._height = 10;
-    this._viewW = 8;
-    this._viewH = 12;
+    this._viewW = 10;
+    this._viewH = 14;
     this._camR = 0;
     this._camC = 0;
     this._touchStartX = 0;
@@ -1283,10 +1287,17 @@ export default {
   text-align: left;
 }
 
+.map-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
 .map-container {
-  width: 120px;
-  height: 215px;
-  margin-top: 8px;
   padding: 4px;
   background-color: #101016;
   border: 1px solid #26262e;
@@ -1370,43 +1381,41 @@ export default {
   border-radius: 2px;
 }
 
-.action-scroll {
+.menu-scroll {
   width: 192px;
-  height: 150px;
-  margin-top: auto;
-  margin-bottom: 6px;
+  height: 52px;
+  margin-top: 6px;
+  margin-bottom: 2px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
 }
 
-.action-item {
-  width: 192px;
-  height: 34px;
-  margin-bottom: 4px;
+.menu-item {
+  width: 44px;
+  height: 50px;
+  margin-right: 6px;
   border-radius: 8px;
-  background-color: #20242f;
+  background-color: #22273a;
   border: 1px solid #2d3240;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.grid-action {
-  background-color: #22273a;
-}
-
-.action-label {
+.menu-label {
   color: #e8e8f0;
   font-size: 13px;
   font-weight: 600;
 }
 
-.action-desc {
+.menu-sub {
   color: #7d8496;
   font-size: 9px;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .map-tip {
