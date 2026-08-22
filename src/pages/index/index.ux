@@ -34,6 +34,9 @@
       <div class="btn" @click="openCodex">
         <text class="btn-text">图鉴 {{codexCount}}/{{codexTotal}}</text>
       </div>
+      <div if="{{canClaimDaily}}" class="btn big-btn" @click="claimDaily">
+        <text class="btn-text">每日签到（灵魂+8）</text>
+      </div>
       <div class="btn" @click="openMeta">
         <text class="btn-text">灵魂 {{soul}} · 永久强化</text>
       </div>
@@ -412,6 +415,7 @@ export default {
     achievementList: [],
     title: '初行者',
     soul: 0,
+    canClaimDaily: false,
     metaHp: 0,
     metaPotion: 0,
     metaAtk: 0,
@@ -508,6 +512,7 @@ export default {
     this._touchStartX = 0;
     this._touchStartY = 0;
     this._touchMoved = false;
+    this._checkDaily();
     var that = this;
     storage.get({
       key: 'BAND_SURVIVOR_CHALLENGE',
@@ -2349,6 +2354,33 @@ export default {
 
   closeAchievements() {
     this.phase = 'home';
+  },
+
+  _todayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  },
+
+  _checkDaily() {
+    var that = this;
+    storage.get({
+      key: 'BAND_SURVIVOR_DAILY',
+      success: function(data) {
+        that.canClaimDaily = data !== that._todayStr();
+      }
+    });
+  },
+
+  claimDaily() {
+    if (!this.canClaimDaily) {
+      this._addLog('今日已领取');
+      return;
+    }
+    this.soul += 8;
+    this.canClaimDaily = false;
+    storage.set({ key: 'BAND_SURVIVOR_DAILY', value: this._todayStr() });
+    this._saveMeta();
+    this._addLog('每日签到：灵魂 +8');
   },
 
   _saveMeta() {
