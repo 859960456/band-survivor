@@ -2169,6 +2169,12 @@ export default {
       this._shield += 15;
     } else if (id === 'haste') {
       this._hasteCharges += 1;
+    } else if (id === 'dodgeup') {
+      this.dodge += 3;
+    } else if (id === 'hppct') {
+      var gain = Math.round(this.maxHp * 0.1);
+      this.maxHp += gain;
+      this.hp = Math.min(this.maxHp, this.hp + gain);
     }
 
     this.level += 1;

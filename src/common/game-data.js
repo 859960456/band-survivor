@@ -99,7 +99,9 @@ export const UPGRADES = [
   { id: 'cd',      name: '冷却 -0.3s',   desc: '技能冷却缩短',        rarity: 'epic'   },
   { id: 'omni',    name: '全能 +5%',     desc: '攻击+2 并小幅强化',   rarity: 'epic'   },
   { id: 'shield',  name: '护盾',         desc: '获得 15 点临时护盾', rarity: 'rare'   },
-  { id: 'haste',   name: '迅捷',         desc: '移动不触发怪物回合(1 次)', rarity: 'epic'   }
+  { id: 'haste',   name: '迅捷',         desc: '移动不触发怪物回合(1 次)', rarity: 'epic'   },
+  { id: 'dodgeup', name: '闪避 +3%',     desc: '提高闪避几率',        rarity: 'rare'   },
+  { id: 'hppct',   name: '生命 +10%',    desc: '提升最大生命',        rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {
