@@ -5,17 +5,14 @@
       <scroll class="home-scroll" scroll-y="true">
         <div class="home-content">
         <text class="title">暗渊行者</text>
-        <text class="subtitle">地牢走格子 · 文字肉鸽</text>
 
-        <div if="{{dailyDone}}" class="btn big-btn highlight" @click="claimDailyTask">
-          <text class="btn-text">领取每日任务奖励（灵魂+10）</text>
+        <div if="{{dailyDone}}" class="home-alert" @click="claimDailyTask">
+          <text class="home-alert-text">📋 每日任务完成 · 领灵魂+10</text>
         </div>
-        <div if="{{canClaimDaily}}" class="btn big-btn highlight" @click="claimDaily">
-          <text class="btn-text">每日签到（灵魂+8）</text>
+        <div if="{{canClaimDaily}}" class="home-alert" @click="claimDaily">
+          <text class="home-alert-text">✨ 每日签到 · 领灵魂+8</text>
         </div>
-        <text class="tip">每日任务：{{dailyLabel}}（{{dailyProgress}}/{{dailyTarget}}）</text>
 
-        <text class="section-label">— 开始 —</text>
         <div class="btn big-btn primary" @click="startGame">
           <text class="btn-text">开始冒险</text>
         </div>
@@ -24,7 +21,15 @@
           <text class="btn-sub">第{{saveFloor}}层 · Lv.{{saveLevel}}</text>
         </div>
 
-        <text class="section-label">— 设置 —</text>
+        <text class="section-label">设置</text>
+        <div class="setting-row" @click="cycleDifficulty">
+          <text class="setting-label">难度</text>
+          <text class="setting-value">{{difficultyLabel}}</text>
+        </div>
+        <div class="setting-row" @click="cycleClass">
+          <text class="setting-label">职业</text>
+          <text class="setting-value">{{classLabel}}</text>
+        </div>
         <div class="setting-row" @click="toggleEndless">
           <text class="setting-label">无尽模式</text>
           <text class="setting-value">{{endless ? '开' : '关'}}</text>
@@ -33,35 +38,23 @@
           <text class="setting-label">挑战模式</text>
           <text class="setting-value">{{challengeMode ? '开' : '关'}}</text>
         </div>
-        <text class="section-label">难度</text>
-        <div class="diff-row">
-          <div class="diff-btn {{difficulty === 0 ? 'active' : ''}}" @click="setDifficulty(0)">简单</div>
-          <div class="diff-btn {{difficulty === 1 ? 'active' : ''}}" @click="setDifficulty(1)">普通</div>
-          <div class="diff-btn {{difficulty === 2 ? 'active' : ''}}" @click="setDifficulty(2)">困难</div>
-        </div>
-        <text class="section-label">职业</text>
-        <div class="diff-row">
-          <div class="diff-btn {{charClass === 'warrior' ? 'active' : ''}}" @click="setClass('warrior')">战士</div>
-          <div class="diff-btn {{charClass === 'ranger' ? 'active' : ''}}" @click="setClass('ranger')">游侠</div>
-          <div class="diff-btn {{charClass === 'mage' ? 'active' : ''}}" @click="setClass('mage')">法师</div>
-        </div>
 
-        <text class="section-label">— 收集 —</text>
-        <div class="list-item" @click="openAchievements">
+        <text class="section-label">收集</text>
+        <div class="setting-row" @click="openAchievements">
           <text class="setting-label">成就</text>
           <text class="setting-value">{{achievementCount}}/{{achievementTotal}}</text>
         </div>
-        <div class="list-item" @click="openCodex">
+        <div class="setting-row" @click="openCodex">
           <text class="setting-label">图鉴</text>
           <text class="setting-value">{{codexCount}}/{{codexTotal}}</text>
         </div>
-        <div class="list-item" @click="openMeta">
+        <div class="setting-row" @click="openMeta">
           <text class="setting-label">永久强化</text>
-          <text class="setting-value">灵魂 {{soul}}</text>
+          <text class="setting-value">灵魂{{soul}}</text>
         </div>
 
         <text class="best">称号：{{title}} · 最佳：第 {{best}} 层</text>
-        </div>
+      </div>
       </scroll>
     </div>
 
@@ -429,6 +422,7 @@ export default {
     difficulty: 1,
     charClass: 'warrior',
     classLabel: '战士',
+    difficultyLabel: '普通',
     endless: false,
     challengeMode: false,
     hasSave: false,
@@ -595,9 +589,11 @@ export default {
         if (!isNaN(d) && d >= 0 && d <= 2) {
           that.difficulty = d;
         }
+        that._updateDifficultyLabel();
         that._loadBest();
       },
       fail: function() {
+        that._updateDifficultyLabel();
         that._loadBest();
       }
     });
@@ -1158,6 +1154,27 @@ export default {
       key: 'BAND_SURVIVOR_ENDLESS',
       value: this.endless ? '1' : '0'
     });
+  },
+
+  _updateDifficultyLabel() {
+    this.difficultyLabel = this.difficulty === 0 ? '简单' : (this.difficulty === 2 ? '困难' : '普通');
+  },
+
+  _updateClassLabel() {
+    var names = { warrior: '战士', ranger: '游侠', mage: '法师' };
+    this.classLabel = names[this.charClass] || '战士';
+  },
+
+  cycleDifficulty() {
+    this.setDifficulty((this.difficulty + 1) % 3);
+    this._updateDifficultyLabel();
+  },
+
+  cycleClass() {
+    var ids = ['warrior', 'ranger', 'mage'];
+    var idx = ids.indexOf(this.charClass);
+    this.setClass(ids[(idx + 1) % ids.length]);
+    this._updateClassLabel();
   },
 
   setDifficulty(n) {
@@ -3851,6 +3868,20 @@ export default {
 .home-scroll {
   width: 212px;
   height: 520px;
+}
+
+.home-alert {
+  width: 176px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background-color: #3a3560;
+  border: 1px solid #ffd75e;
+}
+
+.home-alert-text {
+  color: #ffd75e;
+  font-size: 11px;
 }
 
 .section-label {
