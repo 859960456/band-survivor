@@ -348,6 +348,7 @@ export default {
     dodge: 0,
     combo: 0,
     _poisonTurns: 0,
+    _bossEnraged: false,
     _poisonDmg: 0,
     _burnTurns: 0,
     _burnPower: 0,
@@ -645,6 +646,7 @@ export default {
     this.dodge = 0;
     this.combo = 0;
     this._poisonTurns = 0;
+    this._bossEnraged = false;
     this._poisonDmg = 0;
     this._burnTurns = 0;
     this._burnPower = 0;
@@ -1457,6 +1459,7 @@ export default {
     this.isBoss = isBoss;
     this.skillCd = 0;
     this.combo = 0;
+    this._bossEnraged = false;
     this.phase = 'battle';
     this._addLog('遭遇 ' + stats.name);
   },
@@ -1556,6 +1559,11 @@ export default {
   },
 
   _monsterAttack() {
+    if (this.isBoss && !this._bossEnraged && this.monsterHp < this.monsterMaxHp * 0.5) {
+      this._bossEnraged = true;
+      this._addLog(this.monsterName + ' 狂暴了！攻击大幅提升');
+      this.monsterAtk = Math.round(this.monsterAtk * 1.4);
+    }
     if (this.dodge > 0 && Math.random() * 100 < this.dodge) {
       this._addLog('你闪避了 ' + this.monsterName + ' 的攻击');
       return;
