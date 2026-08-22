@@ -26,7 +26,7 @@
       <div class="btn" @click="openCodex">
         <text class="btn-text">图鉴 {{codexCount}}/{{codexTotal}}</text>
       </div>
-      <text class="best">最佳记录：第 {{best}} 层</text>
+      <text class="best">称号：{{title}} · 最佳：第 {{best}} 层</text>
     </div>
 
     <!-- 地牢探索 -->
@@ -309,6 +309,7 @@ export default {
     achievementCount: 0,
     achievementTotal: 0,
     achievementList: [],
+    title: '初行者',
     eventTitle: '',
     eventDesc: '',
     eventOptions: [],
@@ -1934,6 +1935,15 @@ export default {
     this.achievementList = ACHIEVEMENTS.map(function(a) {
       return { id: a.id, name: a.name, desc: a.desc, done: this.unlockedAchievements.indexOf(a.id) >= 0 };
     }.bind(this));
+    if (this.achievementCount >= 6) {
+      this.title = '传说';
+    } else if (this.achievementCount >= 3) {
+      this.title = '精英';
+    } else if (this.achievementCount >= 1) {
+      this.title = '勇者';
+    } else {
+      this.title = '初行者';
+    }
   },
 
   _unlockAchievement(id) {
