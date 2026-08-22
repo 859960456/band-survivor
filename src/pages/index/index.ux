@@ -912,6 +912,32 @@ export default {
       }
     }
 
+    // 随机把少数墙标记为暗门
+    var secretCount = Math.min(2 + Math.floor(this.floor / 4), 5);
+    var secretPlaced = 0;
+    var guard = 0;
+    while (secretPlaced < secretCount && guard < 200) {
+      guard++;
+      var sr = Math.floor(Math.random() * h);
+      var sc = Math.floor(Math.random() * w);
+      if (grid[sr][sc] !== '#') {
+        continue;
+      }
+      var adjFloor = false;
+      var dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+      for (var di = 0; di < dirs.length; di++) {
+        var ar = sr + dirs[di][0];
+        var ac = sc + dirs[di][1];
+        if (ar >= 0 && ar < h && ac >= 0 && ac < w && grid[ar][ac] === '.') {
+          adjFloor = true;
+          break;
+        }
+      }
+      if (adjFloor) {
+        grid[sr][sc] = 'S';
+        secretPlaced++;
+      }
+    }
     this._grid = grid;
     this._visited = [];
     for (var vi = 0; vi < h; vi++) {
@@ -1049,6 +1075,9 @@ export default {
       for (var vc = 0; vc < viewW; vc++) {
         var c = this._camC + vc;
         var cls = this._grid[r][c] === '#' ? 'wall' : 'floor';
+        if (this._grid[r][c] === 'S') {
+          cls = 'secret';
+        }
         var visited = this._visited && this._visited[r] && this._visited[r][c];
         if (r === this._playerR && c === this._playerC) {
           cls = 'player';
@@ -1196,6 +1225,11 @@ export default {
     if (this._grid[nr][nc] === '#') {
       this._addLog('前方是墙');
       return;
+    }
+    var isSecret = this._grid[nr][nc] === 'S';
+    if (isSecret) {
+      this._grid[nr][nc] = '.';
+      this._addLog('你发现并推开了一扇暗门！');
     }
 
     // 楼梯
@@ -2307,6 +2341,12 @@ export default {
 
 .fog {
   background-color: #17171f;
+}
+
+.secret {
+  background-color: #3a3a2a;
+  background-image: url('/common/icons/wall.png');
+  background-size: 18px 20px;
 }
 
 .wall {
