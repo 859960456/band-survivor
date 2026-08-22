@@ -140,7 +140,8 @@ export const UPGRADES = [
   { id: 'thunder', name: '雷霆',         desc: '几率追加雷击 40% 伤害',    rarity: 'rare'   },
   { id: 'guarded', name: '守护',         desc: '受击有几率获得护盾',       rarity: 'rare'   },
   { id: 'critgold', name: '敛锋',        desc: '暴击时 +5 金币',           rarity: 'rare'   },
-  { id: 'comboHit', name: '韧性',        desc: '受击有几率 +1 连击',        rarity: 'rare'   }
+  { id: 'comboHit', name: '韧性',        desc: '受击有几率 +1 连击',        rarity: 'rare'   },
+  { id: 'haggle',  name: '议价',         desc: '商店价格 -15%',            rarity: 'common' }
 ];
 
 export const RARITY_COLOR = {

@@ -741,6 +741,7 @@ export default {
       shieldGainAmt: this._shieldGainAmt,
       critGold: this._critGold,
       comboOnHit: this._comboOnHit,
+      haggle: this._haggle,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -877,6 +878,7 @@ export default {
         that._shieldGainAmt = s.shieldGainAmt || 0;
         that._critGold = s.critGold || 0;
         that._comboOnHit = s.comboOnHit || 0;
+        that._haggle = s.haggle || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -979,6 +981,7 @@ export default {
     this._shieldGainAmt = 0;
     this._critGold = 0;
     this._comboOnHit = 0;
+    this._haggle = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2797,6 +2800,8 @@ export default {
       this._critGold += 5;
     } else if (id === 'comboHit') {
       this._comboOnHit += 0.2;
+    } else if (id === 'haggle') {
+      this._haggle += 0.15;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
@@ -3320,6 +3325,10 @@ export default {
       if (Math.random() < 0.2) {
         it.price = Math.round(it.price * 0.8);
         it.discount = true;
+      }
+      if (this._haggle > 0) {
+        it.price = Math.round(it.price * (1 - this._haggle));
+        it.haggle = true;
       }
       out.push(it);
     }
