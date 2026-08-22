@@ -62,7 +62,7 @@
       <div class="bar grid-bar">
         <div class="bar-fill hp-fill" style="width: {{hpPercent}}%;"></div>
       </div>
-      <text class="hp-text">HP {{hp}}/{{maxHp}} · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}{{challengeMod ? ' · 词条:' : ''}}</text>
+      <text class="hp-text">HP {{hp}}/{{maxHp}} · 探索{{explorePercent}}% · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}{{challengeMod ? ' · 词条:' : ''}}</text>
       <text class="map-msg">{{lastLog}}</text>
 
       <div class="map-area">
@@ -470,6 +470,7 @@ export default {
     dailyProgress: 0,
     dailyDone: false,
     dailyLabel: '击杀 5 个怪物',
+    explorePercent: 0,
     _damageTaken: 0,
     _maxCombo: 0,
     _bossEnraged: false,
@@ -1357,6 +1358,22 @@ export default {
     this._camC = Math.max(0, Math.min(this._playerC - Math.floor(viewW / 2), this._width - viewW));
   },
 
+  _updateExplorePercent() {
+    var total = 0;
+    var visited = 0;
+    for (var r = 0; r < this._height; r++) {
+      for (var c = 0; c < this._width; c++) {
+        if (this._grid[r][c] !== '#') {
+          total++;
+          if (this._visited && this._visited[r] && this._visited[r][c]) {
+            visited++;
+          }
+        }
+      }
+    }
+    this.explorePercent = total > 0 ? Math.round(visited / total * 100) : 0;
+  },
+
   _renderMap() {
     this._updateCamera();
     var viewH = Math.min(this._viewH, this._height);
@@ -1427,6 +1444,7 @@ export default {
       }
     }
     this.mapCells = cells;
+    this._updateExplorePercent();
     this._saveRun();
   },
 
