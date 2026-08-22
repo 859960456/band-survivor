@@ -2988,6 +2988,8 @@ export default {
       this._blockChance += 0.2;
     } else if (id === 'clean2') {
       this._cleanChance += 0.25;
+    } else if (id === 'healboost2') {
+      this._healBoost += 10;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
