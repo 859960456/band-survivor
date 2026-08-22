@@ -2922,6 +2922,8 @@ export default {
       this._fullVision = true;
     } else if (id === 'forgeMaster') {
       this._forgeBonus += 1;
+    } else if (id === 'critMaster') {
+      this.critMult += 0.3;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
