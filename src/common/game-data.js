@@ -154,7 +154,8 @@ export const UPGRADES = [
   { id: 'startShield', name: '开局护盾', desc: '战斗开始获得 10 护盾',    rarity: 'common' },
   { id: 'fullvision', name: '全知',     desc: '全图视野不再迷雾',        rarity: 'epic'   },
   { id: 'forgeMaster', name: '大师锻造', desc: '强化装备加成 +1',        rarity: 'epic'   },
-  { id: 'critMaster', name: '暴击大师', desc: '暴击伤害 +30%',           rarity: 'epic'   }
+  { id: 'critMaster', name: '暴击大师', desc: '暴击伤害 +30%',           rarity: 'epic'   },
+  { id: 'lifesteal2', name: '吸血大师', desc: '吸血 +2',                 rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

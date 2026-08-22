@@ -2924,6 +2924,8 @@ export default {
       this._forgeBonus += 1;
     } else if (id === 'critMaster') {
       this.critMult += 0.3;
+    } else if (id === 'lifesteal2') {
+      this.lifesteal += 2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
