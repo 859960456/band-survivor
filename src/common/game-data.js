@@ -124,7 +124,8 @@ export const UPGRADES = [
   { id: 'combocap', name: '连环',         desc: '连击上限 +0.2',           rarity: 'rare'   },
   { id: 'treasure', name: '寻宝',         desc: '每层物品 +1',             rarity: 'rare'   },
   { id: 'vigor',   name: '活力',         desc: '每层回复 8 生命',          rarity: 'common' },
-  { id: 'ironhide', name: '铁肤',         desc: '固定减伤 +2',             rarity: 'rare'   }
+  { id: 'ironhide', name: '铁肤',         desc: '固定减伤 +2',             rarity: 'rare'   },
+  { id: 'bloodlust', name: '血怒',        desc: '每击杀攻击 +1',           rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {

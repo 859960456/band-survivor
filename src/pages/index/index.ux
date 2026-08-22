@@ -724,6 +724,7 @@ export default {
       treasureBonus: this._treasureBonus,
       floorHeal: this._floorHeal,
       bonusDef: this._bonusDef,
+      bloodlust: this._bloodlust,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -843,6 +844,7 @@ export default {
         that._treasureBonus = s.treasureBonus || 0;
         that._floorHeal = s.floorHeal || 0;
         that._bonusDef = s.bonusDef || 0;
+        that._bloodlust = s.bloodlust || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -926,6 +928,7 @@ export default {
     this._treasureBonus = 0;
     this._floorHeal = 0;
     this._bonusDef = 0;
+    this._bloodlust = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1938,7 +1941,8 @@ export default {
     }
     var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6 + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
-    var dmg = Math.max(1, Math.round(this.atk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
+    var effectiveAtk = this.atk + this._bloodlust - 1;
+    var dmg = Math.max(1, Math.round(effectiveAtk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
     if (this._berserk && this.maxHp > 0) {
       var missing = 1 - this.hp / this.maxHp;
       dmg = Math.max(1, Math.round(dmg * (1 + missing * 0.3)));
@@ -2096,6 +2100,9 @@ export default {
 
   _onMonsterDead() {
     this.kills += 1;
+    if (this._bloodlust > 0) {
+      this._bloodlust += 1;
+    }
     if (this._killHeal > 0 && this.hp < this.maxHp) {
       this.hp = Math.min(this.maxHp, this.hp + this._killHeal);
       this._updateHp();
@@ -2638,6 +2645,8 @@ export default {
       this._floorHeal += 8;
     } else if (id === 'ironhide') {
       this._bonusDef += 2;
+    } else if (id === 'bloodlust') {
+      this._bloodlust = 1;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
