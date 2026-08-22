@@ -742,6 +742,7 @@ export default {
       critGold: this._critGold,
       comboOnHit: this._comboOnHit,
       haggle: this._haggle,
+      potionShield: this._potionShield,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -879,6 +880,7 @@ export default {
         that._critGold = s.critGold || 0;
         that._comboOnHit = s.comboOnHit || 0;
         that._haggle = s.haggle || 0;
+        that._potionShield = s.potionShield || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -982,6 +984,7 @@ export default {
     this._critGold = 0;
     this._comboOnHit = 0;
     this._haggle = 0;
+    this._potionShield = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1987,8 +1990,11 @@ export default {
     this.potions -= 1;
     var healAmt = this._healAmount();
     this.hp = Math.min(this.maxHp, this.hp + healAmt);
+    if (this._potionShield > 0) {
+      this._shield += this._potionShield;
+    }
     this._updateHp();
-    this._addLog('使用药水，回复 ' + healAmt + ' 生命');
+    this._addLog('使用药水，回复 ' + healAmt + ' 生命' + (this._potionShield > 0 ? '，获得护盾' : ''));
     this._monsterAttack();
   },
 
@@ -2802,6 +2808,8 @@ export default {
       this._comboOnHit += 0.2;
     } else if (id === 'haggle') {
       this._haggle += 0.15;
+    } else if (id === 'potionShield') {
+      this._potionShield += 8;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
@@ -2941,8 +2949,11 @@ export default {
     this.potions -= 1;
     var healAmt = this._healAmount();
     this.hp = Math.min(this.maxHp, this.hp + healAmt);
+    if (this._potionShield > 0) {
+      this._shield += this._potionShield;
+    }
     this._updateHp();
-    this._addLog('使用药水，回复 ' + healAmt + ' 生命');
+    this._addLog('使用药水，回复 ' + healAmt + ' 生命' + (this._potionShield > 0 ? '，获得护盾' : ''));
     this._monstersTurn();
     this._afterMonstersTurn();
   },
@@ -3564,8 +3575,11 @@ export default {
     this.potions -= 1;
     var healAmt = this._healAmount();
     this.hp = Math.min(this.maxHp, this.hp + healAmt);
+    if (this._potionShield > 0) {
+      this._shield += this._potionShield;
+    }
     this._updateHp();
-    this._addLog('使用药水，回复 ' + healAmt + ' 生命');
+    this._addLog('使用药水，回复 ' + healAmt + ' 生命' + (this._potionShield > 0 ? '，获得护盾' : ''));
   }
 };
 </script>
