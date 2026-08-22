@@ -279,6 +279,9 @@
         <text class="btn-text">赌装备（40金）</text>
         <text class="btn-sub">高概率高品质</text>
       </div>
+      <div class="btn shop-close {{gold < 5 ? 'disabled' : ''}}" @click="refreshShop">
+        <text class="btn-text">刷新商品（5金）</text>
+      </div>
       <div class="btn shop-close {{materials <= 0 ? 'disabled' : ''}}" @click="sellMaterials">
         <text class="btn-text">出售材料（{{materials}}个）</text>
         <text class="btn-sub">每个 +8金</text>
@@ -2467,12 +2470,32 @@ export default {
     this.phase = 'home';
   },
 
+  _rollShopItems() {
+    var arr = SHOP_ITEMS.slice();
+    var out = [];
+    for (var i = 0; i < arr.length && out.length < 6; i++) {
+      var idx = Math.floor(Math.random() * arr.length);
+      out.push(arr.splice(idx, 1)[0]);
+    }
+    this.shopItems = out;
+  },
+
   openShop() {
     if (this.phase !== 'grid') {
       return;
     }
     this.phase = 'shop';
+    this._rollShopItems();
     this._updateUpgradeCosts();
+  },
+
+  refreshShop() {
+    if (this.phase !== 'shop' || this.gold < 5) {
+      return;
+    }
+    this.gold -= 5;
+    this._rollShopItems();
+    this._addLog('商店已刷新（-5金）');
   },
 
   _equipRolled(weapon) {
