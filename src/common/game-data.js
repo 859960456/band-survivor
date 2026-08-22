@@ -101,7 +101,9 @@ export const UPGRADES = [
   { id: 'shield',  name: '护盾',         desc: '获得 15 点临时护盾', rarity: 'rare'   },
   { id: 'haste',   name: '迅捷',         desc: '移动不触发怪物回合(1 次)', rarity: 'epic'   },
   { id: 'dodgeup', name: '闪避 +3%',     desc: '提高闪避几率',        rarity: 'rare'   },
-  { id: 'hppct',   name: '生命 +10%',    desc: '提升最大生命',        rarity: 'epic'   }
+  { id: 'hppct',   name: '生命 +10%',    desc: '提升最大生命',        rarity: 'epic'   },
+  { id: 'materials', name: '材料 +3',     desc: '立即获得制作材料',     rarity: 'common' },
+  { id: 'gold100',  name: '金币 +20',     desc: '立即获得金币',         rarity: 'common' }
 ];
 
 export const RARITY_COLOR = {

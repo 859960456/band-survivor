@@ -2299,6 +2299,10 @@ export default {
       this._hasteCharges += 1;
     } else if (id === 'dodgeup') {
       this.dodge += 3;
+    } else if (id === 'materials') {
+      this.materials += 3;
+    } else if (id === 'gold100') {
+      this.gold += 20;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
