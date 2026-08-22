@@ -158,7 +158,8 @@ export const UPGRADES = [
   { id: 'lifesteal2', name: '吸血大师', desc: '吸血 +2',                 rarity: 'rare'   },
   { id: 'cd2',     name: '冷却大师', desc: '技能冷却 -0.3s',            rarity: 'epic'   },
   { id: 'goldMaster', name: '金币大师', desc: '金币获取 +15%',           rarity: 'epic'   },
-  { id: 'expMaster', name: '经验大师', desc: '经验获取 +15%',           rarity: 'epic'   }
+  { id: 'expMaster', name: '经验大师', desc: '经验获取 +15%',           rarity: 'epic'   },
+  { id: 'luck',     name: '幸运',     desc: '装备品质概率提升',          rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

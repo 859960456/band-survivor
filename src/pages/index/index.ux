@@ -754,6 +754,7 @@ export default {
       startShield: this._startShield,
       fullVision: this._fullVision,
       forgeBonus: this._forgeBonus,
+      luck: this._luck,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -903,6 +904,7 @@ export default {
         that._startShield = s.startShield || 0;
         that._fullVision = !!s.fullVision;
         that._forgeBonus = s.forgeBonus || 0;
+        that._luck = s.luck || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1019,6 +1021,7 @@ export default {
     this._startShield = 0;
     this._fullVision = false;
     this._forgeBonus = 0;
+    this._luck = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1808,13 +1811,13 @@ export default {
   },
 
   _rollWeapon() {
-    var w = rollWeapon(WEAPONS, QUALITIES, WEAPON_AFFIXES, this.floor);
+    var w = rollWeapon(WEAPONS, QUALITIES, WEAPON_AFFIXES, this.floor + (this._luck || 0));
     this._recordEquip(w.baseName);
     return w;
   },
 
   _rollArmor() {
-    var a = rollArmor(ARMORS, QUALITIES, ARMOR_AFFIXES, this.floor);
+    var a = rollArmor(ARMORS, QUALITIES, ARMOR_AFFIXES, this.floor + (this._luck || 0));
     this._recordEquip(a.baseName);
     return a;
   },
@@ -2932,6 +2935,8 @@ export default {
       this.goldMul += 0.15;
     } else if (id === 'expMaster') {
       this.expMul += 0.15;
+    } else if (id === 'luck') {
+      this._luck += 1;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
