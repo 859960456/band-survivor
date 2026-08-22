@@ -2,48 +2,65 @@
   <div class="page">
     <!-- 首页 -->
     <div if="{{phase === 'home'}}" class="screen">
-      <text class="title">暗渊行者</text>
-      <text class="subtitle">地牢走格子 · 文字肉鸽</text>
-      <text class="tip">每日任务：{{dailyLabel}}（{{dailyProgress}}/{{dailyTarget}}）</text>
-      <div class="diff-row">
-        <div class="diff-btn {{difficulty === 0 ? 'active' : ''}}" @click="setDifficulty(0)">简单</div>
-        <div class="diff-btn {{difficulty === 1 ? 'active' : ''}}" @click="setDifficulty(1)">普通</div>
-        <div class="diff-btn {{difficulty === 2 ? 'active' : ''}}" @click="setDifficulty(2)">困难</div>
-      </div>
-      <div class="diff-row">
-        <div class="diff-btn {{charClass === 'warrior' ? 'active' : ''}}" @click="setClass('warrior')">战士</div>
-        <div class="diff-btn {{charClass === 'ranger' ? 'active' : ''}}" @click="setClass('ranger')">游侠</div>
-        <div class="diff-btn {{charClass === 'mage' ? 'active' : ''}}" @click="setClass('mage')">法师</div>
-      </div>
-      <div class="btn big-btn {{endless ? 'active-toggle' : ''}}" @click="toggleEndless">
-        <text class="btn-text">无尽模式：{{endless ? '开' : '关'}}</text>
-      </div>
-      <div class="btn big-btn {{challengeMode ? 'active-toggle' : ''}}" @click="toggleChallenge">
-        <text class="btn-text">挑战模式：{{challengeMode ? '开' : '关'}}</text>
-      </div>
-      <div class="btn big-btn" @click="startGame">
-        <text class="btn-text">开始冒险</text>
-      </div>
-      <div if="{{hasSave}}" class="btn big-btn" @click="continueGame">
-        <text class="btn-text">继续冒险</text>
-        <text class="btn-sub">第{{saveFloor}}层 · Lv.{{saveLevel}}</text>
-      </div>
-      <div class="btn" @click="openAchievements">
-        <text class="btn-text">成就 {{achievementCount}}/{{achievementTotal}}</text>
-      </div>
-      <div class="btn" @click="openCodex">
-        <text class="btn-text">图鉴 {{codexCount}}/{{codexTotal}}</text>
-      </div>
-      <div if="{{dailyDone}}" class="btn big-btn" @click="claimDailyTask">
-        <text class="btn-text">领取每日任务奖励（灵魂+10）</text>
-      </div>
-      <div if="{{canClaimDaily}}" class="btn big-btn" @click="claimDaily">
-        <text class="btn-text">每日签到（灵魂+8）</text>
-      </div>
-      <div class="btn" @click="openMeta">
-        <text class="btn-text">灵魂 {{soul}} · 永久强化</text>
-      </div>
-      <text class="best">称号：{{title}} · 最佳：第 {{best}} 层</text>
+      <scroll class="home-scroll" scroll-y="true">
+        <text class="title">暗渊行者</text>
+        <text class="subtitle">地牢走格子 · 文字肉鸽</text>
+
+        <div if="{{dailyDone}}" class="btn big-btn highlight" @click="claimDailyTask">
+          <text class="btn-text">领取每日任务奖励（灵魂+10）</text>
+        </div>
+        <div if="{{canClaimDaily}}" class="btn big-btn highlight" @click="claimDaily">
+          <text class="btn-text">每日签到（灵魂+8）</text>
+        </div>
+        <text class="tip">每日任务：{{dailyLabel}}（{{dailyProgress}}/{{dailyTarget}}）</text>
+
+        <text class="section-label">— 开始 —</text>
+        <div class="btn big-btn primary" @click="startGame">
+          <text class="btn-text">开始冒险</text>
+        </div>
+        <div if="{{hasSave}}" class="btn big-btn" @click="continueGame">
+          <text class="btn-text">继续冒险</text>
+          <text class="btn-sub">第{{saveFloor}}层 · Lv.{{saveLevel}}</text>
+        </div>
+
+        <text class="section-label">— 设置 —</text>
+        <div class="setting-row" @click="toggleEndless">
+          <text class="setting-label">无尽模式</text>
+          <text class="setting-value">{{endless ? '开' : '关'}}</text>
+        </div>
+        <div class="setting-row" @click="toggleChallenge">
+          <text class="setting-label">挑战模式</text>
+          <text class="setting-value">{{challengeMode ? '开' : '关'}}</text>
+        </div>
+        <text class="section-label">难度</text>
+        <div class="diff-row">
+          <div class="diff-btn {{difficulty === 0 ? 'active' : ''}}" @click="setDifficulty(0)">简单</div>
+          <div class="diff-btn {{difficulty === 1 ? 'active' : ''}}" @click="setDifficulty(1)">普通</div>
+          <div class="diff-btn {{difficulty === 2 ? 'active' : ''}}" @click="setDifficulty(2)">困难</div>
+        </div>
+        <text class="section-label">职业</text>
+        <div class="diff-row">
+          <div class="diff-btn {{charClass === 'warrior' ? 'active' : ''}}" @click="setClass('warrior')">战士</div>
+          <div class="diff-btn {{charClass === 'ranger' ? 'active' : ''}}" @click="setClass('ranger')">游侠</div>
+          <div class="diff-btn {{charClass === 'mage' ? 'active' : ''}}" @click="setClass('mage')">法师</div>
+        </div>
+
+        <text class="section-label">— 收集 —</text>
+        <div class="list-item" @click="openAchievements">
+          <text class="setting-label">成就</text>
+          <text class="setting-value">{{achievementCount}}/{{achievementTotal}}</text>
+        </div>
+        <div class="list-item" @click="openCodex">
+          <text class="setting-label">图鉴</text>
+          <text class="setting-value">{{codexCount}}/{{codexTotal}}</text>
+        </div>
+        <div class="list-item" @click="openMeta">
+          <text class="setting-label">永久强化</text>
+          <text class="setting-value">灵魂 {{soul}}</text>
+        </div>
+
+        <text class="best">称号：{{title}} · 最佳：第 {{best}} 层</text>
+      </scroll>
     </div>
 
     <!-- 地牢探索 -->
@@ -3819,6 +3836,56 @@ export default {
   height: 100%;
   background-color: #0d0d0f;
   position: relative;
+}
+
+.home-scroll {
+  width: 212px;
+  height: 520px;
+}
+
+.section-label {
+  color: #5a6a8a;
+  font-size: 11px;
+  margin-top: 14px;
+  margin-bottom: 4px;
+  text-align: center;
+  width: 192px;
+}
+
+.list-item {
+  width: 176px;
+  height: 36px;
+  margin-top: 6px;
+  border-radius: 8px;
+  background-color: #22273a;
+  border: 1px solid #2d3240;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.btn.highlight {
+  border-color: #ffd75e;
+  background-color: #3a3560;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #3a5db8, #2a3f7f);
+}
+
+.setting-row {
+  width: 176px;
+  height: 32px;
+  margin-top: 4px;
+  border-radius: 8px;
+  background-color: #22273a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  box-sizing: border-box;
 }
 
 .screen {
