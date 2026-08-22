@@ -1990,6 +1990,7 @@ export default {
     this._discoverMonster(this.monsterId);
     if (this.isBoss) {
       this.bossKills += 1;
+      this._advanceDaily(this.dailyType === 'boss' ? 1 : 0);
       var avail = [];
       for (var ri = 0; ri < RELICS.length; ri++) {
         if (this.relics.indexOf(RELICS[ri].id) < 0) {
@@ -2463,6 +2464,7 @@ export default {
 
     this.level += 1;
     this.talentPoints += 1;
+    this._advanceDaily(this.dailyType === 'level' ? 1 : 0);
     this._vibrate(160);
     this.exp -= this.expNext;
     this.expNext = Math.floor(this.expNext * 1.35);
@@ -2707,14 +2709,20 @@ export default {
   },
 
   _newDailyTask() {
-    var types = ['kill', 'floor'];
+    var types = ['kill', 'floor', 'boss', 'level'];
     this.dailyType = types[Math.floor(Math.random() * types.length)];
     if (this.dailyType === 'kill') {
       this.dailyTarget = 5;
       this.dailyLabel = '击杀 5 个怪物';
-    } else {
+    } else if (this.dailyType === 'floor') {
       this.dailyTarget = 3;
       this.dailyLabel = '到达第 3 层';
+    } else if (this.dailyType === 'boss') {
+      this.dailyTarget = 1;
+      this.dailyLabel = '击败 1 个 BOSS';
+    } else {
+      this.dailyTarget = 5;
+      this.dailyLabel = '达到 Lv.5';
     }
     this.dailyProgress = 0;
     this.dailyDone = false;
@@ -2727,6 +2735,10 @@ export default {
   _refreshDailyLabel() {
     if (this.dailyType === 'kill') {
       this.dailyLabel = '击杀 5 个怪物';
+    } else if (this.dailyType === 'boss') {
+      this.dailyLabel = '击败 1 个 BOSS';
+    } else if (this.dailyType === 'level') {
+      this.dailyLabel = '达到 Lv.5';
     } else {
       this.dailyLabel = '到达第 3 层';
     }
