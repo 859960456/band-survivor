@@ -3,6 +3,7 @@
     <!-- 首页 -->
     <div if="{{phase === 'home'}}" class="screen">
       <scroll class="home-scroll" scroll-y="true">
+        <div class="home-content">
         <text class="title">暗渊行者</text>
         <text class="subtitle">地牢走格子 · 文字肉鸽</text>
 
@@ -60,6 +61,7 @@
         </div>
 
         <text class="best">称号：{{title}} · 最佳：第 {{best}} 层</text>
+        </div>
       </scroll>
     </div>
 
@@ -3836,6 +3838,14 @@ export default {
   height: 100%;
   background-color: #0d0d0f;
   position: relative;
+}
+
+.home-content {
+  width: 192px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px;
 }
 
 .home-scroll {
