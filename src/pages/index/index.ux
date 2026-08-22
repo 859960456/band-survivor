@@ -270,7 +270,7 @@
       <scroll class="shop-scroll" scroll-y="true">
         <div for="{{shopItems}}" class="shop-item" @click="buyItem($item.id)">
           <text class="shop-name">{{$item.name}}</text>
-          <text class="shop-desc">{{$item.desc}} · {{$item.price}}金</text>
+          <text class="shop-desc">{{$item.desc}} · {{$item.price}}金{{$item.discount ? '（折）' : ''}}</text>
         </div>
       </scroll>
       <div class="btn shop-close {{gold < weaponUpgradeCost ? 'disabled' : ''}}" @click="upgradeWeapon">
@@ -2943,7 +2943,12 @@ export default {
     var out = [];
     for (var i = 0; i < arr.length && out.length < 6; i++) {
       var idx = Math.floor(Math.random() * arr.length);
-      out.push(arr.splice(idx, 1)[0]);
+      var it = Object.assign({}, arr.splice(idx, 1)[0]);
+      if (Math.random() < 0.2) {
+        it.price = Math.round(it.price * 0.8);
+        it.discount = true;
+      }
+      out.push(it);
     }
     this.shopItems = out;
   },
