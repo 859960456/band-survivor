@@ -749,6 +749,7 @@ export default {
       stairVision: this._stairVision,
       startCombo: this._startCombo,
       comboHeal: this._comboHeal,
+      levelShield: this._levelShield,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -893,6 +894,7 @@ export default {
         that._stairVision = !!s.stairVision;
         that._startCombo = s.startCombo || 0;
         that._comboHeal = s.comboHeal || 0;
+        that._levelShield = s.levelShield || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1003,6 +1005,7 @@ export default {
     this._stairVision = false;
     this._startCombo = 0;
     this._comboHeal = 0;
+    this._levelShield = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2867,6 +2870,8 @@ export default {
       this._startCombo += 2;
     } else if (id === 'comboHeal') {
       this._comboHeal += 4;
+    } else if (id === 'levelShield') {
+      this._levelShield += 10;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
@@ -2875,6 +2880,9 @@ export default {
 
     this.level += 1;
     this.talentPoints += 1;
+    if (this._levelShield > 0) {
+      this._shield += this._levelShield;
+    }
     this._advanceDaily(this.dailyType === 'level' ? 1 : 0);
     this._vibrate(160);
     this.exp -= this.expNext;
