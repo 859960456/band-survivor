@@ -298,7 +298,7 @@ import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS } from '../../common/game-data.js';
 
-const MAX_LOG = 3;
+const MAX_LOG = 6;
 const BOSS_EVERY = 5;
 
 export default {
