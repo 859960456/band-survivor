@@ -164,7 +164,8 @@ export const UPGRADES = [
   { id: 'revive',  name: '涅槃',       desc: '每局死亡重生一次30%血',    rarity: 'epic'   },
   { id: 'comboPower', name: '连击精通', desc: '连击加成更强',            rarity: 'epic'   },
   { id: 'keenEye', name: '锐眼',      desc: '暴击率 +5%',               rarity: 'rare'   },
-  { id: 'dodge2',  name: '闪避大师', desc: '闪避 +3%',                 rarity: 'rare'   }
+  { id: 'dodge2',  name: '闪避大师', desc: '闪避 +3%',                 rarity: 'rare'   },
+  { id: 'thorns2', name: '荆棘大师', desc: '反伤 +3',                  rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {

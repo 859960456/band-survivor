@@ -2972,6 +2972,8 @@ export default {
       this.critChance += 0.05;
     } else if (id === 'dodge2') {
       this.dodge += 3;
+    } else if (id === 'thorns2') {
+      this._thorns += 3;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
