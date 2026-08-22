@@ -140,6 +140,9 @@
           <text class="ach-desc">{{$item.desc}}</text>
         </div>
       </scroll>
+      <div class="btn" @click="resetTalents">
+        <text class="btn-text">重置天赋（返还点数）</text>
+      </div>
       <div class="btn" @click="closeTalents">
         <text class="btn-text">关闭</text>
       </div>
@@ -2127,6 +2130,49 @@ export default {
         this._renderMap();
       }
     }
+  },
+
+  _removeTalent(t) {
+    if (t.stat === 'atk') {
+      this.baseAtk = Math.max(0, this.baseAtk - t.value);
+      this.atk = this.baseAtk + this.weaponAtk;
+    } else if (t.stat === 'hp') {
+      this.maxHp = Math.max(1, this.maxHp - t.value);
+      this.hp = Math.min(this.hp, this.maxHp);
+    } else if (t.stat === 'goldMul') {
+      this.goldMul = Math.max(0, this.goldMul - t.value);
+    } else if (t.stat === 'expMul') {
+      this.expMul = Math.max(0, this.expMul - t.value);
+    } else if (t.stat === 'lifesteal') {
+      this.lifesteal = Math.max(0, this.lifesteal - t.value);
+    } else if (t.stat === 'burnChance') {
+      this.burnChance = Math.max(0, this.burnChance - t.value);
+    } else if (t.stat === 'shield') {
+      this._shield = Math.max(0, this._shield - t.value);
+    } else if (t.stat === 'haste') {
+      this._hasteCharges = Math.max(0, this._hasteCharges - t.value);
+    } else if (t.stat === 'combo') {
+      this._comboMaxAdd = Math.max(0, this._comboMaxAdd - t.value);
+    }
+    this._updateHp();
+  },
+
+  resetTalents() {
+    if (this.phase !== 'talents' || this.talents.length === 0) {
+      return;
+    }
+    for (var i = 0; i < this.talents.length; i++) {
+      for (var j = 0; j < TALENTS.length; j++) {
+        if (TALENTS[j].id === this.talents[i]) {
+          this._removeTalent(TALENTS[j]);
+          break;
+        }
+      }
+    }
+    this.talentPoints += this.talents.length;
+    this.talents = [];
+    this._updateTalentList();
+    this._addLog('已重置天赋，返还 ' + this.talentPoints + ' 点');
   },
 
   buyTalent(id) {
