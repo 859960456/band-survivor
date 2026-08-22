@@ -382,7 +382,7 @@
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES } from '../../common/game-data.js';
-import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel } from '../../common/game-core.js';
+import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey } from '../../common/game-core.js';
 
 const MAX_LOG = 6;
 const BOSS_EVERY = 5;
@@ -894,7 +894,7 @@ export default {
   },
 
   _bestKey() {
-    return 'BAND_SURVIVOR_BEST_' + this.difficulty;
+    return bestKey(this.difficulty);
   },
 
   _loadBest() {
@@ -2419,12 +2419,7 @@ export default {
   },
 
   _classBase() {
-    for (var i = 0; i < CLASSES.length; i++) {
-      if (CLASSES[i].id === this.charClass) {
-        return CLASSES[i];
-      }
-    }
-    return CLASSES[0];
+    return classById(CLASSES, this.charClass);
   },
 
   setClass(id) {

@@ -58,3 +58,16 @@ export function moveThreshold(sensitivity) {
 export function sensLabel(sensitivity) {
   return sensitivity === 0 ? '低' : (sensitivity === 2 ? '高' : '中');
 }
+
+export function classById(classes, id) {
+  for (var i = 0; i < classes.length; i++) {
+    if (classes[i].id === id) {
+      return classes[i];
+    }
+  }
+  return classes[0];
+}
+
+export function bestKey(difficulty) {
+  return 'BAND_SURVIVOR_BEST_' + difficulty;
+}
