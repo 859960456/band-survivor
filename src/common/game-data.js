@@ -134,7 +134,8 @@ export const UPGRADES = [
   { id: 'stun',    name: '电击',         desc: '攻击有几率眩晕怪物',      rarity: 'rare'   },
   { id: 'execute', name: '处决',         desc: '对低血怪物伤害 +50%',     rarity: 'epic'   },
   { id: 'artisan', name: '工匠',         desc: '打造/赌博费用 -20%',      rarity: 'rare'   },
-  { id: 'cdkill',  name: '杀招',         desc: '击杀后技能冷却 -1',        rarity: 'rare'   }
+  { id: 'cdkill',  name: '杀招',         desc: '击杀后技能冷却 -1',        rarity: 'rare'   },
+  { id: 'clean',   name: '净化',         desc: '几率免疫中毒伤害',        rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
