@@ -197,7 +197,8 @@ export const ACHIEVEMENTS = [
   { id: 'kill_50',    name: '万夫莫敌',   desc: '击杀 50 个怪物' },
   { id: 'floor_15',   name: '深渊行者',   desc: '到达第 15 层' },
   { id: 'rich_500',   name: '富可敌国',   desc: '持有 500 金币' },
-  { id: 'boss_5',     name: '屠龙者',     desc: '击败 5 个 BOSS' }
+  { id: 'boss_5',     name: '屠龙者',     desc: '击败 5 个 BOSS' },
+  { id: 'codex_master', name: '图鉴大师',   desc: '集齐所有怪物图鉴' }
 ];
 
 export const RELICS = [

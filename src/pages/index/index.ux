@@ -2567,6 +2567,9 @@ export default {
     this.codexList = Object.keys(MONSTERS).map(function(id) {
       return { id: id, name: MONSTERS[id].name, found: this.codex.indexOf(id) >= 0 };
     }.bind(this));
+    if (this.codexCount >= this.codexTotal && this.codexTotal > 0) {
+      this._unlockAchievement('codex_master');
+    }
   },
 
   _discoverMonster(id) {
