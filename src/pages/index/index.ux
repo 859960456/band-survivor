@@ -334,6 +334,8 @@ export default {
     burnChance: 0,
     dodge: 0,
     combo: 0,
+    _poisonTurns: 0,
+    _poisonDmg: 0,
     _burnTurns: 0,
     _burnPower: 0,
     hp: 100,
@@ -618,6 +620,8 @@ export default {
     this.burnChance = 0;
     this.dodge = 0;
     this.combo = 0;
+    this._poisonTurns = 0;
+    this._poisonDmg = 0;
     this._burnTurns = 0;
     this._burnPower = 0;
     this.hp = BASE_PLAYER.hp;
@@ -994,9 +998,12 @@ export default {
       } else if (roll < 0.78) {
         type = 'event';
         icon = '?';
-      } else if (roll < 0.95) {
+      } else if (roll < 0.90) {
         type = 'trap';
         icon = '^';
+      } else if (roll < 0.99) {
+        type = 'poison';
+        icon = '~';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -1120,6 +1127,8 @@ export default {
           icon = '';
         } else if (cls === 'trap') {
           icon = '';
+        } else if (cls === 'poison') {
+          icon = '';
         }
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
       }
@@ -1231,6 +1240,18 @@ export default {
       this._grid[nr][nc] = '.';
       this._addLog('你发现并推开了一扇暗门！');
     }
+    if (this._poisonTurns > 0) {
+      this._poisonTurns--;
+      this.hp -= this._poisonDmg;
+      this._updateHp();
+      this._addLog('中毒发作，受到 ' + this._poisonDmg + ' 伤害');
+      if (this.hp <= 0) {
+        this.hp = 0;
+        this._updateHp();
+        this._die();
+        return;
+      }
+    }
 
     // 楼梯
     if (nr === this._stairsR && nc === this._stairsC) {
@@ -1305,6 +1326,10 @@ export default {
       } else {
         this._addLog('获得 ' + weapon.name + '，但不如当前武器');
       }
+    } else if (item.type === 'poison') {
+      this._poisonTurns = 3;
+      this._poisonDmg = Math.max(2, Math.round(3 + this.floor * 0.5));
+      this._addLog('踩中毒沼，陷入中毒（每步 -' + this._poisonDmg + '）');
     } else if (item.type === 'trap') {
       var tdmg = Math.max(3, Math.round(6 + this.floor * 0.6));
       this.hp -= tdmg;
@@ -2327,6 +2352,11 @@ export default {
   width: 18px;
   height: 20px;
   border-radius: 3px;
+}
+
+.poison {
+  background-color: #5aa04e;
+  border-radius: 50%;
 }
 
 .trap {
