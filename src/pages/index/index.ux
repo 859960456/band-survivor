@@ -729,6 +729,7 @@ export default {
       materialBonus: this._materialBonus,
       healBoost: this._healBoost,
       intimidate: this._intimidate,
+      resolve: this._resolve,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -853,6 +854,7 @@ export default {
         that._materialBonus = s.materialBonus || 0;
         that._healBoost = s.healBoost || 0;
         that._intimidate = !!s.intimidate;
+        that._resolve = !!s.resolve;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -941,6 +943,8 @@ export default {
     this._materialBonus = 0;
     this._healBoost = 0;
     this._intimidate = false;
+    this._resolve = false;
+    this._resolveUsed = false;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1871,6 +1875,7 @@ export default {
     this.combo = 0;
     this._isElite = false;
     this._bossEnraged = false;
+    this._resolveUsed = false;
     if (this._startHaste > 0) {
       this._hasteCharges += this._startHaste;
     }
@@ -2021,6 +2026,12 @@ export default {
     this._updateHp();
     this._vibrate(60);
     this._addLog(this.monsterName + ' 反击 ' + dmg + ' 伤害' + (absorbed > 0 ? '（护盾吸收 ' + absorbed + '）' : ''));
+    if (this._resolve && !this._resolveUsed && this.hp > 0 && this.hp < this.maxHp * 0.3) {
+      this.hp = Math.min(this.maxHp, this.hp + 20);
+      this._resolveUsed = true;
+      this._updateHp();
+      this._addLog('坚毅复苏！回复 20 生命');
+    }
 
     if (this._thorns > 0 && this.monsterAlive) {
       this.monsterHp -= this._thorns;
@@ -2673,6 +2684,8 @@ export default {
       this._healBoost += 10;
     } else if (id === 'intimidate') {
       this._intimidate = true;
+    } else if (id === 'resolve') {
+      this._resolve = true;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
