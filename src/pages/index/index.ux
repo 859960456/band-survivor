@@ -1022,9 +1022,12 @@ export default {
       } else if (roll < 0.90) {
         type = 'trap';
         icon = '^';
-      } else if (roll < 0.99) {
+      } else if (roll < 0.97) {
         type = 'poison';
         icon = '~';
+      } else if (roll < 0.99) {
+        type = 'challenge';
+        icon = '★';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -1149,6 +1152,8 @@ export default {
         } else if (cls === 'trap') {
           icon = '';
         } else if (cls === 'poison') {
+          icon = '';
+        } else if (cls === 'challenge') {
           icon = '';
         }
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
@@ -1347,6 +1352,8 @@ export default {
       } else {
         this._addLog('获得 ' + weapon.name + '，但不如当前武器');
       }
+    } else if (item.type === 'challenge') {
+      this._startChallenge();
     } else if (item.type === 'poison') {
       this._poisonTurns = 3;
       this._poisonDmg = Math.max(2, Math.round(3 + this.floor * 0.5));
@@ -1388,6 +1395,34 @@ export default {
     if (idx >= 0) {
       this._items.splice(idx, 1);
     }
+  },
+
+  _startChallenge() {
+    var area = this._areaByFloor(this.floor);
+    var list = area.monsters;
+    var id = list[Math.floor(Math.random() * list.length)];
+    var base = this._monsterStats(id);
+    var elite = {
+      name: '精英·' + base.name,
+      hp: Math.round(base.hp * 2.2),
+      atk: Math.round(base.atk * 1.8),
+      gold: Math.round(base.gold * 3),
+      exp: Math.round(base.exp * 2.5)
+    };
+    this.monsterAlive = true;
+    this.monsterId = id;
+    this.monsterName = elite.name;
+    this.monsterMaxHp = elite.hp;
+    this.monsterHp = elite.hp;
+    this.monsterHpPercent = 100;
+    this.monsterAtk = elite.atk;
+    this.monsterGold = elite.gold;
+    this.monsterExp = elite.exp;
+    this.isBoss = false;
+    this.skillCd = 0;
+    this.combo = 0;
+    this.phase = 'battle';
+    this._addLog('遭遇精英 ' + elite.name);
   },
 
   _startBattle(mon) {
@@ -2387,6 +2422,11 @@ export default {
   width: 18px;
   height: 20px;
   border-radius: 3px;
+}
+
+.challenge {
+  background-color: #e0b34e;
+  border-radius: 50%;
 }
 
 .poison {
