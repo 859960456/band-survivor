@@ -145,6 +145,7 @@
     <!-- 图鉴 -->
     <div if="{{phase === 'codex'}}" class="overlay dead-overlay">
       <text class="dead-title">怪物图鉴</text>
+      <text class="dead-text">区域探索：{{visitedAreas.length}}/4</text>
       <scroll class="shop-scroll" scroll-y="true">
         <div for="{{codexList}}" class="ach-item {{$item.found ? 'done' : ''}}">
           <text class="ach-name">{{$item.name || $item.id}}</text>
@@ -271,6 +272,10 @@
       <div class="btn shop-close {{gold < 40 ? 'disabled' : ''}}" @click="gambleEquip">
         <text class="btn-text">赌装备（40金）</text>
         <text class="btn-sub">高概率高品质</text>
+      </div>
+      <div class="btn shop-close {{materials <= 0 ? 'disabled' : ''}}" @click="sellMaterials">
+        <text class="btn-text">出售材料（{{materials}}个）</text>
+        <text class="btn-sub">每个 +8金</text>
       </div>
       <div class="btn shop-close" @click="closeShop">
         <text class="btn-text">离开商店</text>
@@ -434,6 +439,7 @@ export default {
     codex: [],
     codexTotal: 0,
     codexCount: 0,
+    visitedAreas: [],
     relics: [],
     materials: 0,
     talentPoints: 0,
@@ -635,6 +641,7 @@ export default {
       grid: this._grid,
       visited: this._visited,
       relics: this.relics,
+      visitedAreas: this.visitedAreas,
       materials: this.materials,
       talentPoints: this.talentPoints,
       talents: this.talents,
@@ -695,6 +702,7 @@ export default {
         that._grid = s.grid || [];
         that._visited = s.visited || [];
         that.relics = s.relics || [];
+        that.visitedAreas = s.visitedAreas || [];
         that.materials = s.materials || 0;
         that.talentPoints = s.talentPoints || 0;
         that.talents = s.talents || [];
@@ -759,6 +767,7 @@ export default {
     this.exp = BASE_PLAYER.exp;
     this.expNext = BASE_PLAYER.expNext;
     this.relics = [];
+    this.visitedAreas = [];
     this.materials = 0;
     this.talentPoints = 0;
     this.talents = [];
@@ -942,6 +951,9 @@ export default {
     var area = this._areaByFloor(num);
     this.areaName = area.name;
     this.areaEff = area.effDesc || '';
+    if (this.visitedAreas.indexOf(area.id) < 0) {
+      this.visitedAreas.push(area.id);
+    }
     if (this._isBossFloor(num)) {
       this._addLog('第 ' + num + ' 层：' + area.name + ' BOSS 层！');
     } else {
@@ -2387,6 +2399,17 @@ export default {
     } else {
       this._equipRolledArmor(this._rollArmor());
     }
+    this._updateUpgradeCosts();
+  },
+
+  sellMaterials() {
+    if (this.phase !== 'shop' || this.materials <= 0) {
+      return;
+    }
+    var gain = this.materials * 8;
+    this.gold += gain;
+    this.materials = 0;
+    this._addLog('出售材料，获得 ' + gain + ' 金币');
     this._updateUpgradeCosts();
   },
 
