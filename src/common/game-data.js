@@ -156,7 +156,8 @@ export const UPGRADES = [
   { id: 'forgeMaster', name: '大师锻造', desc: '强化装备加成 +1',        rarity: 'epic'   },
   { id: 'critMaster', name: '暴击大师', desc: '暴击伤害 +30%',           rarity: 'epic'   },
   { id: 'lifesteal2', name: '吸血大师', desc: '吸血 +2',                 rarity: 'rare'   },
-  { id: 'cd2',     name: '冷却大师', desc: '技能冷却 -0.3s',            rarity: 'epic'   }
+  { id: 'cd2',     name: '冷却大师', desc: '技能冷却 -0.3s',            rarity: 'epic'   },
+  { id: 'goldMaster', name: '金币大师', desc: '金币获取 +15%',           rarity: 'epic'   }
 ];
 
 export const RARITY_COLOR = {
