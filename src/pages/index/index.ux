@@ -330,6 +330,7 @@
           <text class="bag-slot-sub">强化</text>
         </div>
       </div>
+      <text class="bag-line">历史最佳：武+{{bestWeaponAtk}} / 防+{{bestArmorDef}}</text>
       <text class="bag-line">金币 {{gold}} · 闪{{dodge}}% · {{skillName}}</text>
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
@@ -415,6 +416,8 @@ export default {
     achievementList: [],
     title: '初行者',
     soul: 0,
+    bestWeaponAtk: 0,
+    bestArmorDef: 0,
     canClaimDaily: false,
     metaHp: 0,
     metaPotion: 0,
@@ -578,6 +581,8 @@ export default {
             that.metaHp = m.metaHp || 0;
             that.metaPotion = m.metaPotion || 0;
             that.metaAtk = m.metaAtk || 0;
+            that.bestWeaponAtk = m.bestWeaponAtk || 0;
+            that.bestArmorDef = m.bestArmorDef || 0;
           }
         } catch (e) {}
       }
@@ -704,6 +709,7 @@ export default {
     if (this.phase !== 'grid' || !this._grid || this._grid.length === 0) {
       return;
     }
+    this._recordBest();
     storage.set({
       key: 'BAND_SURVIVOR_SAVE',
       value: JSON.stringify(this._serializeRun())
@@ -2466,7 +2472,7 @@ export default {
   _saveMeta() {
     storage.set({
       key: 'BAND_SURVIVOR_META',
-      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk })
+      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef })
     });
   },
 
@@ -2690,6 +2696,17 @@ export default {
       this._equipRolledArmor(armor);
     }
     this._updateUpgradeCosts();
+  },
+
+  _recordBest() {
+    if (this.weaponAtk > this.bestWeaponAtk) {
+      this.bestWeaponAtk = this.weaponAtk;
+      this._saveMeta();
+    }
+    if (this.armorDef > this.bestArmorDef) {
+      this.bestArmorDef = this.armorDef;
+      this._saveMeta();
+    }
   },
 
   _updateUpgradeCosts() {
