@@ -736,6 +736,7 @@ export default {
       cdkill: this._cdkill,
       cleanChance: this._cleanChance,
       openingStrike: this._openingStrike,
+      thunderChance: this._thunderChance,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -867,6 +868,7 @@ export default {
         that._cdkill = s.cdkill || 0;
         that._cleanChance = s.cleanChance || 0;
         that._openingStrike = s.openingStrike || 0;
+        that._thunderChance = s.thunderChance || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -964,6 +966,7 @@ export default {
     this._cdkill = 0;
     this._cleanChance = 0;
     this._openingStrike = 0;
+    this._thunderChance = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -2011,6 +2014,19 @@ export default {
       dmg = Math.max(1, Math.round(dmg * 1.5));
     }
     this._damageDealt += dmg;
+    if (this._thunderChance > 0 && Math.random() < this._thunderChance && this.monsterAlive) {
+      var thunderDmg = Math.max(1, Math.round(dmg * 0.4));
+      this.monsterHp -= thunderDmg;
+      this._updateMonsterHp();
+      this._addLog('雷霆追加 ' + thunderDmg + ' 伤害');
+      if (this.monsterHp <= 0) {
+        this.monsterHp = 0;
+        this._updateMonsterHp();
+        this.monsterAlive = false;
+        this._onMonsterDead();
+        return;
+      }
+    }
     this.monsterHp -= dmg;
     this._updateMonsterHp();
     if (isCrit) {
@@ -2750,6 +2766,8 @@ export default {
       this._cleanChance += 0.25;
     } else if (id === 'opening') {
       this._openingStrike += 8;
+    } else if (id === 'thunder') {
+      this._thunderChance += 0.2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;

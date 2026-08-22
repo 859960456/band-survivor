@@ -136,7 +136,8 @@ export const UPGRADES = [
   { id: 'artisan', name: '工匠',         desc: '打造/赌博费用 -20%',      rarity: 'rare'   },
   { id: 'cdkill',  name: '杀招',         desc: '击杀后技能冷却 -1',        rarity: 'rare'   },
   { id: 'clean',   name: '净化',         desc: '几率免疫中毒伤害',        rarity: 'rare'   },
-  { id: 'opening', name: '先机',         desc: '战斗开始先手 8 伤害',      rarity: 'rare'   }
+  { id: 'opening', name: '先机',         desc: '战斗开始先手 8 伤害',      rarity: 'rare'   },
+  { id: 'thunder', name: '雷霆',         desc: '几率追加雷击 40% 伤害',    rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
