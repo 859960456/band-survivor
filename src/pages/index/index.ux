@@ -2557,7 +2557,15 @@ export default {
     this.phase = 'dead';
     this._vibrate(200);
     this._clearSave();
-    this.soul += this.floor * 2 + this.level;
+    var soulBase = this.floor * 2 + this.level;
+    var soulMul = this.difficulty === 0 ? 0.8 : (this.difficulty === 2 ? 1.3 : 1);
+    if (this.challengeMode) {
+      soulMul *= 1.2;
+    }
+    if (this.endless) {
+      soulMul *= 1.1;
+    }
+    this.soul += Math.round(soulBase * soulMul);
     this._saveMeta();
     if (this.floor > this.best) {
       this.best = this.floor;
