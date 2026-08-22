@@ -1855,6 +1855,18 @@ export default {
         this._die();
       }
     }
+    if (this.monsterId === 'frost_king' && Math.random() < 0.25) {
+      var freeze = Math.max(3, Math.round(dmg * 0.5));
+      this.hp -= freeze;
+      this._damageTaken += freeze;
+      this._updateHp();
+      this._addLog('霜冻王的寒气造成额外 ' + freeze + ' 伤害');
+      if (this.hp <= 0) {
+        this.hp = 0;
+        this._updateHp();
+        this._die();
+      }
+    }
     if ((this.monsterId === 'fire_imp' || this.monsterId === 'lava_golem' || this.monsterId === 'inferno_lord') && Math.random() < 0.3) {
       var burn = Math.max(2, Math.round(dmg * 0.5));
       this.hp -= burn;
