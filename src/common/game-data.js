@@ -185,7 +185,10 @@ export const RELICS = [
   { id: 'vitality', name: '生命之泉', desc: '生命上限 +20', stat: 'hp',       value: 20 },
   { id: 'greed',    name: '贪婪之戒', desc: '金币获取 +10%', stat: 'goldMul', value: 0.1 },
   { id: 'wisdom',   name: '智慧之书', desc: '经验获取 +10%', stat: 'expMul',  value: 0.1 },
-  { id: 'swift',    name: '疾风靴',   desc: '技能冷却 -0.4s', stat: 'cd',     value: 0.4 }
+  { id: 'swift',    name: '疾风靴',   desc: '技能冷却 -0.4s', stat: 'cd',     value: 0.4 },
+  { id: 'iron',     name: '铁壁',     desc: '获得 20 点护盾',   stat: 'shield', value: 20 },
+  { id: 'haste',    name: '疾行者',   desc: '获得 1 迅捷次数',  stat: 'haste',  value: 1 },
+  { id: 'combo',    name: '连击之心', desc: '连击上限 +0.2',    stat: 'combo',  value: 0.2 }
 ];
 
 export const TALENTS = [

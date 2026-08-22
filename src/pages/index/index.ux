@@ -452,6 +452,7 @@ export default {
     _shield: 0,
     _hasteCharges: 0,
     _damageDealt: 0,
+    _comboMaxAdd: 0,
     _damageTaken: 0,
     _maxCombo: 0,
     _bossEnraged: false,
@@ -675,6 +676,7 @@ export default {
       skillName: this.skillName,
       shield: this._shield,
       hasteCharges: this._hasteCharges,
+      comboMaxAdd: this._comboMaxAdd,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -777,6 +779,7 @@ export default {
         that.skillName = s.skillName || that._skillName();
         that._shield = s.shield || 0;
         that._hasteCharges = s.hasteCharges || 0;
+        that._comboMaxAdd = s.comboMaxAdd || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -846,6 +849,7 @@ export default {
     this._damageDealt = 0;
     this._damageTaken = 0;
     this._maxCombo = 0;
+    this._comboMaxAdd = 0;
     this._bossEnraged = false;
     this._poisonDmg = 0;
     this._burnTurns = 0;
@@ -1739,7 +1743,7 @@ export default {
     }
     this.combo += 1;
     this._maxCombo = Math.max(this._maxCombo, this.combo);
-    var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6);
+    var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6 + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
     var dmg = Math.max(1, Math.round(this.atk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
     this._damageDealt += dmg;
@@ -2091,6 +2095,12 @@ export default {
       this.expMul += relic.value;
     } else if (relic.stat === 'cd') {
       this.skillCdMax = Math.max(1, this.skillCdMax - relic.value);
+    } else if (relic.stat === 'shield') {
+      this._shield += relic.value;
+    } else if (relic.stat === 'haste') {
+      this._hasteCharges += relic.value;
+    } else if (relic.stat === 'combo') {
+      this._comboMaxAdd += relic.value;
     }
     this._addLog('获得遗物：' + relic.name + '（' + relic.desc + '）');
   },
