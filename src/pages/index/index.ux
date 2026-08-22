@@ -2930,6 +2930,8 @@ export default {
       this.skillCdMax = Math.max(1, this.skillCdMax - 0.3);
     } else if (id === 'goldMaster') {
       this.goldMul += 0.15;
+    } else if (id === 'expMaster') {
+      this.expMul += 0.15;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
