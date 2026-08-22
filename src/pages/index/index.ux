@@ -719,6 +719,7 @@ export default {
       blockChance: this._blockChance,
       barrier: this._barrier,
       berserk: this._berserk,
+      skillCombo: this._skillCombo,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -833,6 +834,7 @@ export default {
         that._blockChance = s.blockChance || 0;
         that._barrier = s.barrier || 0;
         that._berserk = !!s.berserk;
+        that._skillCombo = s.skillCombo || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -911,6 +913,7 @@ export default {
     this._blockChance = 0;
     this._barrier = 0;
     this._berserk = false;
+    this._skillCombo = 0;
     this.challengeMod = '';
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
@@ -1869,6 +1872,9 @@ export default {
     }
     this.skillCd = this.skillCdMax;
     this._addLog('释放 ' + this._skillName());
+    if (this._skillCombo > 0) {
+      this.combo += this._skillCombo;
+    }
     this._playerAction(this._skillMult());
   },
 
@@ -2603,6 +2609,8 @@ export default {
       this._barrier += 8;
     } else if (id === 'berserk') {
       this._berserk = true;
+    } else if (id === 'skillcombo') {
+      this._skillCombo += 2;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;
