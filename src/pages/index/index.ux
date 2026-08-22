@@ -189,7 +189,7 @@
     <div if="{{phase === 'bag'}}" class="overlay bag-overlay">
       <text class="bag-title">背包</text>
       <text class="bag-line">武器：{{weaponName}} +{{weaponAtk}}</text>
-      <text class="bag-line">防具：{{armorName}} +{{armorDef}}</text>
+      <text class="bag-line">防具：{{armorName}} +{{armorDef}} · 闪{{dodge}}%</text>
       <text class="bag-line">药水：{{potions}} 瓶</text>
       <text class="bag-line">金币：{{gold}}</text>
       <div class="btn" @click="usePotionFromBag">
@@ -296,6 +296,7 @@ export default {
     expMul: 1,
     skillCdMax: SKILL_CD,
     burnChance: 0,
+    dodge: 0,
     _burnTurns: 0,
     _burnPower: 0,
     hp: 100,
@@ -550,6 +551,7 @@ export default {
     this.expMul = 1;
     this.skillCdMax = SKILL_CD;
     this.burnChance = 0;
+    this.dodge = 0;
     this._burnTurns = 0;
     this._burnPower = 0;
     this.hp = BASE_PLAYER.hp;
@@ -1167,7 +1169,8 @@ export default {
     var q = QUALITIES[Math.floor(Math.random() * QUALITIES.length)];
     var affix = ARMOR_AFFIXES[Math.floor(Math.random() * ARMOR_AFFIXES.length)];
     var def = Math.round(base.def * q.mult) + affix.def;
-    return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, q: q };
+    var dodge = Math.round(q.mult * 3);
+    return { name: q.name + '·' + base.name + '(' + affix.name + ')', def: def, dodge: dodge, q: q };
   },
 
   _pickItem(item) {
@@ -1208,6 +1211,7 @@ export default {
       if (armor.def > this.armorDef) {
         this.armorDef = armor.def;
         this.armorName = armor.name;
+        this.dodge = armor.dodge || 0;
         this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
       } else {
         this._addLog('获得 ' + armor.name + '，但不如当前防具');
@@ -1343,6 +1347,10 @@ export default {
   },
 
   _monsterAttack() {
+    if (this.dodge > 0 && Math.random() * 100 < this.dodge) {
+      this._addLog('你闪避了 ' + this.monsterName + ' 的攻击');
+      return;
+    }
     var dmg = Math.max(1, Math.round((this.monsterAtk - this.armorDef) * (0.85 + Math.random() * 0.3)));
     this.hp -= dmg;
     this._updateHp();
@@ -1417,6 +1425,7 @@ export default {
     if (armor.def > this.armorDef) {
       this.armorDef = armor.def;
       this.armorName = armor.name;
+      this.dodge = armor.dodge || 0;
       this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
     } else {
       this._addLog('获得 ' + armor.name + '，但不如当前防具');
