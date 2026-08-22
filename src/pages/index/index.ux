@@ -333,7 +333,7 @@
           <text class="bag-slot-sub">强化</text>
         </div>
       </div>
-      <text class="bag-line">历史最佳：武+{{bestWeaponAtk}} / 防+{{bestArmorDef}}</text>
+      <text class="bag-line">历史最佳：武+{{bestWeaponAtk}} / 防+{{bestArmorDef}} · 遗物图鉴 {{relicCodex.length}}/{{relicTotal}}</text>
       <text class="bag-line">金币 {{gold}} · 闪{{dodge}}% · {{skillName}}</text>
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
@@ -421,6 +421,8 @@ export default {
     soul: 0,
     bestWeaponAtk: 0,
     bestArmorDef: 0,
+    relicCodex: [],
+    relicTotal: 0,
     canClaimDaily: false,
     metaHp: 0,
     metaPotion: 0,
@@ -508,6 +510,7 @@ export default {
 
   onInit() {
     this.shopItems = SHOP_ITEMS;
+    this.relicTotal = RELICS.length;
     this.areaName = '';
     this.areaEff = '';
     this._width = 6;
@@ -586,6 +589,7 @@ export default {
             that.metaAtk = m.metaAtk || 0;
             that.bestWeaponAtk = m.bestWeaponAtk || 0;
             that.bestArmorDef = m.bestArmorDef || 0;
+            that.relicCodex = m.relicCodex || [];
           }
         } catch (e) {}
       }
@@ -2258,6 +2262,10 @@ export default {
       return;
     }
     this.relics.push(id);
+    if (this.relicCodex.indexOf(id) < 0) {
+      this.relicCodex.push(id);
+      this._saveMeta();
+    }
     if (relic.stat === 'atk') {
       this.baseAtk += relic.value;
       this.atk = this.baseAtk + this.weaponAtk;
@@ -2586,7 +2594,7 @@ export default {
   _saveMeta() {
     storage.set({
       key: 'BAND_SURVIVOR_META',
-      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef })
+      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef, relicCodex: this.relicCodex })
     });
   },
 
