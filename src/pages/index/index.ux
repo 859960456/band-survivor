@@ -750,6 +750,7 @@ export default {
       startCombo: this._startCombo,
       comboHeal: this._comboHeal,
       levelShield: this._levelShield,
+      warcry: this._warcry,
       hp: this.hp,
       maxHp: this.maxHp,
       exp: this.exp,
@@ -895,6 +896,7 @@ export default {
         that._startCombo = s.startCombo || 0;
         that._comboHeal = s.comboHeal || 0;
         that._levelShield = s.levelShield || 0;
+        that._warcry = s.warcry || 0;
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -1006,6 +1008,8 @@ export default {
     this._startCombo = 0;
     this._comboHeal = 0;
     this._levelShield = 0;
+    this._warcry = 0;
+    this._battleAtkBonus = 0;
     this._stunned = false;
     this.challengeMod = '';
     this._maxCombo = 0;
@@ -1951,6 +1955,7 @@ export default {
     this.monsterExp = stats.exp;
     this.isBoss = isBoss;
     this.skillCd = 0;
+    this._battleAtkBonus = this._warcry || 0;
     this.combo = this._startCombo || 0;
     this._isElite = false;
     this._bossEnraged = false;
@@ -2065,7 +2070,7 @@ export default {
     }
     var comboBonus = 1 + Math.min(this.combo * 0.03, 0.6 + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
-    var effectiveAtk = this.atk + this._bloodlust - 1;
+    var effectiveAtk = this.atk + this._bloodlust - 1 + (this._battleAtkBonus || 0);
     var dmg = Math.max(1, Math.round(effectiveAtk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
     if (this._berserk && this.maxHp > 0) {
       var missing = 1 - this.hp / this.maxHp;
@@ -2889,6 +2894,8 @@ export default {
       this._comboHeal += 4;
     } else if (id === 'levelShield') {
       this._levelShield += 10;
+    } else if (id === 'warcry') {
+      this._warcry += 3;
     } else if (id === 'hppct') {
       var gain = Math.round(this.maxHp * 0.1);
       this.maxHp += gain;

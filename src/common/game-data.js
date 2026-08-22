@@ -149,7 +149,8 @@ export const UPGRADES = [
   { id: 'stairvision', name: '鹰眼',   desc: '开局预知楼梯位置',          rarity: 'rare'   },
   { id: 'startCombo', name: '先声',   desc: '战斗开始 +2 连击',          rarity: 'rare'   },
   { id: 'comboHeal', name: '连击治愈', desc: '连击里程碑回复生命',        rarity: 'rare'   },
-  { id: 'levelShield', name: '升级护体', desc: '升级时获得护盾',          rarity: 'rare'   }
+  { id: 'levelShield', name: '升级护体', desc: '升级时获得护盾',          rarity: 'rare'   },
+  { id: 'warcry', name: '战吼',      desc: '战斗开始攻击 +3',          rarity: 'rare'   }
 ];
 
 export const RARITY_COLOR = {
