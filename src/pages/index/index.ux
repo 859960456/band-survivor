@@ -1261,7 +1261,9 @@ export default {
     }
 
     // 地图房间生成：调用 game-core 的种子生长算法
-    var rooms = growDungeon(w, h, this.floor, function(farthest, sorted) {
+        var rooms = [];
+    try {
+      var rooms = growDungeon(w, h, this.floor, function(farthest, sorted) {
       farthest.type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
       if (sorted.length >= 3) sorted[sorted.length - 2].type = 'shrine';
       if (sorted.length >= 4) {
@@ -1269,6 +1271,18 @@ export default {
         if (midR.type === 'combat') midR.type = 'treasure';
       }
     }.bind(this));
+    } catch(e) {
+      console.error('growDungeon error:', e);
+    }
+    if (!rooms || rooms.length === 0) {
+      rooms = [
+        { x: 1, y: 1, w: 4, h: 4, type: 'start', cleared: false },
+        { x: w-5, y: 1, w: 4, h: 4, type: 'combat', cleared: false },
+        { x: 1, y: h-5, w: 4, h: 4, type: 'combat', cleared: false },
+        { x: w-5, y: h-5, w: 4, h: 4, type: 'treasure', cleared: false }
+      ];
+    }
+    
 
     // 挖房间
     for (var i = 0; i < rooms.length; i++) {
