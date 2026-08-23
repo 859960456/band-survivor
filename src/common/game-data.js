@@ -329,3 +329,13 @@ export const CHALLENGE_MODS = [
   { id: 'iron',  name: '铁血',     desc: '攻击+5 生命+20',     atkAdd: 5,  hpAdd: 20 },
   { id: 'greed', name: '贪婪',     desc: '金币+30% 经验-20%', goldMul: 1.3, expMul: 0.8 }
 ];
+
+// 精英/BOSS 随机词缀池
+export const ENEMY_AFFIXES = [
+  { id: 'enrage',  name: '狂暴', desc: '攻击提升30%',           stat: 'atkMul',    value: 1.3 },
+  { id: 'split',   name: '分裂', desc: '血量低于50%时攻击+50%',  stat: 'lowHpAtk',  value: 1.5 },
+  { id: 'vampiric',name: '吸血', desc: '攻击回复造成伤害的40%',   stat: 'lifesteal', value: 0.4 },
+  { id: 'thorny',  name: '荆棘', desc: '玩家受击反伤5点',         stat: 'reflect',   value: 5 },
+  { id: 'swift',   name: '迅捷', desc: '有几率连续行动两次',       stat: 'doubleAct', value: 0.2 },
+  { id: 'armored', name: '铁甲', desc: '受到伤害减少25%',         stat: 'dmgReduce', value: 0.25 }
+];

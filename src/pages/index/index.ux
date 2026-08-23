@@ -394,6 +394,7 @@
           </div>
           <text class="monster-atk">攻击 {{monsterAtk}}</text>
           <text class="monster-skill" if="{{monsterSkillHint}}">技能：{{monsterSkillHint}}</text>
+          <text class="monster-skill" if="{{_enemyAffixName}}" style="color:#ff5555;">词缀：{{_enemyAffixName}}</text>
         </div>
 
         <div class="log-box">
@@ -422,7 +423,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS, RANGED_MONSTERS, AREA_LORE } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS, RANGED_MONSTERS, AREA_LORE, ENEMY_AFFIXES } from '../../common/game-data.js';
 import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor, randPick, achievementName } from '../../common/game-core.js';
 import * as GameSave from '../../common/game-save.js';
 import * as GameProgress from '../../common/game-progress.js';
@@ -942,6 +943,9 @@ export default {
     this._cdkill = 0;
     this._cleanChance = 0;
     this._openingStrike = 0;
+    this._enemyAffix = null;
+    this._enemyAffixName = '';
+    this._enemyDoubleAct = false;
     this._thunderChance = 0;
     this._shieldGainChance = 0;
     this._shieldGainAmt = 0;
@@ -1934,8 +1938,14 @@ export default {
     this.skillCd = 0;
     this.combo = 0;
     this._isElite = true;
+    var ea = ENEMY_AFFIXES[Math.floor(Math.random() * ENEMY_AFFIXES.length)];
+    this._enemyAffix = ea;
+    this._enemyAffixName = ea.name;
+    if (ea.stat === 'atkMul') {
+      elite.atk = Math.round(elite.atk * ea.value);
+    }
     this.phase = 'battle';
-    this._addLog('遭遇精英 ' + elite.name);
+    this._addLog('遭遇精英 ' + elite.name + ' [' + ea.name + ']');
   },
 
   _startBattle(mon) {
@@ -1987,6 +1997,11 @@ export default {
       }
     }
     this.phase = 'battle';
+    if (isBoss && !this._enemyAffix) {
+      this._enemyAffix = ENEMY_AFFIXES[Math.floor(Math.random() * ENEMY_AFFIXES.length)];
+      this._enemyAffixName = this._enemyAffix.name;
+      this._addLog('[' + this._enemyAffix.name + '] ' + stats.name);
+    }
     if (isBoss) {
       var bossArea = this._areaByFloor(this.floor);
       var bossLore = AREA_LORE[bossArea.id];
@@ -2216,6 +2231,30 @@ export default {
         this._onMonsterDead();
         return;
       }
+    }
+
+    // 敌人词缀效果
+    var ea = this._enemyAffix;
+    if (ea) {
+      if (ea.stat === 'vampiric' || ea.stat === 'lifesteal') {
+        var heal = Math.max(1, Math.round(dmg * ea.value));
+        this.monsterHp = Math.min(this.monsterMaxHp, this.monsterHp + heal);
+        this._updateMonsterHp();
+        this._addLog(ea.name + '回复 ' + heal);
+      }
+      if (ea.stat === 'thorny' || ea.stat === 'reflect') {
+        var refl = Math.max(1, Math.round(ea.value));
+        this.hp -= refl;
+        this._updateHp();
+        this._addLog('荆棘反伤 ' + refl);
+      }
+      if (ea.stat === 'lowHpAtk' && this.monsterHp < this.monsterMaxHp * 0.5) {
+        var bonusDmg = Math.max(1, Math.round(dmg * (ea.value - 1)));
+        this.hp -= bonusDmg;
+        this._updateHp();
+        this._addLog('分裂狂暴！额外 ' + bonusDmg + ' 伤害');
+      }
+      if (this.hp <= 0) { this.hp = 0; this._updateHp(); this._die(); return; }
     }
 
     // 怪物技能
