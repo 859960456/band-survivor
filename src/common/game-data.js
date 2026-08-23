@@ -313,6 +313,37 @@ export const CLASSES = [
     promoteLv: 8, promoteName: '大魔导', promoteBonus: { skillPower: 1.0, crit: 0.05, hpAdd: 10 }, skillBonus: '陨星术' }
 ];
 
+// 击杀风味文本
+export const KILL_FLAVORS = [
+  '应声倒地！', '化为灰烬！', '发出最后哀嚎……', '轰然崩碎！',
+  '化作血水。', '不甘消散。', '倒在你面前。', '痛苦嘶吼后倒下。',
+  '灵魂被撕裂。', '身体碎成无数碎片。', '发出绝望的惨叫。', '化为虚无。'
+];
+
+// 拾取风味文本
+export const PICK_FLAVORS = {
+  gold: ['闪亮的金币！', '意外之财！', '沉甸甸的钱袋。'],
+  potion: ['一瓶泛着荧光的药水。', '闻起来很提神。'],
+  weapon: ['一把趁手的武器。', '刀刃上还残留着前主人的气息。'],
+  armor: ['一套坚固的护甲。', '虽然有些破旧但依然可靠。']
+};
+
+// 事件风味文本
+export const EVENT_FLAVORS = {
+  good: ['你感到一阵暖流。', '幸运女神在微笑。', '空气中弥漫着希望的气息。'],
+  bad: ['一阵寒意袭来……', '黑暗在低语。', '厄运降临了。']
+};
+
+// BOSS 开场台词
+export const BOSS_QUOTES = {
+  bear_king: '"吾之长眠，不容打扰！"',
+  cave_guard: '岩石之躯中传来低沉的轰鸣。',
+  ruin_golem: '尘封千年的守护者苏醒了。',
+  abyss_lord: '"凡人，你的灵魂将成为我的养分。"',
+  frost_king: '寒气瞬间冻结了周围的空气。',
+  inferno_lord: '"让我看看你的灵魂能燃烧多久！"'
+};
+
 export const RANGED_MONSTERS = ['wraith', 'void_walker', 'imp', 'fire_imp'];
 
 export const AREA_LORE = {
