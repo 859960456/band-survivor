@@ -372,6 +372,12 @@
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
       </div>
+      <div class="btn" @click="salvageWeapon">
+        <text class="btn-text">分解武器（+{{weaponAtk * 2}}材料）</text>
+      </div>
+      <div class="btn" @click="salvageArmor">
+        <text class="btn-text">分解防具（+{{armorDef * 2}}材料）</text>
+      </div>
       <div class="btn" @click="closeBag">
         <text class="btn-text">关闭背包</text>
       </div>
@@ -3800,6 +3806,27 @@ export default {
   closeBag() {
     this.phase = 'grid';
     this._renderMap();
+    this._saveRun();
+  },
+
+  salvageWeapon() {
+    if (this.phase !== 'bag' || this.weaponAtk <= 0) return;
+    var mats = this.weaponAtk * 2;
+    this.materials += mats;
+    this.weaponAtk = 0;
+    this.weaponName = '无';
+    this.atk = this.baseAtk + this.weaponAtk;
+    this._addLog('分解武器，获得材料 +' + mats);
+    this._saveRun();
+  },
+
+  salvageArmor() {
+    if (this.phase !== 'bag' || this.armorDef <= 0) return;
+    var mats = this.armorDef * 2;
+    this.materials += mats;
+    this.armorDef = 0;
+    this.armorName = '无';
+    this._addLog('分解防具，获得材料 +' + mats);
     this._saveRun();
   },
 
