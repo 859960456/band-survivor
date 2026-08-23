@@ -1261,8 +1261,7 @@ export default {
     }
 
     // 地图房间生成：调用 game-core 的种子生长算法
-    var rooms = [];
-    growDungeon(w, h, this.floor, function(farthest, sorted) {
+    var rooms = growDungeon(w, h, this.floor, function(farthest, sorted) {
       farthest.type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
       if (sorted.length >= 3) sorted[sorted.length - 2].type = 'shrine';
       if (sorted.length >= 4) {
