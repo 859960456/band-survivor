@@ -96,8 +96,7 @@
         <text class="map-preview-title-text">第{{floor}}层 · {{areaName}}</text>
         <div class="minimap-grid">
           <div for="{{minimapCells}}" class="minimap-cell {{$item.cls}}">
-            <text if="{{$item.text}}" class="minimap-me">{{$item.text}}</text>
-            <image if="{{$item.icon}}" class="minimap-img" src="{{$item.icon}}" />
+            <text class="minimap-icon" if="{{$item.icon}}">{{$item.icon}}</text>
           </div>
         </div>
       </div>
@@ -1201,14 +1200,14 @@ export default {
       this._updateHp();
     }
     var sizes = [
+      [6, 8],
+      [7, 9],
+      [8, 10],
+      [9, 12],
       [10, 14],
-      [11, 15],
       [12, 16],
-      [12, 18],
       [13, 18],
-      [13, 19],
-      [14, 20],
-      [14, 22]
+      [14, 20]
     ];
     var idx = Math.min(Math.floor((num - 1) / 2), sizes.length - 1);
     this._height = sizes[idx][0];
@@ -1259,83 +1258,59 @@ export default {
       }
       grid.push(row);
     }
-    // ===== 地图生成：从种子生长算法 =====
-    // 每次运行从随机起始房间向外生长，产生完全不同的地图结构
+
+    // 房间数随层数增加：前期 2 间，后期 6 间
+    var roomCount = Math.min(2 + Math.floor(this.floor / 3), 6);
     var rooms = [];
-    
-    // 起始房间放在地图中央附近
-    var sw = 3 + Math.floor(Math.random() * 3);
-    var sh = 3 + Math.floor(Math.random() * 3);
-    var sx = Math.max(2, Math.floor(w / 2) - (sw >> 1) + Math.floor(Math.random() * 3));
-    var sy = Math.max(2, Math.floor(h / 2) - (sh >> 1) + Math.floor(Math.random() * 3));
-    sx = Math.min(sx, w - sw - 1); sy = Math.min(sy, h - sh - 1);
-    rooms.push({ x: sx, y: sy, w: sw, h: sh, cx: 0, cy: 0, type: 'combat', cleared: false, dist: 0 });
-    
-    // 从现有房间向外生长
-    var targetRooms = 4 + Math.floor(Math.random() * 5);
-    var attempts = 80;
-    var dirs = [[0,-1],[0,1],[-1,0],[1,0]];
-    
-    while (rooms.length < targetRooms && attempts > 0) {
+    var attempts = 100;
+    while (rooms.length < roomCount && attempts > 0) {
       attempts--;
-      var parent = rooms[Math.floor(Math.random() * rooms.length)];
-      var dir = dirs[Math.floor(Math.random() * 4)];
-      var rw = 2 + Math.floor(Math.random() * 6);
-      var rh = 2 + Math.floor(Math.random() * 6);
-      var gap = 1;
-      var rx, ry;
-      if (dir[0] === 0 && dir[1] === -1) {
-        rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
-        ry = parent.y - rh - gap;
-      } else if (dir[0] === 1) {
-        rx = parent.x + parent.w + gap;
-        ry = parent.y + Math.floor(Math.random() * parent.h) - (rh >> 1);
-      } else if (dir[0] === 0) {
-        rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
-        ry = parent.y + parent.h + gap;
-      } else {
-        rx = parent.x - rw - gap;
-        ry = parent.y + Math.floor(Math.random() * parent.h) - (rh >> 1);
+      var rw = 3 + Math.floor(Math.random() * 2);
+      var rh = 3 + Math.floor(Math.random() * 2);
+      if (rw > w - 2) rw = w - 2;
+      if (rh > h - 2) rh = h - 2;
+      if (rw < 2) rw = 2;
+      if (rh < 2) rh = 2;
+
+      var maxX = w - rw - 1;
+      var maxY = h - rh - 1;
+      if (maxX < 1 || maxY < 1) {
+        continue;
       }
-      if (rx < 1 || ry < 1 || rx + rw > w - 1 || ry + rh > h - 1) continue;
+      var rx = 1 + Math.floor(Math.random() * maxX);
+      var ry = 1 + Math.floor(Math.random() * maxY);
+
       var ok = true;
       for (var k = 0; k < rooms.length; k++) {
-        var rk = rooms[k];
-        if (rx < rk.x + rk.w + 1 && rx + rw + 1 > rk.x && ry < rk.y + rk.h + 1 && ry + rh + 1 > rk.y) { ok = false; break; }
-      }
-      if (!ok) continue;
-      rooms.push({ x: rx, y: ry, w: rw, h: rh, cx: 0, cy: 0, type: 'combat', cleared: false, dist: 0 });
-    }
-    
-    if (rooms.length < 3) {
-      var fbDirs = [[1,0],[-1,0],[0,1],[0,-1]];
-      for (var fi = 0; fi < fbDirs.length && rooms.length < 3; fi++) {
-        var fx = rooms[0].x + fbDirs[fi][0] * (rooms[0].w + 2);
-        var fy = rooms[0].y + fbDirs[fi][1] * (rooms[0].h + 2);
-        fx = Math.max(1, Math.min(fx, w - 4)); fy = Math.max(1, Math.min(fy, h - 4));
-        var fok = true;
-        for (var fk = 0; fk < rooms.length; fk++) {
-          if (fx < rooms[fk].x + rooms[fk].w && fx + 3 > rooms[fk].x && fy < rooms[fk].y + rooms[fk].h && fy + 3 > rooms[fk].y) { fok = false; break; }
+        var r = rooms[k];
+        if (rx < r.x + r.w + 1 && rx + rw + 1 > r.x &&
+            ry < r.y + r.h + 1 && ry + rh + 1 > r.y) {
+          ok = false;
+          break;
         }
-        if (fok) rooms.push({ x: fx, y: fy, w: 3, h: 3, cx: 0, cy: 0, type: 'combat', cleared: false, dist: 0 });
       }
+      if (!ok) {
+        continue;
+      }
+      rooms.push({ x: rx, y: ry, w: rw, h: rh });
     }
-    
-    // 房间类型分配
-    var fr = rooms[0];
-    for (var ri = 0; ri < rooms.length; ri++) {
-      rooms[ri].cx = rooms[ri].x + (rooms[ri].w >> 1);
-      rooms[ri].cy = rooms[ri].y + (rooms[ri].h >> 1);
-      var ddx = rooms[ri].cx - fr.cx, ddy = rooms[ri].cy - fr.cy;
-      rooms[ri].dist = Math.sqrt(ddx*ddx + ddy*ddy);
-    }
-    var sorted = rooms.slice().sort(function(a,b){ return a.dist - b.dist; });
-    for (var ti = 0; ti < rooms.length; ti++) { rooms[ti].type = 'combat'; rooms[ti].cleared = false; }
-    sorted[0].type = 'start';
-    sorted[sorted.length-1].type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
-    if (sorted.length >= 3) sorted[sorted.length-2].type = 'shrine';
-    if (sorted.length >= 4) { var mid = sorted[Math.floor(sorted.length/2)]; if (mid.type==='combat') mid.type='treasure'; }
 
+    // 保底至少两个不重叠的房间
+    if (rooms.length < 2) {
+      var tryX = 1;
+      var tryY = 1;
+      if (rooms.length === 1) {
+        var only = rooms[0];
+        tryX = Math.max(1, w - only.w - 3);
+        tryY = Math.max(1, h - only.h - 3);
+      }
+      if (rooms.length === 0) {
+        rooms.push({ x: 1, y: 1, w: 3, h: 3 });
+      }
+      if (tryX < 1) tryX = 1;
+      if (tryY < 1) tryY = 1;
+      rooms.push({ x: tryX, y: tryY, w: 3, h: 3 });
+    }
 
     // 挖房间
     for (var i = 0; i < rooms.length; i++) {
@@ -1422,18 +1397,6 @@ export default {
         secretPlaced++;
       }
     }
-    // 标记格子所属房间类型
-    this._roomTypeMap = {};
-    for (var rti = 0; rti < rooms.length; rti++) {
-      var rtRoom = rooms[rti];
-      for (var ry = rtRoom.y; ry < rtRoom.y + rtRoom.h; ry++) {
-        for (var rx = rtRoom.x; rx < rtRoom.x + rtRoom.w; rx++) {
-          if (ry >= 0 && ry < h && rx >= 0 && rx < w) {
-            this._roomTypeMap[rx + ',' + ry] = rtRoom.type;
-          }
-        }
-      }
-    }
     this._grid = grid;
     this._visited = [];
     for (var vi = 0; vi < h; vi++) {
@@ -1467,38 +1430,18 @@ export default {
     this._monsters = [];
     this._items = [];
 
-    // ===== 按房间类型放置内容 =====
-    var combatRooms = rooms.filter(function(r) { return r.type === 'combat'; });
-    var bossRoom = rooms.find(function(r) { return r.type === 'boss'; });
-    
-    // 怪物只放在战斗房和Boss房
+    // 放怪：数量随层数增加，但每层都有解
     var monsterCount = Math.min(2 + Math.floor(this.floor / 2), 6);
     for (var m = 0; m < monsterCount; m++) {
-      var targetRoom = null;
-      if (this._isBossFloor(this.floor) && bossRoom) {
-        targetRoom = bossRoom;
-      } else {
-        // 肉鸽随机：怪物可以出现在任何非出生/非宝藏房间
-        var validRooms = rooms.filter(function(r) { return r.type !== 'start'; });
-        targetRoom = validRooms[Math.floor(Math.random() * validRooms.length)] || rooms[0];
+      var mp = this._randomFloorCell(true);
+      if (!mp) {
+        break;
       }
-      
-      // 在房间内找空格
-      var placed = false;
-      for (var tryCount = 0; tryCount < 20 && !placed; tryCount++) {
-        var mr = targetRoom.y + Math.floor(Math.random() * targetRoom.h);
-        var mc = targetRoom.x + Math.floor(Math.random() * targetRoom.w);
-        if (this._grid[mr] && this._grid[mr][mc] === '.' &&
-            !(mr === this._playerR && mc === this._playerC) &&
-            !this._monsterAt(mr, mc)) {
-          var id = this._isBossFloor(this.floor) ? this._areaByFloor(this.floor).boss : this._randomMonsterForArea();
-          this._monsters.push({ id: id, row: mr, col: mc, alive: true });
-          placed = true;
-        }
-      }
+      var id = this._isBossFloor(this.floor) ? this._areaByFloor(this.floor).boss : this._randomMonsterForArea();
+      this._monsters.push({ id: id, row: mp.r, col: mp.c, alive: true });
     }
 
-    // 物品全图随机放置（肉鸽元素：随机性）+ 宝藏房保底宝箱
+    // 放物品：1~3 个随机物品
     var itemCount = 1 + Math.floor(Math.random() * 3) + (this._treasureBonus || 0);
     for (var t = 0; t < itemCount; t++) {
       var ip = this._randomFloorCell(true);
@@ -1546,37 +1489,6 @@ export default {
         icon = type === 'ice' ? '❄' : '♨';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
-    }
-
-    // ===== 肉鸽随机奖励：每个房间都有概率出好东西 =====
-    for (var ri2 = 0; ri2 < rooms.length; ri2++) {
-      var r2 = rooms[ri2];
-      if (r2.type === 'treasure') {
-        // 宝藏房必出一个宝箱或祭坛
-        var tr = r2.y + Math.floor(r2.h / 2);
-        var tc = r2.x + Math.floor(r2.w / 2);
-        if (this._grid[tr] && this._grid[tr][tc] === '.') {
-          this._items.push({ type: Math.random() < 0.5 ? 'chest' : 'altar', row: tr, col: tc,
-            icon: Math.random() < 0.5 ? '◈' : '▲' });
-        }
-      } else if (r2.type === 'shrine') {
-        // 祭坛房必出符文
-        var sr2 = r2.y + Math.floor(r2.h / 2);
-        var sc2 = r2.x + Math.floor(r2.w / 2);
-        if (this._grid[sr2] && this._grid[sr2][sc2] === '.') {
-          this._items.push({ type: 'rune', row: sr2, col: sc2, icon: '◆' });
-        }
-      }
-      // 战斗房 30% 概率额外掉落一个物品（肉鸽随机性）
-      else if (r2.type === 'combat' && Math.random() < 0.3) {
-        var bonusCell = { r: r2.y + Math.floor(Math.random() * r2.h), c: r2.x + Math.floor(Math.random() * r2.w) };
-        if (this._grid[bonusCell.r] && this._grid[bonusCell.r][bonusCell.c] === '.') {
-          var bonusTypes = ['gold', 'potion', 'weapon', 'armor', 'event', 'rune'];
-          var bType = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
-          var icons = { gold:'$', potion:'!', weapon:'/', armor:'A', event:'?', rune:'◆' };
-          this._items.push({ type: bType, row: bonusCell.r, col: bonusCell.c, icon: icons[bType] || '$' });
-        }
-      }
     }
 
     // 保证必有一瓶药水（提高可解性）
@@ -1652,46 +1564,24 @@ export default {
     var cells = [];
     for (var r = 0; r < this._height; r++) {
       for (var c = 0; c < this._width; c++) {
-        var textVal = '';
+        var cls = 'unexplored';
         var icon = '';
-        var isWall = this._grid[r][c] === '#' || this._grid[r][c] === 'S';
+        var isWall = this._grid[r][c] === '#';
         var visited = this._visited && this._visited[r] && this._visited[r][c];
-        var cls;
-        
-        // 优先级与主地图一致：玩家 > 楼梯 > 迷雾 > 怪物/物品 > 地板
-        if (isWall) {
-          cls = 'mm-wall';
-        } else if (r === this._playerR && c === this._playerC) {
-          cls = 'mm-player';
-          textVal = '我';
-        } else if (!visited) {
-          cls = 'mm-fog';
-        } else if (r === this._stairsR && c === this._stairsC) {
-          cls = 'mm-stairs';
-          icon = '/common/icons/stairs.png';
-        } else {
+        if (isWall) { cls = 'mm-wall'; }
+        else if (!visited) { cls = 'mm-fog'; }
+        else if (r === this._playerR && c === this._playerC) { cls = 'mm-player'; icon='●'; }
+        else if (r === this._stairsR && c === this._stairsC) { cls = 'mm-stairs'; icon='▼'; }
+        else {
           var mon = this._monsterAt(r, c);
-          if (mon) {
-            cls = 'mm-monster';
-            icon = '/common/icons/monster.png';
-          } else {
+          if (mon) { cls = 'mm-monster'; icon='▲'; }
+          else {
             var item = this._itemAt(r, c);
-            if (item) {
-              cls = 'mm-item';
-              var iconMap = {
-                gold: '/common/icons/gold.png',
-                potion: '/common/icons/potion.png',
-                weapon: '/common/icons/weapon.png',
-                armor: '/common/icons/armor.png'
-              };
-              icon = iconMap[item.type] || '';
-              if (!icon) { cls = 'mm-floor'; }
-            } else {
-              cls = 'mm-floor';
-            }
+            if (item) { cls = 'mm-item'; icon='◆'; }
+            else { cls = 'mm-floor'; }
           }
         }
-        cells.push({ r: r, c: c, cls: cls, icon: icon, text: textVal });
+        cells.push({ r: r, c: c, cls: cls, icon: icon });
       }
     }
     this.minimapCells = cells;
@@ -4910,43 +4800,5 @@ export default {
   color: #445566;
   font-size: 9px;
   margin-top: 4px;
-}
-
-.minimap-img {
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  width: 14px;
-  height: 14px;
-}
-
-.minimap-cell {
-  width: 16px;
-  height: 16px;
-  position: relative;
-}
-
-.mm-chest { background-color: #d9a441; }
-
-.minimap-icon {
-  display: none !important;
-}
-
-.mm-wall { background-color: #2a2a35; }
-.mm-fog { background-color: #0a0a0a; }
-
-.minimap-me {
-  width: 14px;
-  height: 14px;
-  line-height: 14px;
-  text-align: center;
-  color: #000000;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.mm-player {
-  background-color: #ffffff !important;
-  border-radius: 3px;
 }
 </style>
