@@ -416,7 +416,7 @@
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS } from '../../common/game-data.js';
-import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById } from '../../common/game-core.js';
+import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor, randPick, achievementName } from '../../common/game-core.js';
 import * as GameSave from '../../common/game-save.js';
 import * as GameProgress from '../../common/game-progress.js';
 
