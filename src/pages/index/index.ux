@@ -1260,29 +1260,89 @@ export default {
       grid.push(row);
     }
 
-    // 地图房间生成：调用 game-core 的种子生长算法
-        var rooms = [];
-    try {
-      var rooms = growDungeon(w, h, this.floor, function(farthest, sorted) {
-      farthest.type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
-      if (sorted.length >= 3) sorted[sorted.length - 2].type = 'shrine';
-      if (sorted.length >= 4) {
-        var midR = sorted[Math.floor(sorted.length / 2)];
-        if (midR.type === 'combat') midR.type = 'treasure';
+    // ===== 新地图生成：分区放置算法 =====
+    // 将地图分为N个区域，每个区域放一个房间，保证空间分布均匀
+    var roomCount = Math.min(3 + Math.floor(this.floor / 2), 8);
+    var rooms = [];
+    
+    // 将可用空间分成网格区域
+    var cols = 2 + Math.floor(roomCount / 4); // 区域列数
+    var rows_ = Math.ceil(roomCount / cols);   // 区域行数
+    var cellW = Math.floor((w - 2) / cols);    // 每个区域的宽度
+    var cellH = Math.floor((h - 2) / rows_);   // 每个区域的高度
+    
+    for (var region = 0; region < roomCount; region++) {
+      var col = region % cols;
+      var row = Math.floor(region / cols);
+      
+      // 区域左上角（加1避免贴边）
+      var baseX = 1 + col * cellW;
+      var baseY = 1 + row * cellH;
+      
+      // 在区域内随机放置房间
+      var rw = Math.max(3, Math.min(cellW - 1, 3 + Math.floor(Math.random() * (cellW - 3))));
+      var rh = Math.max(3, Math.min(cellH - 1, 3 + Math.floor(Math.random() * (cellH - 3))));
+      var rx = baseX + Math.floor(Math.random() * Math.max(1, cellW - rw));
+      var ry = baseY + Math.floor(Math.random() * Math.max(1, cellH - rh));
+      
+      // 边界检查
+      rx = Math.max(1, Math.min(rx, w - rw - 1));
+      ry = Math.max(1, Math.min(ry, h - rh - 1));
+      
+      // 检查与已有房间重叠
+      var ok = true;
+      for (var k = 0; k < rooms.length; k++) {
+        var r = rooms[k];
+        if (rx < r.x + r.w && rx + rw > r.x && ry < r.y + r.h && ry + rh > r.y) {
+          ok = false;
+          break;
+        }
       }
-    }.bind(this));
-    } catch(e) {
-      console.error('growDungeon error:', e);
-    }
-    if (!rooms || rooms.length === 0) {
-      rooms = [
-        { x: 1, y: 1, w: 4, h: 4, type: 'start', cleared: false },
-        { x: w-5, y: 1, w: 4, h: 4, type: 'combat', cleared: false },
-        { x: 1, y: h-5, w: 4, h: 4, type: 'combat', cleared: false },
-        { x: w-5, y: h-5, w: 4, h: 4, type: 'treasure', cleared: false }
-      ];
+      if (!ok && rooms.length >= 3) continue; // 前3个必须放置
+      
+      // 调整大小确保不超界
+      if (rx + rw > w - 1) rw = w - 1 - rx;
+      if (ry + rh > h - 1) rh = h - 1 - ry;
+      if (rw < 2) { rw = 2; rx = Math.min(rx, w - 3); }
+      if (rh < 2) { rh = 2; ry = Math.min(ry, h - 3); }
+      
+      rooms.push({ x: rx, y: ry, w: rw, h: rh,
+        cx: rx + rw >> 1, cy: ry + rh >> 1,
+        type: 'combat', cleared: false, dist: 0
+      });
     }
     
+    // 保底
+    if (rooms.length === 0) {
+      rooms.push({ x: 2, y: 2, w: 3, h: 3, cx: 3, cy: 3, type: 'combat', cleared: false, dist: 0 });
+    }
+    
+    // ===== 房间类型分配 =====
+    var firstRoom = rooms[0];
+    for (var ri = 0; ri < rooms.length; ri++) {
+      var rm = rooms[ri];
+      var ddx = rm.cx - firstRoom.cx;
+      var ddy = rm.cy - firstRoom.cy;
+      rm.dist = Math.sqrt(ddx * ddx + ddy * ddy);
+    }
+    var sortedByDist = rooms.slice().sort(function(a, b) { return a.dist - b.dist; });
+    for (var ti = 0; ti < rooms.length; ti++) { rooms[ti].type = 'combat'; rooms[ti].cleared = false; }
+    sortedByDist[0].type = 'start';
+    var farthest = sortedByDist[sortedByDist.length - 1];
+    farthest.type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
+    if (sortedByDist.length >= 3) sortedByDist[sortedByDist.length - 2].type = 'shrine';
+    if (sortedByDist.length >= 4) {
+      var midR = sortedByDist[Math.floor(sortedByDist.length / 2)];
+      if (midR.type === 'combat') midR.type = 'treasure';
+    }
+    // 调整 Boss 房大小
+    for (var si = 0; si < rooms.length; si++) {
+      var rr = rooms[si];
+      if (rr.type === 'boss') {
+        var bw = Math.min(6, w - rr.x - 1); var bh = Math.min(6, h - rr.y - 1);
+        if (bw >= 3 && bh >= 3) { rr.w = bw; rr.h = bh; rr.cx = rr.x + (rr.w >> 1); rr.cy = rr.y + (rr.h >> 1); }
+      }
+    }
 
     // 挖房间
     for (var i = 0; i < rooms.length; i++) {
