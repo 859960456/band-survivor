@@ -96,7 +96,7 @@
         <text class="map-preview-title-text">第{{floor}}层 · {{areaName}}</text>
         <div class="minimap-grid">
           <div for="{{minimapCells}}" class="minimap-cell {{$item.cls}}">
-            <text class="minimap-icon" if="{{$item.icon}}">{{$item.icon}}</text>
+            <image if="{{$item.icon}}" class="minimap-img" src="{{$item.icon}}" />
           </div>
         </div>
       </div>
@@ -1664,15 +1664,29 @@ export default {
         var visited = this._visited && this._visited[r] && this._visited[r][c];
         if (isWall) { cls = 'mm-wall'; }
         else if (!visited) { cls = 'mm-fog'; }
-        else if (r === this._playerR && c === this._playerC) { cls = 'mm-player'; icon='●'; }
-        else if (r === this._stairsR && c === this._stairsC) { cls = 'mm-stairs'; icon='▼'; }
-        else {
-          var mon = this._monsterAt(r, c);
-          if (mon) { cls = 'mm-monster'; icon='▲'; }
+        else if (r === this._playerR && c === this._playerC) {
+          cls = 'mm-player';
+          icon = '/common/icons/player.png';
+        } else if (r === this._stairsR && c === this._stairsC) {
+          cls = 'mm-stairs';
+          icon = '/common/icons/stairs.png';
+        } else {
+          if (!visited && !isWall) { cls = 'mm-fog'; }
           else {
-            var item = this._itemAt(r, c);
-            if (item) { cls = 'mm-item'; icon='◆'; }
-            else { cls = 'mm-floor'; }
+            var mon = this._monsterAt(r, c);
+            if (mon) { cls = 'mm-monster'; icon = '/common/icons/monster.png'; }
+            else {
+              var item = this._itemAt(r, c);
+              if (item) {
+                var iconMap = { gold:'/common/icons/gold.png', potion:'/common/icons/potion.png',
+                  weapon:'/common/icons/weapon.png', armor:'/common/icons/armor.png',
+                  chest:'', altar:'', rune:'', event:'', challenge:'',
+                  trap:'', poison:'', ice:'', lava:'' };
+                cls = item.type === 'chest' ? 'mm-chest' : 'mm-item';
+                icon = iconMap[item.type] || '';
+                if (item.type === 'challenge') { cls = 'mm-monster'; }
+              } else { cls = 'mm-floor'; }
+            }
           }
         }
         cells.push({ r: r, c: c, cls: cls, icon: icon });
@@ -4894,5 +4908,25 @@ export default {
   color: #445566;
   font-size: 9px;
   margin-top: 4px;
+}
+
+.minimap-img {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 14px;
+  height: 14px;
+}
+
+.minimap-cell {
+  width: 16px;
+  height: 16px;
+  position: relative;
+}
+
+.mm-chest { background-color: #d9a441; }
+
+.minimap-icon {
+  display: none !important;
 }
 </style>
