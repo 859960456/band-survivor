@@ -1580,7 +1580,10 @@ export default {
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
       }
     }
-    this.mapCells = cells;
+    this.mapCells = [];
+    for (var ci = 0; ci < cells.length; ci++) {
+      this.mapCells.push(cells[ci]);
+    }
     this._updateExplorePercent();
   },
 
@@ -1948,6 +1951,8 @@ export default {
         this.monsterHp = 0;
         this._updateMonsterHp();
         this.monsterAlive = false;
+        this.phase = 'battle';
+        this._addLog('遭遇 ' + stats.name + '（先手击杀！）');
         this._onMonsterDead();
         return;
       }
@@ -2334,8 +2339,10 @@ export default {
         break;
       }
     }
-    this._playerR = this._battleMonsterR;
-    this._playerC = this._battleMonsterC;
+    if (!this._isElite) {
+      this._playerR = this._battleMonsterR;
+      this._playerC = this._battleMonsterC;
+    }
 
     this._dropWeapon();
     this._dropArmor();
