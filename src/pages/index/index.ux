@@ -522,6 +522,8 @@ export default {
     dailyDone: false,
     dailyLabel: '击杀 5 个怪物',
     explorePercent: 0,
+    showMapPreview: false,
+    minimapCells: [],
     _damageTaken: 0,
     _maxCombo: 0,
     _bossEnraged: false,
@@ -1536,6 +1538,40 @@ export default {
     var viewW = Math.min(this._viewW, this._width);
     this._camR = Math.max(0, Math.min(this._playerR - Math.floor(viewH / 2), this._height - viewH));
     this._camC = Math.max(0, Math.min(this._playerC - Math.floor(viewW / 2), this._width - viewW));
+  },
+
+  toggleMapPreview() {
+    this.showMapPreview = !this.showMapPreview;
+    if (this.showMapPreview) {
+      this._buildMinimap();
+    }
+  },
+
+  _buildMinimap() {
+    var cells = [];
+    for (var r = 0; r < this._height; r++) {
+      for (var c = 0; c < this._width; c++) {
+        var cls = 'unexplored';
+        var icon = '';
+        var isWall = this._grid[r][c] === '#';
+        var visited = this._visited && this._visited[r] && this._visited[r][c];
+        if (isWall) { cls = 'mm-wall'; }
+        else if (!visited) { cls = 'mm-fog'; }
+        else if (r === this._playerR && c === this._playerC) { cls = 'mm-player'; icon='●'; }
+        else if (r === this._stairsR && c === this._stairsC) { cls = 'mm-stairs'; icon='▼'; }
+        else {
+          var mon = this._monsterAt(r, c);
+          if (mon) { cls = 'mm-monster'; icon='▲'; }
+          else {
+            var item = this._itemAt(r, c);
+            if (item) { cls = 'mm-item'; icon='◆'; }
+            else { cls = 'mm-floor'; }
+          }
+        }
+        cells.push({ r: r, c: c, cls: cls, icon: icon });
+      }
+    }
+    this.minimapCells = cells;
   },
 
   _updateExplorePercent() {
@@ -4683,5 +4719,73 @@ export default {
   color: #e8e8f0;
   font-size: 14px;
   margin-top: 12px;
+}
+
+.map-preview-btn {
+  width: 176px;
+  height: 24px;
+  margin-top: 4px;
+  border-radius: 6px;
+  background-color: #1a2030;
+  border: 1px solid #2a3050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-preview-btn-text {
+  color: #5a7aaa;
+  font-size: 11px;
+}
+
+.map-preview-panel {
+  width: 192px;
+  border-radius: 8px;
+  background-color: #0d1118;
+  border: 1px solid #2a3050;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.map-preview-title {
+  padding-bottom: 4px;
+}
+
+.map-preview-title-text {
+  color: #7aa2ff;
+  font-size: 12px;
+}
+
+.minimap-grid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.minimap-cell {
+  width: 14px;
+  height: 14px;
+}
+
+.minimap-icon {
+  font-size: 10px;
+  text-align: center;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
+
+.mm-wall { background-color: #0a0a0f; }
+.mm-fog { background-color: #111118; }
+.mm-floor { background-color: #2a2a38; }
+.mm-player { background-color: #3aa0ff; border-radius: 50%; }
+.mm-stairs { background-color: #ffd75e; }
+.mm-monster { background-color: #ff5555; border-radius: 50%; }
+.mm-item { background-color: #44cc88; }
+
+.map-preview-legend {
+  color: #445566;
+  font-size: 9px;
+  margin-top: 4px;
 }
 </style>
