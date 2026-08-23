@@ -103,3 +103,90 @@ export function achievementName(achievements, id) {
   }
   return id;
 }
+
+// 种子生长地牢生成算法
+// 从起始房间向外随机方向生长，每局产生完全不同的布局
+export function growDungeon(width, height, floor, roomTypeAssigner) {
+  var rooms = [];
+
+  // 起始房间在地图中央附近
+  var sw = 3 + Math.floor(Math.random() * 3);
+  var sh = 3 + Math.floor(Math.random() * 3);
+  var sx = Math.max(2, Math.floor(width / 2) - (sw >> 1));
+  var sy = Math.max(2, Math.floor(height / 2) - (sh >> 1));
+  sx = Math.min(sx, width - sw - 1); sy = Math.min(sy, height - sh - 1);
+  var first = { x: sx, y: sy, w: sw, h: sh, cx: 0, cy: 0, type: 'start', cleared: false, dist: 0 };
+  first.cx = first.x + (first.w >> 1);
+  first.cy = first.y + (first.h >> 1);
+  rooms.push(first);
+
+  // 从现有房间向外生长
+  var target = 4 + Math.floor(Math.random() * 5);
+  var tries = 80;
+  var dirs = [[0,-1],[0,1],[-1,0],[1,0]];
+
+  while (rooms.length < target && tries > 0) {
+    tries--;
+    var parent = rooms[Math.floor(Math.random() * rooms.length)];
+    var dir = dirs[Math.floor(Math.random() * 4)];
+    var rw = 2 + Math.floor(Math.random() * 6);
+    var rhh = 2 + Math.floor(Math.random() * 6);
+    var rx, ry;
+
+    if (dir[1] === -1) {
+      rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
+      ry = parent.y - rhh - 1;
+    } else if (dir[0] === 1) {
+      rx = parent.x + parent.w + 1;
+      ry = parent.y + Math.floor(Math.random() * parent.h) - (rhh >> 1);
+    } else if (dir[1] === 1) {
+      rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
+      ry = parent.y + parent.h + 1;
+    } else {
+      rx = parent.x - rw - 1;
+      ry = parent.y + Math.floor(Math.random() * parent.h) - (rhh >> 1);
+    }
+    if (rx < 1 || ry < 1 || rx + rw > width - 1 || ry + rhh > height - 1) continue;
+    var ok = true;
+    for (var k = 0; k < rooms.length; k++) {
+      if (rx < rooms[k].x + rooms[k].w && rx + rw > rooms[k].x &&
+          ry < rooms[k].y + rooms[k].h && ry + rhh > rooms[k].y) { ok = false; break; }
+    }
+    if (!ok) continue;
+    var nr = { x: rx, y: ry, w: rw, h: rhh, cx: rx+(rw>>1), cy: ry+(rhh>>1),
+               type: 'combat', cleared: false, dist: 0 };
+    rooms.push(nr);
+  }
+
+  // 保底至少3个
+  if (rooms.length < 3) {
+    for (var fi = 0; fi < 4 && rooms.length < 3; fi++) {
+      var fd = dirs[fi];
+      var fx = rooms[0].cx + fd[0] * (rooms[0].w + 2);
+      var fy = rooms[0].cy + fd[1] * (rooms[0].h + 2);
+      fx = Math.max(1, Math.min(fx, width - 4)); fy = Math.max(1, Math.min(fy, height - 4));
+      var fok = true;
+      for (var fk = 0; fk < rooms.length; fk++) {
+        if (fx < rooms[fk].x + rooms[fk].w && fx + 3 > rooms[fk].x && fy < rooms[fk].y + rooms[fk].h && fy + 3 > rooms[fk].y) { fok = false; break; }
+      }
+      if (fok) {
+        var nr2 = { x: fx, y: fy, w: 3, h: 3, cx: fx+1, cy: fy+1,
+                    type: 'combat', cleared: false, dist: 0 };
+        rooms.push(nr2);
+      }
+    }
+  }
+
+  // 计算距离并分配房间类型
+  for (var i = 0; i < rooms.length; i++) {
+    rooms[i].dist = Math.sqrt((rooms[i].cx-rooms[0].cx)*(rooms[i].cx-rooms[0].cx)+(rooms[i].cy-rooms[0].cy)*(rooms[i].cy-rooms[0].cy));
+  }
+  var sorted = rooms.slice().sort(function(a,b){return a.dist-b.dist;});
+  sorted[0].type = 'start';
+  var farthest = sorted[sorted.length-1];
+  if (roomTypeAssigner) roomTypeAssigner(farthest, sorted);
+
+  return rooms;
+}
+
+
