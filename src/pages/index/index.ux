@@ -277,8 +277,10 @@
       <text class="dead-title">你倒下了</text>
       <text class="dead-text">探索到第 {{floor}} 层</text>
       <text class="dead-text">等级 Lv.{{level}} / 击杀 {{kills}}</text>
-      <text class="dead-text">造成 {{_damageDealt}} 伤害 · 承受 {{_damageTaken}}</text>
-      <text class="dead-text">最大连击 {{_maxCombo}} · 遗物 {{relics.length}}</text>
+      <text class="dead-text">造成伤害 {{_damageDealt}} / 承受 {{_damageTaken}}</text>
+      <text class="dead-text">最大连击 {{_maxCombo}} / 材料 {{materials}}</text>
+      <text class="dead-text">遗物 {{relics.length}}件 / 天赋 {{talents.length}}个</text>
+      <text class="dead-text">金币 {{gold}} / 药水 {{potions}}瓶</text>
       <text class="dead-text">最佳记录：第 {{best}} 层</text>
       <div class="btn" @click="restart">
         <text class="btn-text">再来一局</text>
@@ -361,9 +363,12 @@
           <text class="bag-slot-sub">强化</text>
         </div>
       </div>
-      <text class="bag-line">历史最佳：武+{{bestWeaponAtk}} / 防+{{bestArmorDef}} · 遗物图鉴 {{relicCodex.length}}/{{relicTotal}}</text>
-      <text class="bag-line">装备图鉴 {{equipCodex.length}}/{{equipTotal}}</text>
-      <text class="bag-line">金币 {{gold}} · 闪{{dodge}}% · {{skillName}}</text>
+      <text class="bag-line">⚔ {{weaponName}} +{{weaponAtk}}</text>
+      <text class="bag-line">   技能:{{skillName}} · 吸血:{{lifesteal}} · 暴击率:{{critChance}}%</text>
+      <text class="bag-line">🛡 {{armorName}} +{{armorDef}} · 减伤:{{_bonusDef}} · 闪避:{{dodge}}%</text>
+      <text class="bag-line">护盾:{{_shield}} · 材料:{{materials}} · 药水:{{potions}}</text>
+      <text class="bag-line">历史最佳: 武+{{bestWeaponAtk}} / 防+{{bestArmorDef}}</text>
+      <text class="bag-line">遗物图鉴 {{relicCodex.length}}/{{relicTotal}} · 装备图鉴 {{equipCodex.length}}/{{equipTotal}}</text>
       <div class="btn" @click="usePotionFromBag">
         <text class="btn-text">使用药水</text>
       </div>
