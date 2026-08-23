@@ -305,10 +305,24 @@ export const TALENTS = [
 ];
 
 export const CLASSES = [
-  { id: 'warrior', name: '战士', desc: '高血高攻', hp: 125, atk: 12, potions: 2, dodge: 0,  crit: 0 },
-  { id: 'ranger',  name: '游侠', desc: '高闪避',   hp: 95,  atk: 11, potions: 3, dodge: 6,  crit: 0 },
-  { id: 'mage',    name: '法师', desc: '高暴击',   hp: 85,  atk: 13, potions: 2, dodge: 0,  crit: 0.15 }
+  { id: 'warrior', name: '战士', desc: '高血高攻', hp: 125, atk: 12, potions: 2, dodge: 0,  crit: 0,
+    promoteLv: 8, promoteName: '狂战士', promoteBonus: { atkAdd: 6, hpAdd: 30, crit: 0.05 }, skillBonus: '怒火斩' },
+  { id: 'ranger',  name: '游侠', desc: '高闪避',   hp: 95,  atk: 11, potions: 3, dodge: 6,  crit: 0,
+    promoteLv: 8, promoteName: '影猎手', promoteBonus: { dodgeAdd: 8, critAdd: 0.08, atkAdd: 3 }, skillBonus: '穿透箭' },
+  { id: 'mage',    name: '法师', desc: '高暴击',   hp: 85,  atk: 13, potions: 2, dodge: 0,  crit: 0.15,
+    promoteLv: 8, promoteName: '大魔导', promoteBonus: { skillPower: 1.0, crit: 0.05, hpAdd: 10 }, skillBonus: '陨星术' }
 ];
+
+export const RANGED_MONSTERS = ['wraith', 'void_walker', 'imp', 'fire_imp'];
+
+export const AREA_LORE = {
+  forest:  { intro: '千年守护者在此沉眠，扭曲的力量唤醒了它们……', boss: '熊王低吼着站起，眼中闪烁疯狂的红光。' },
+  cave:    { intro: '石壁上的抓痕提醒你——曾有探险者来过，但再也没出去。', boss: '洞窟守卫缓缓转身，岩石皮肤上布满古老符文。' },
+  ruins:   { intro: '古遗迹的石柱上刻满失落文字，空气中弥漫禁忌魔法。', boss: '遗迹巨像眼中亮起蓝光，将你视为入侵者。' },
+  abyss:   { intro: '深渊入口展开，光线无法到达，只有绝望回荡。', boss: '深渊领主浮现："你的灵魂将成为我的养分。"' },
+  tundra:  { intro: '风雪割裂皮肤，冰山上有什么在移动……', boss: '霜冻王从冰棺挣脱，寒气冻结了空气。' },
+  lava:    { intro: '热浪扑面，脚下随时可能崩塌坠入岩浆。', boss: '炼狱领主张开双臂："让我看看你的灵魂能燃烧多久！"' }
+};
 
 export const CHALLENGE_MODS = [
   { id: 'glass', name: '玻璃大炮', desc: '攻击+30% 生命-30%', atkMul: 1.3, hpMul: 0.7 },

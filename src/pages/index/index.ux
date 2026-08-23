@@ -24,7 +24,14 @@
           <text class="btn-text">继续冒险 第{{saveFloor}}层</text>
         </div>
 
-        <text class="h-label">难度</text>
+        <div if="{{ngLevel > 0}}" class="h-row">
+        <text class="h-row-l">轮回</text>
+        <text class="h-row-r">NG+{{ngLevel}}</text>
+      </div>
+      <div if="{{ngLevel > 0 && !ngActive}}" class="btn big-btn" @click="startNGPlus">
+        <text class="btn-text">进入轮回 NG+{{ngLevel}}</text>
+      </div>
+      <text class="h-label">难度</text>
         <div class="h-row" @click="cycleDifficulty">
           <text class="h-row-l">当前</text>
           <text class="h-row-r">{{difficultyLabel}}</text>
@@ -415,7 +422,7 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS } from '../../common/game-data.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS, RANGED_MONSTERS, AREA_LORE } from '../../common/game-data.js';
 import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor, randPick, achievementName } from '../../common/game-core.js';
 import * as GameSave from '../../common/game-save.js';
 import * as GameProgress from '../../common/game-progress.js';
@@ -492,6 +499,11 @@ export default {
     _damageDealt: 0,
     _comboMaxAdd: 0,
     challengeMod: '',
+    ngLevel: 0,
+    promoted: false,
+    ngActive: false,
+    ngLevel: 0,
+    promoteName: '',
     dailyType: 'kill',
     dailyTarget: 5,
     dailyProgress: 0,
@@ -634,6 +646,7 @@ export default {
             that.bestArmorDef = m.bestArmorDef || 0;
             that.relicCodex = m.relicCodex || [];
             that.equipCodex = m.equipCodex || [];
+            that.ngLevel = m.ngLevel || 0;
           }
         } catch (e) {}
       }
@@ -836,6 +849,8 @@ export default {
         that._reviveUsed = !!s.reviveUsed;
         that._comboPerStack = s.comboPerStack || 0.03;
         that._levelHp = s.levelHp || 0;
+        that.promoted = !!s.promoted;
+        that.promoteName = s.promoteName || '';
         that.hp = s.hp || BASE_PLAYER.hp;
         that.maxHp = s.maxHp || BASE_PLAYER.maxHp;
         that.exp = s.exp || 0;
@@ -954,6 +969,8 @@ export default {
     this._levelHp = 0;
     this._stunned = false;
     this.challengeMod = '';
+    this.promoted = false;
+    this.ngActive = this.ngLevel > 0;
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
     this._bossEnraged = false;
@@ -1132,7 +1149,13 @@ export default {
   _monsterStats(id) {
     var base = MONSTERS[id] || MONSTERS.slime;
     var area = this._areaByFloor(this.floor);
-    return computeMonsterStats(base, this.floor, this._difficultyMul(), this.endless, area.effect);
+    var result = computeMonsterStats(base, this.floor, this._difficultyMul(), this.endless, area.effect);
+    var ngMul = 1 + (this.ngLevel || 0) * 0.5;
+    result.hp = Math.round(result.hp * ngMul);
+    result.atk = Math.round(result.atk * ngMul);
+    result.gold = Math.round(result.gold * ngMul);
+    result.exp = Math.round(result.exp * ngMul);
+    return result;
   },
 
   _genFloor(num) {
@@ -1179,13 +1202,17 @@ export default {
     if (this.visitedAreas.indexOf(area.id) < 0) {
       this.visitedAreas.push(area.id);
     }
-    if (this._isBossFloor(num)) {
-      this._addLog('第 ' + num + ' 层：' + area.name + ' BOSS 层！');
-    } else {
-      this._addLog('进入 ' + area.name + ' · ' + this.floor);
-      if (area.effDesc) {
-        this._addLog(area.effDesc);
+    var lore = AREA_LORE[area.id];
+    if (lore) {
+      if (this._isBossFloor(num)) {
+        this._addLog('⚔ ' + lore.boss);
+      } else {
+        this._addLog('【' + area.name + '】' + lore.intro);
       }
+    } else if (this._isBossFloor(num)) {
+      this._addLog('第 ' + num + ' 层：BOSS 层！');
+    } else {
+      this._addLog('进入 ' + area.name + ' · 第' + this.floor + '层');
     }
     this._saveRun();
   },
@@ -1960,6 +1987,13 @@ export default {
       }
     }
     this.phase = 'battle';
+    if (isBoss) {
+      var bossArea = this._areaByFloor(this.floor);
+      var bossLore = AREA_LORE[bossArea.id];
+      if (bossLore && bossLore.boss) {
+        this._addLog(bossLore.boss);
+      }
+    }
     this._addLog('遭遇 ' + stats.name);
   },
 
@@ -2613,6 +2647,24 @@ export default {
     }.bind(this));
   },
 
+  _checkPromotion() {
+    if (this.promoted) return;
+    var cls = this._classBase();
+    if (!cls.promoteLv || this.level < cls.promoteLv) return;
+    var pb = cls.promoteBonus || {};
+    this.promoted = true;
+    this.promoteName = cls.promoteName;
+    if (pb.atkAdd) { this.baseAtk += pb.atkAdd; this.atk = this.baseAtk + this.weaponAtk; }
+    if (pb.hpAdd) { this.maxHp += pb.hpAdd; }
+    if (pb.dodgeAdd) { this.dodge += pb.dodgeAdd; }
+    if (pb.critAdd) { this.critChance += pb.critAdd; }
+    if (pb.crit) { this.critChance += pb.crit; }
+    if (pb.skillPower) { this._skillPowerAdd += pb.skillPower; }
+    this._vibrate(300);
+    this._addLog('★ 转职成功！你成为了 ' + cls.promoteName + '！');
+    this._saveRun();
+  },
+
   _applyTalent(t) {
     if (t.stat === 'atk') {
       this.baseAtk += t.value;
@@ -2967,6 +3019,7 @@ export default {
       this._shield += this._levelShield;
     }
     this._advanceDaily(this.dailyType === 'level' ? 1 : 0);
+    this._checkPromotion();
     this._vibrate(160);
     this.exp -= this.expNext;
     this.expNext = Math.floor(this.expNext * 1.35);
@@ -3008,6 +3061,23 @@ export default {
         }
       }
     }
+  },
+
+  _surroundMove(mon, dr, dc) {
+    var sideDr = dc !== 0 ? Math.sign(dr) : 0;
+    var sideDc = dr !== 0 ? Math.sign(dc) : 0;
+    var attempts = [[sideDr || (Math.random() < 0.5 ? 1 : -1), 0], [0, sideDc || (Math.random() < 0.5 ? 1 : -1)]];
+    for (var a = 0; a < attempts.length; a++) {
+      var nr = mon.row + attempts[a][0];
+      var nc = mon.col + attempts[a][1];
+      if (nr >= 0 && nr < this._height && nc >= 0 && nc < this._width &&
+          this._grid[nr][nc] !== '#' && this._grid[nr][nc] !== 'S' &&
+          !this._monsterAt(nr, nc) && !(nr === this._playerR && nc === this._playerC)) {
+        mon.row = nr; mon.col = nc;
+        return;
+      }
+    }
+    this._moveMonster(mon, dr, dc);
   },
 
   _chargeMonster(mon, dr, dc) {
@@ -3064,6 +3134,11 @@ export default {
     this.phase = 'dead';
     this._vibrate(200);
     this._clearSave();
+    if (this.floor >= 15 && this.ngLevel < 5) {
+      this.ngLevel += 1;
+      this._saveMeta();
+      this._addLog('轮回等级提升至 NG+' + this.ngLevel);
+    }
     var soulBase = this.floor * 2 + this.level;
     var soulMul = this.difficulty === 0 ? 0.8 : (this.difficulty === 2 ? 1.3 : 1);
     if (this.challengeMode) {
@@ -3247,7 +3322,7 @@ export default {
   _saveMeta() {
     storage.set({
       key: 'BAND_SURVIVOR_META',
-      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef, relicCodex: this.relicCodex, equipCodex: this.equipCodex })
+      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef, relicCodex: this.relicCodex, equipCodex: this.equipCodex, ngLevel: this.ngLevel })
     });
   },
 
@@ -3356,6 +3431,16 @@ export default {
     }
     this._updateHp();
     this._addLog('挑战词条：' + mod.name + '（' + mod.desc + '）');
+  },
+
+  startNGPlus() {
+    if (this.ngLevel <= 0) return;
+    this.ngActive = true;
+    this._resetRun();
+    this.phase = this.tutorialSeen ? 'grid' : 'tutorial';
+    this._genFloor(1);
+    this._addLog('轮回 NG+' + this.ngLevel + ' 开始！敌人更强大……');
+    this._saveRun();
   },
 
   _saveSettings() {
