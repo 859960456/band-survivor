@@ -1259,90 +1259,83 @@ export default {
       }
       grid.push(row);
     }
-
-    // ===== 新地图生成：分区放置算法 =====
-    // 将地图分为N个区域，每个区域放一个房间，保证空间分布均匀
-    var roomCount = Math.min(3 + Math.floor(this.floor / 2), 8);
+    // ===== 地图生成：从种子生长算法 =====
+    // 每次运行从随机起始房间向外生长，产生完全不同的地图结构
     var rooms = [];
     
-    // 将可用空间分成网格区域
-    var cols = 2 + Math.floor(roomCount / 4); // 区域列数
-    var rows_ = Math.ceil(roomCount / cols);   // 区域行数
-    var cellW = Math.floor((w - 2) / cols);    // 每个区域的宽度
-    var cellH = Math.floor((h - 2) / rows_);   // 每个区域的高度
+    // 起始房间放在地图中央附近
+    var sw = 3 + Math.floor(Math.random() * 3);
+    var sh = 3 + Math.floor(Math.random() * 3);
+    var sx = Math.max(2, Math.floor(w / 2) - (sw >> 1) + Math.floor(Math.random() * 3));
+    var sy = Math.max(2, Math.floor(h / 2) - (sh >> 1) + Math.floor(Math.random() * 3));
+    sx = Math.min(sx, w - sw - 1); sy = Math.min(sy, h - sh - 1);
+    rooms.push({ x: sx, y: sy, w: sw, h: sh, cx: 0, cy: 0, type: 'combat', cleared: false, dist: 0 });
     
-    for (var region = 0; region < roomCount; region++) {
-      var col = region % cols;
-      var row = Math.floor(region / cols);
-      
-      // 区域左上角（加1避免贴边）
-      var baseX = 1 + col * cellW;
-      var baseY = 1 + row * cellH;
-      
-      // 在区域内随机放置房间
-      var rw = Math.max(3, Math.min(cellW - 1, 3 + Math.floor(Math.random() * (cellW - 3))));
-      var rh = Math.max(3, Math.min(cellH - 1, 3 + Math.floor(Math.random() * (cellH - 3))));
-      var rx = baseX + Math.floor(Math.random() * Math.max(1, cellW - rw));
-      var ry = baseY + Math.floor(Math.random() * Math.max(1, cellH - rh));
-      
-      // 边界检查
-      rx = Math.max(1, Math.min(rx, w - rw - 1));
-      ry = Math.max(1, Math.min(ry, h - rh - 1));
-      
-      // 检查与已有房间重叠
+    // 从现有房间向外生长
+    var targetRooms = 4 + Math.floor(Math.random() * 5);
+    var attempts = 80;
+    var dirs = [[0,-1],[0,1],[-1,0],[1,0]];
+    
+    while (rooms.length < targetRooms && attempts > 0) {
+      attempts--;
+      var parent = rooms[Math.floor(Math.random() * rooms.length)];
+      var dir = dirs[Math.floor(Math.random() * 4)];
+      var rw = 2 + Math.floor(Math.random() * 6);
+      var rh = 2 + Math.floor(Math.random() * 6);
+      var gap = 1;
+      var rx, ry;
+      if (dir[0] === 0 && dir[1] === -1) {
+        rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
+        ry = parent.y - rh - gap;
+      } else if (dir[0] === 1) {
+        rx = parent.x + parent.w + gap;
+        ry = parent.y + Math.floor(Math.random() * parent.h) - (rh >> 1);
+      } else if (dir[0] === 0) {
+        rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
+        ry = parent.y + parent.h + gap;
+      } else {
+        rx = parent.x - rw - gap;
+        ry = parent.y + Math.floor(Math.random() * parent.h) - (rh >> 1);
+      }
+      if (rx < 1 || ry < 1 || rx + rw > w - 1 || ry + rh > h - 1) continue;
       var ok = true;
       for (var k = 0; k < rooms.length; k++) {
-        var r = rooms[k];
-        if (rx < r.x + r.w && rx + rw > r.x && ry < r.y + r.h && ry + rh > r.y) {
-          ok = false;
-          break;
+        var rk = rooms[k];
+        if (rx < rk.x + rk.w + 1 && rx + rw + 1 > rk.x && ry < rk.y + rk.h + 1 && ry + rh + 1 > rk.y) { ok = false; break; }
+      }
+      if (!ok) continue;
+      rooms.push({ x: rx, y: ry, w: rw, h: rh, cx: 0, cy: 0, type: 'combat', cleared: false, dist: 0 });
+    }
+    
+    if (rooms.length < 3) {
+      var fbDirs = [[1,0],[-1,0],[0,1],[0,-1]];
+      for (var fi = 0; fi < fbDirs.length && rooms.length < 3; fi++) {
+        var fx = rooms[0].x + fbDirs[fi][0] * (rooms[0].w + 2);
+        var fy = rooms[0].y + fbDirs[fi][1] * (rooms[0].h + 2);
+        fx = Math.max(1, Math.min(fx, w - 4)); fy = Math.max(1, Math.min(fy, h - 4));
+        var fok = true;
+        for (var fk = 0; fk < rooms.length; fk++) {
+          if (fx < rooms[fk].x + rooms[fk].w && fx + 3 > rooms[fk].x && fy < rooms[fk].y + rooms[fk].h && fy + 3 > rooms[fk].y) { fok = false; break; }
         }
+        if (fok) rooms.push({ x: fx, y: fy, w: 3, h: 3, cx: 0, cy: 0, type: 'combat', cleared: false, dist: 0 });
       }
-      if (!ok && rooms.length >= 3) continue; // 前3个必须放置
-      
-      // 调整大小确保不超界
-      if (rx + rw > w - 1) rw = w - 1 - rx;
-      if (ry + rh > h - 1) rh = h - 1 - ry;
-      if (rw < 2) { rw = 2; rx = Math.min(rx, w - 3); }
-      if (rh < 2) { rh = 2; ry = Math.min(ry, h - 3); }
-      
-      rooms.push({ x: rx, y: ry, w: rw, h: rh,
-        cx: rx + rw >> 1, cy: ry + rh >> 1,
-        type: 'combat', cleared: false, dist: 0
-      });
     }
     
-    // 保底
-    if (rooms.length === 0) {
-      rooms.push({ x: 2, y: 2, w: 3, h: 3, cx: 3, cy: 3, type: 'combat', cleared: false, dist: 0 });
-    }
-    
-    // ===== 房间类型分配 =====
-    var firstRoom = rooms[0];
+    // 房间类型分配
+    var fr = rooms[0];
     for (var ri = 0; ri < rooms.length; ri++) {
-      var rm = rooms[ri];
-      var ddx = rm.cx - firstRoom.cx;
-      var ddy = rm.cy - firstRoom.cy;
-      rm.dist = Math.sqrt(ddx * ddx + ddy * ddy);
+      rooms[ri].cx = rooms[ri].x + (rooms[ri].w >> 1);
+      rooms[ri].cy = rooms[ri].y + (rooms[ri].h >> 1);
+      var ddx = rooms[ri].cx - fr.cx, ddy = rooms[ri].cy - fr.cy;
+      rooms[ri].dist = Math.sqrt(ddx*ddx + ddy*ddy);
     }
-    var sortedByDist = rooms.slice().sort(function(a, b) { return a.dist - b.dist; });
+    var sorted = rooms.slice().sort(function(a,b){ return a.dist - b.dist; });
     for (var ti = 0; ti < rooms.length; ti++) { rooms[ti].type = 'combat'; rooms[ti].cleared = false; }
-    sortedByDist[0].type = 'start';
-    var farthest = sortedByDist[sortedByDist.length - 1];
-    farthest.type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
-    if (sortedByDist.length >= 3) sortedByDist[sortedByDist.length - 2].type = 'shrine';
-    if (sortedByDist.length >= 4) {
-      var midR = sortedByDist[Math.floor(sortedByDist.length / 2)];
-      if (midR.type === 'combat') midR.type = 'treasure';
-    }
-    // 调整 Boss 房大小
-    for (var si = 0; si < rooms.length; si++) {
-      var rr = rooms[si];
-      if (rr.type === 'boss') {
-        var bw = Math.min(6, w - rr.x - 1); var bh = Math.min(6, h - rr.y - 1);
-        if (bw >= 3 && bh >= 3) { rr.w = bw; rr.h = bh; rr.cx = rr.x + (rr.w >> 1); rr.cy = rr.y + (rr.h >> 1); }
-      }
-    }
+    sorted[0].type = 'start';
+    sorted[sorted.length-1].type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
+    if (sorted.length >= 3) sorted[sorted.length-2].type = 'shrine';
+    if (sorted.length >= 4) { var mid = sorted[Math.floor(sorted.length/2)]; if (mid.type==='combat') mid.type='treasure'; }
+
 
     // 挖房间
     for (var i = 0; i < rooms.length; i++) {
