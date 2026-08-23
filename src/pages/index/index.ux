@@ -1659,40 +1659,46 @@ export default {
     var cells = [];
     for (var r = 0; r < this._height; r++) {
       for (var c = 0; c < this._width; c++) {
-        var cls = 'unexplored';
-        var icon = '';
         var textVal = '';
-        var isWall = this._grid[r][c] === '#';
+        var icon = '';
+        var isWall = this._grid[r][c] === '#' || this._grid[r][c] === 'S';
         var visited = this._visited && this._visited[r] && this._visited[r][c];
-        if (isWall) { cls = 'mm-wall'; }
-        else if (!visited) { cls = 'mm-fog'; }
-        else if (r === this._playerR && c === this._playerC) {
+        var cls;
+        
+        // 优先级与主地图一致：玩家 > 楼梯 > 迷雾 > 怪物/物品 > 地板
+        if (isWall) {
+          cls = 'mm-wall';
+        } else if (r === this._playerR && c === this._playerC) {
           cls = 'mm-player';
-          icon = '';
           textVal = '我';
+        } else if (!visited) {
+          cls = 'mm-fog';
         } else if (r === this._stairsR && c === this._stairsC) {
           cls = 'mm-stairs';
           icon = '/common/icons/stairs.png';
         } else {
-          if (!visited && !isWall) { cls = 'mm-fog'; }
-          else {
-            var mon = this._monsterAt(r, c);
-            if (mon) { cls = 'mm-monster'; icon = '/common/icons/monster.png'; }
-            else {
-              var item = this._itemAt(r, c);
-              if (item) {
-                var iconMap = { gold:'/common/icons/gold.png', potion:'/common/icons/potion.png',
-                  weapon:'/common/icons/weapon.png', armor:'/common/icons/armor.png',
-                  chest:'', altar:'', rune:'', event:'', challenge:'',
-                  trap:'', poison:'', ice:'', lava:'' };
-                cls = item.type === 'chest' ? 'mm-chest' : 'mm-item';
-                icon = iconMap[item.type] || '';
-                if (item.type === 'challenge') { cls = 'mm-monster'; }
-              } else { cls = 'mm-floor'; }
+          var mon = this._monsterAt(r, c);
+          if (mon) {
+            cls = 'mm-monster';
+            icon = '/common/icons/monster.png';
+          } else {
+            var item = this._itemAt(r, c);
+            if (item) {
+              cls = 'mm-item';
+              var iconMap = {
+                gold: '/common/icons/gold.png',
+                potion: '/common/icons/potion.png',
+                weapon: '/common/icons/weapon.png',
+                armor: '/common/icons/armor.png'
+              };
+              icon = iconMap[item.type] || '';
+              if (!icon) { cls = 'mm-floor'; }
+            } else {
+              cls = 'mm-floor';
             }
           }
         }
-        cells.push({ r: r, c: c, cls: cls, icon: icon, text: textVal || '' });
+        cells.push({ r: r, c: c, cls: cls, icon: icon, text: textVal });
       }
     }
     this.minimapCells = cells;
