@@ -96,7 +96,8 @@
         <text class="map-preview-title-text">第{{floor}}层 · {{areaName}}</text>
         <div class="minimap-grid">
           <div for="{{minimapCells}}" class="minimap-cell {{$item.cls}}">
-            <text class="minimap-icon" if="{{$item.icon}}">{{$item.icon}}</text>
+            <text if="{{$item.text}}" class="minimap-me">{{$item.text}}</text>
+            <image if="{{$item.icon}}" class="minimap-img" src="{{$item.icon}}" />
           </div>
         </div>
       </div>
@@ -1200,14 +1201,14 @@ export default {
       this._updateHp();
     }
     var sizes = [
-      [6, 8],
-      [7, 9],
-      [8, 10],
-      [9, 12],
       [10, 14],
+      [11, 15],
       [12, 16],
+      [12, 18],
       [13, 18],
-      [14, 20]
+      [13, 19],
+      [14, 20],
+      [14, 22]
     ];
     var idx = Math.min(Math.floor((num - 1) / 2), sizes.length - 1);
     this._height = sizes[idx][0];
@@ -1259,57 +1260,88 @@ export default {
       grid.push(row);
     }
 
-    // 房间数随层数增加：前期 2 间，后期 6 间
-    var roomCount = Math.min(2 + Math.floor(this.floor / 3), 6);
+    // ===== 新地图生成：分区放置算法 =====
+    // 将地图分为N个区域，每个区域放一个房间，保证空间分布均匀
+    var roomCount = Math.min(3 + Math.floor(this.floor / 2), 8);
     var rooms = [];
-    var attempts = 100;
-    while (rooms.length < roomCount && attempts > 0) {
-      attempts--;
-      var rw = 3 + Math.floor(Math.random() * 2);
-      var rh = 3 + Math.floor(Math.random() * 2);
-      if (rw > w - 2) rw = w - 2;
-      if (rh > h - 2) rh = h - 2;
-      if (rw < 2) rw = 2;
-      if (rh < 2) rh = 2;
-
-      var maxX = w - rw - 1;
-      var maxY = h - rh - 1;
-      if (maxX < 1 || maxY < 1) {
-        continue;
-      }
-      var rx = 1 + Math.floor(Math.random() * maxX);
-      var ry = 1 + Math.floor(Math.random() * maxY);
-
+    
+    // 将可用空间分成网格区域
+    var cols = 2 + Math.floor(roomCount / 4); // 区域列数
+    var rows_ = Math.ceil(roomCount / cols);   // 区域行数
+    var cellW = Math.floor((w - 2) / cols);    // 每个区域的宽度
+    var cellH = Math.floor((h - 2) / rows_);   // 每个区域的高度
+    
+    for (var region = 0; region < roomCount; region++) {
+      var col = region % cols;
+      var row = Math.floor(region / cols);
+      
+      // 区域左上角（加1避免贴边）
+      var baseX = 1 + col * cellW;
+      var baseY = 1 + row * cellH;
+      
+      // 在区域内随机放置房间
+      var rw = Math.max(3, Math.min(cellW - 1, 3 + Math.floor(Math.random() * (cellW - 3))));
+      var rh = Math.max(3, Math.min(cellH - 1, 3 + Math.floor(Math.random() * (cellH - 3))));
+      var rx = baseX + Math.floor(Math.random() * Math.max(1, cellW - rw));
+      var ry = baseY + Math.floor(Math.random() * Math.max(1, cellH - rh));
+      
+      // 边界检查
+      rx = Math.max(1, Math.min(rx, w - rw - 1));
+      ry = Math.max(1, Math.min(ry, h - rh - 1));
+      
+      // 检查与已有房间重叠
       var ok = true;
       for (var k = 0; k < rooms.length; k++) {
         var r = rooms[k];
-        if (rx < r.x + r.w + 1 && rx + rw + 1 > r.x &&
-            ry < r.y + r.h + 1 && ry + rh + 1 > r.y) {
+        if (rx < r.x + r.w && rx + rw > r.x && ry < r.y + r.h && ry + rh > r.y) {
           ok = false;
           break;
         }
       }
-      if (!ok) {
-        continue;
-      }
-      rooms.push({ x: rx, y: ry, w: rw, h: rh });
+      if (!ok && rooms.length >= 3) continue; // 前3个必须放置
+      
+      // 调整大小确保不超界
+      if (rx + rw > w - 1) rw = w - 1 - rx;
+      if (ry + rh > h - 1) rh = h - 1 - ry;
+      if (rw < 2) { rw = 2; rx = Math.min(rx, w - 3); }
+      if (rh < 2) { rh = 2; ry = Math.min(ry, h - 3); }
+      
+      rooms.push({ x: rx, y: ry, w: rw, h: rh,
+        cx: rx + rw >> 1, cy: ry + rh >> 1,
+        type: 'combat', cleared: false, dist: 0
+      });
     }
-
-    // 保底至少两个不重叠的房间
-    if (rooms.length < 2) {
-      var tryX = 1;
-      var tryY = 1;
-      if (rooms.length === 1) {
-        var only = rooms[0];
-        tryX = Math.max(1, w - only.w - 3);
-        tryY = Math.max(1, h - only.h - 3);
+    
+    // 保底
+    if (rooms.length === 0) {
+      rooms.push({ x: 2, y: 2, w: 3, h: 3, cx: 3, cy: 3, type: 'combat', cleared: false, dist: 0 });
+    }
+    
+    // ===== 房间类型分配 =====
+    var firstRoom = rooms[0];
+    for (var ri = 0; ri < rooms.length; ri++) {
+      var rm = rooms[ri];
+      var ddx = rm.cx - firstRoom.cx;
+      var ddy = rm.cy - firstRoom.cy;
+      rm.dist = Math.sqrt(ddx * ddx + ddy * ddy);
+    }
+    var sortedByDist = rooms.slice().sort(function(a, b) { return a.dist - b.dist; });
+    for (var ti = 0; ti < rooms.length; ti++) { rooms[ti].type = 'combat'; rooms[ti].cleared = false; }
+    sortedByDist[0].type = 'start';
+    var farthest = sortedByDist[sortedByDist.length - 1];
+    farthest.type = this._isBossFloor(this.floor) ? 'boss' : 'treasure';
+    if (sortedByDist.length >= 3) sortedByDist[sortedByDist.length - 2].type = 'shrine';
+    if (sortedByDist.length >= 4) {
+      var midR = sortedByDist[Math.floor(sortedByDist.length / 2)];
+      if (midR.type === 'combat') midR.type = 'treasure';
+    }
+    // 调整 Boss 房大小
+    for (var si = 0; si < rooms.length; si++) {
+      var rr = rooms[si];
+      if (rr.type === 'boss') {
+        var bw = Math.min(6, w - rr.x - 1); var bh = Math.min(6, h - rr.y - 1);
+        if (bw >= 3 && bh >= 3) { rr.w = bw; rr.h = bh; rr.cx = rr.x + (rr.w >> 1); rr.cy = rr.y + (rr.h >> 1); }
       }
-      if (rooms.length === 0) {
-        rooms.push({ x: 1, y: 1, w: 3, h: 3 });
-      }
-      if (tryX < 1) tryX = 1;
-      if (tryY < 1) tryY = 1;
-      rooms.push({ x: tryX, y: tryY, w: 3, h: 3 });
     }
 
     // 挖房间
@@ -1397,6 +1429,18 @@ export default {
         secretPlaced++;
       }
     }
+    // 标记格子所属房间类型
+    this._roomTypeMap = {};
+    for (var rti = 0; rti < rooms.length; rti++) {
+      var rtRoom = rooms[rti];
+      for (var ry = rtRoom.y; ry < rtRoom.y + rtRoom.h; ry++) {
+        for (var rx = rtRoom.x; rx < rtRoom.x + rtRoom.w; rx++) {
+          if (ry >= 0 && ry < h && rx >= 0 && rx < w) {
+            this._roomTypeMap[rx + ',' + ry] = rtRoom.type;
+          }
+        }
+      }
+    }
     this._grid = grid;
     this._visited = [];
     for (var vi = 0; vi < h; vi++) {
@@ -1430,18 +1474,38 @@ export default {
     this._monsters = [];
     this._items = [];
 
-    // 放怪：数量随层数增加，但每层都有解
+    // ===== 按房间类型放置内容 =====
+    var combatRooms = rooms.filter(function(r) { return r.type === 'combat'; });
+    var bossRoom = rooms.find(function(r) { return r.type === 'boss'; });
+    
+    // 怪物只放在战斗房和Boss房
     var monsterCount = Math.min(2 + Math.floor(this.floor / 2), 6);
     for (var m = 0; m < monsterCount; m++) {
-      var mp = this._randomFloorCell(true);
-      if (!mp) {
-        break;
+      var targetRoom = null;
+      if (this._isBossFloor(this.floor) && bossRoom) {
+        targetRoom = bossRoom;
+      } else {
+        // 肉鸽随机：怪物可以出现在任何非出生/非宝藏房间
+        var validRooms = rooms.filter(function(r) { return r.type !== 'start'; });
+        targetRoom = validRooms[Math.floor(Math.random() * validRooms.length)] || rooms[0];
       }
-      var id = this._isBossFloor(this.floor) ? this._areaByFloor(this.floor).boss : this._randomMonsterForArea();
-      this._monsters.push({ id: id, row: mp.r, col: mp.c, alive: true });
+      
+      // 在房间内找空格
+      var placed = false;
+      for (var tryCount = 0; tryCount < 20 && !placed; tryCount++) {
+        var mr = targetRoom.y + Math.floor(Math.random() * targetRoom.h);
+        var mc = targetRoom.x + Math.floor(Math.random() * targetRoom.w);
+        if (this._grid[mr] && this._grid[mr][mc] === '.' &&
+            !(mr === this._playerR && mc === this._playerC) &&
+            !this._monsterAt(mr, mc)) {
+          var id = this._isBossFloor(this.floor) ? this._areaByFloor(this.floor).boss : this._randomMonsterForArea();
+          this._monsters.push({ id: id, row: mr, col: mc, alive: true });
+          placed = true;
+        }
+      }
     }
 
-    // 放物品：1~3 个随机物品
+    // 物品全图随机放置（肉鸽元素：随机性）+ 宝藏房保底宝箱
     var itemCount = 1 + Math.floor(Math.random() * 3) + (this._treasureBonus || 0);
     for (var t = 0; t < itemCount; t++) {
       var ip = this._randomFloorCell(true);
@@ -1489,6 +1553,37 @@ export default {
         icon = type === 'ice' ? '❄' : '♨';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
+    }
+
+    // ===== 肉鸽随机奖励：每个房间都有概率出好东西 =====
+    for (var ri2 = 0; ri2 < rooms.length; ri2++) {
+      var r2 = rooms[ri2];
+      if (r2.type === 'treasure') {
+        // 宝藏房必出一个宝箱或祭坛
+        var tr = r2.y + Math.floor(r2.h / 2);
+        var tc = r2.x + Math.floor(r2.w / 2);
+        if (this._grid[tr] && this._grid[tr][tc] === '.') {
+          this._items.push({ type: Math.random() < 0.5 ? 'chest' : 'altar', row: tr, col: tc,
+            icon: Math.random() < 0.5 ? '◈' : '▲' });
+        }
+      } else if (r2.type === 'shrine') {
+        // 祭坛房必出符文
+        var sr2 = r2.y + Math.floor(r2.h / 2);
+        var sc2 = r2.x + Math.floor(r2.w / 2);
+        if (this._grid[sr2] && this._grid[sr2][sc2] === '.') {
+          this._items.push({ type: 'rune', row: sr2, col: sc2, icon: '◆' });
+        }
+      }
+      // 战斗房 30% 概率额外掉落一个物品（肉鸽随机性）
+      else if (r2.type === 'combat' && Math.random() < 0.3) {
+        var bonusCell = { r: r2.y + Math.floor(Math.random() * r2.h), c: r2.x + Math.floor(Math.random() * r2.w) };
+        if (this._grid[bonusCell.r] && this._grid[bonusCell.r][bonusCell.c] === '.') {
+          var bonusTypes = ['gold', 'potion', 'weapon', 'armor', 'event', 'rune'];
+          var bType = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+          var icons = { gold:'$', potion:'!', weapon:'/', armor:'A', event:'?', rune:'◆' };
+          this._items.push({ type: bType, row: bonusCell.r, col: bonusCell.c, icon: icons[bType] || '$' });
+        }
+      }
     }
 
     // 保证必有一瓶药水（提高可解性）
@@ -1564,24 +1659,46 @@ export default {
     var cells = [];
     for (var r = 0; r < this._height; r++) {
       for (var c = 0; c < this._width; c++) {
-        var cls = 'unexplored';
+        var textVal = '';
         var icon = '';
-        var isWall = this._grid[r][c] === '#';
+        var isWall = this._grid[r][c] === '#' || this._grid[r][c] === 'S';
         var visited = this._visited && this._visited[r] && this._visited[r][c];
-        if (isWall) { cls = 'mm-wall'; }
-        else if (!visited) { cls = 'mm-fog'; }
-        else if (r === this._playerR && c === this._playerC) { cls = 'mm-player'; icon='●'; }
-        else if (r === this._stairsR && c === this._stairsC) { cls = 'mm-stairs'; icon='▼'; }
-        else {
+        var cls;
+        
+        // 优先级与主地图一致：玩家 > 楼梯 > 迷雾 > 怪物/物品 > 地板
+        if (isWall) {
+          cls = 'mm-wall';
+        } else if (r === this._playerR && c === this._playerC) {
+          cls = 'mm-player';
+          textVal = '我';
+        } else if (!visited) {
+          cls = 'mm-fog';
+        } else if (r === this._stairsR && c === this._stairsC) {
+          cls = 'mm-stairs';
+          icon = '/common/icons/stairs.png';
+        } else {
           var mon = this._monsterAt(r, c);
-          if (mon) { cls = 'mm-monster'; icon='▲'; }
-          else {
+          if (mon) {
+            cls = 'mm-monster';
+            icon = '/common/icons/monster.png';
+          } else {
             var item = this._itemAt(r, c);
-            if (item) { cls = 'mm-item'; icon='◆'; }
-            else { cls = 'mm-floor'; }
+            if (item) {
+              cls = 'mm-item';
+              var iconMap = {
+                gold: '/common/icons/gold.png',
+                potion: '/common/icons/potion.png',
+                weapon: '/common/icons/weapon.png',
+                armor: '/common/icons/armor.png'
+              };
+              icon = iconMap[item.type] || '';
+              if (!icon) { cls = 'mm-floor'; }
+            } else {
+              cls = 'mm-floor';
+            }
           }
         }
-        cells.push({ r: r, c: c, cls: cls, icon: icon });
+        cells.push({ r: r, c: c, cls: cls, icon: icon, text: textVal });
       }
     }
     this.minimapCells = cells;
@@ -4800,5 +4917,43 @@ export default {
   color: #445566;
   font-size: 9px;
   margin-top: 4px;
+}
+
+.minimap-img {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 14px;
+  height: 14px;
+}
+
+.minimap-cell {
+  width: 16px;
+  height: 16px;
+  position: relative;
+}
+
+.mm-chest { background-color: #d9a441; }
+
+.minimap-icon {
+  display: none !important;
+}
+
+.mm-wall { background-color: #2a2a35; }
+.mm-fog { background-color: #0a0a0a; }
+
+.minimap-me {
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  text-align: center;
+  color: #000000;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.mm-player {
+  background-color: #ffffff !important;
+  border-radius: 3px;
 }
 </style>
