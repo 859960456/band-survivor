@@ -1466,9 +1466,12 @@ export default {
       } else if (roll < 0.985) {
         type = 'rune';
         icon = '◆';
-      } else if (roll < 0.99) {
+      } else if (roll < 0.985) {
         type = 'portal';
         icon = '◎';
+      } else if (roll < 0.99) {
+        type = Math.random() < 0.5 ? 'ice' : 'lava';
+        icon = type === 'ice' ? '❄' : '♨';
       }
       this._items.push({ type: type, row: ip.r, col: ip.c, icon: icon });
     }
@@ -1617,6 +1620,10 @@ export default {
         } else if (cls === 'altar') {
           icon = '';
         } else if (cls === 'rune') {
+          icon = '';
+        } else if (cls === 'ice') {
+          icon = '';
+        } else if (cls === 'lava') {
           icon = '';
         } else if (cls === 'portal') {
           icon = '';
@@ -1845,6 +1852,17 @@ export default {
     } else if (item.type === 'portal') {
       this._portalNext = true;
       this._addLog('进入传送门，即将跃升一层');
+    } else if (item.type === 'ice') {
+      this._addLog('踩到冰面！脚下一滑……');
+      this._hasteCharges += 1;
+      this._addLog('获得 1 迅捷（冰面滑行）');
+    } else if (item.type === 'lava') {
+      var lavaDmg = Math.max(5, Math.round(10 + this.floor * 0.8));
+      this.hp -= lavaDmg;
+      this._updateHp();
+      this._vibrate(80);
+      this._addLog('踩到岩浆！受到 ' + lavaDmg + ' 伤害');
+      if (this.hp <= 0) { this.hp = 0; this._updateHp(); this._die(); }
     } else if (item.type === 'rune') {
       this.talentPoints += 1;
       this._addLog('参悟符文，天赋点 +1');
@@ -4166,6 +4184,16 @@ export default {
   position: absolute;
   width: 18px;
   height: 20px;
+  border-radius: 3px;
+}
+
+.ice {
+  background-color: #a0d0e8;
+  border-radius: 50%;
+}
+
+.lava {
+  background-color: #ff4400;
   border-radius: 3px;
 }
 
