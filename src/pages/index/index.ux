@@ -2378,7 +2378,17 @@ export default {
       this.materials += 5;
       this.potions += 1;
       this.talentPoints += 1;
-      this._addLog('BOSS 战利品：材料 +5，药水 +1，天赋点 +1');
+      var ngBonus = (this.ngLevel || 0);
+      var msg = 'BOSS 战利品：材料 +5，药水 +1，天赋点 +1';
+      if (ngBonus > 0) {
+        var bonusSoul = ngBonus * 3;
+        var bonusMat = ngBonus * 2;
+        this.soul += bonusSoul;
+        this.materials += bonusMat;
+        msg += '，NG+' + ngBonus + ' 额外：灵魂 +' + bonusSoul + ' 材料 +' + bonusMat;
+      }
+      this._saveMeta();
+      this._addLog(msg);
     } else if (this._isElite) {
       this.materials += 3;
       this._addLog('精英战利品：材料 +3');
