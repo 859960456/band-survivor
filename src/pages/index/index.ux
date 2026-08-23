@@ -1200,14 +1200,14 @@ export default {
       this._updateHp();
     }
     var sizes = [
-      [6, 8],
-      [7, 9],
-      [8, 10],
-      [9, 12],
       [10, 14],
+      [11, 15],
       [12, 16],
+      [12, 18],
       [13, 18],
-      [14, 20]
+      [13, 19],
+      [14, 20],
+      [14, 22]
     ];
     var idx = Math.min(Math.floor((num - 1) / 2), sizes.length - 1);
     this._height = sizes[idx][0];
@@ -1265,8 +1265,8 @@ export default {
     var attempts = 100;
     while (rooms.length < roomCount && attempts > 0) {
       attempts--;
-      var rw = 3 + Math.floor(Math.random() * 2);
-      var rh = 3 + Math.floor(Math.random() * 2);
+      var rw = 2 + Math.floor(Math.random() * 4); // 2~5
+      var rh = 2 + Math.floor(Math.random() * 4); // 2~5
       if (rw > w - 2) rw = w - 2;
       if (rh > h - 2) rh = h - 2;
       if (rw < 2) rw = 2;
@@ -1283,8 +1283,8 @@ export default {
       var ok = true;
       for (var k = 0; k < rooms.length; k++) {
         var r = rooms[k];
-        if (rx < r.x + r.w + 1 && rx + rw + 1 > r.x &&
-            ry < r.y + r.h + 1 && ry + rh + 1 > r.y) {
+        if (rx < r.x + r.w && rx + rw > r.x &&
+            ry < r.y + r.h && ry + rh > r.y) {
           ok = false;
           break;
         }
