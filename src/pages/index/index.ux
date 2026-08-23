@@ -1349,15 +1349,6 @@ export default {
       }
       this._visited.push(vrow);
     }
-    this._revealAround();
-    if (this._fullVision) {
-      for (var fv = 0; fv < h; fv++) {
-        for (var fw = 0; fw < w; fw++) {
-          if (!this._visited[fv]) { this._visited[fv] = []; }
-          this._visited[fv][fw] = true;
-        }
-      }
-    }
     var first = rooms[0];
     var last = rooms[rooms.length - 1];
     // 避免出生点和楼梯同一个格子
@@ -1368,6 +1359,17 @@ export default {
     this._playerC = first.x + Math.floor(first.w / 2);
     this._stairsR = last.y + Math.floor(last.h / 2);
     this._stairsC = last.x + Math.floor(last.w / 2);
+
+    this._revealAround();
+    if (this._fullVision) {
+      for (var fv = 0; fv < h; fv++) {
+        for (var fw = 0; fw < w; fw++) {
+          if (!this._visited[fv]) { this._visited[fv] = []; }
+          this._visited[fv][fw] = true;
+        }
+      }
+    }
+
     this._monsters = [];
     this._items = [];
 
