@@ -88,6 +88,19 @@
         <div class="bar-fill hp-fill" style="width: {{hpPercent}}%;"></div>
       </div>
       <text class="hp-text">HP {{hp}}/{{maxHp}} · 探索{{explorePercent}}% · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}{{challengeMod ? ' · 词条:' : ''}}</text>
+
+      <div class="map-preview-btn" @click="toggleMapPreview">
+        <text class="map-preview-btn-text">🗺 楼层地图</text>
+      </div>
+      <div if="{{showMapPreview}}" class="map-preview-panel">
+        <text class="map-preview-title-text">第{{floor}}层 · {{areaName}}</text>
+        <div class="minimap-grid">
+          <div for="{{minimapCells}}" class="minimap-cell {{$item.cls}}">
+            <text class="minimap-icon" if="{{$item.icon}}">{{$item.icon}}</text>
+          </div>
+        </div>
+      </div>
+
       <text class="map-msg">{{lastLog}}</text>
 
       <div class="map-area">
