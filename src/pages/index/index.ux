@@ -2025,11 +2025,23 @@ export default {
   },
 
   _skillName() {
+    if (this.promoted && this.promoteName) {
+      var cls = this._classBase();
+      if (cls && cls.skillBonus) {
+        return cls.skillBonus;
+      }
+    }
     return skillName(this.weaponAtk);
   },
 
   _skillMult() {
-    return skillMult(this.weaponAtk) + this._skillPowerAdd;
+    var base = skillMult(this.weaponAtk) + this._skillPowerAdd;
+    if (this.promoted) {
+      if (this.charClass === 'warrior') base *= 1.3;
+      else if (this.charClass === 'ranger') base *= 1.5;
+      else if (this.charClass === 'mage') base *= 1.8;
+    }
+    return base;
   },
 
   doSkill() {
