@@ -603,6 +603,7 @@ export default {
     _damageTaken: 0,
     _maxCombo: 0,
     _mStatus: { poison: 0, burn: 0, ice: 0, shock: 0, bleed: 0 },
+    _exploreDirty: false,
     _setBonusApplied: false,
     _moveCount: 0,
     _eventSkipCount: 0,
@@ -962,6 +963,7 @@ export default {
         that._width = s.mw || 6;
         that._grid = s.grid || [];
         that._visited = s.visited || [];
+        that._exploreDirty = true;
         that.relics = s.relics || [];
         that.visitedAreas = s.visitedAreas || [];
         that.materials = s.materials || 0;
@@ -1127,6 +1129,7 @@ export default {
     this.mapCells = [];
     this._grid = [];
     this._visited = [];
+    this._exploreDirty = true;
     this._monsters = [];
     this._items = [];
     this._playerR = 0;
@@ -1314,6 +1317,7 @@ export default {
         }
       }
     }
+    this._exploreDirty = true;
     this._renderMap();
     var area = this._areaByFloor(num);
     this.areaName = area.name;
@@ -1531,6 +1535,7 @@ export default {
     }
     this._grid = grid;
     this._visited = [];
+    this._exploreDirty = true;
     for (var vi = 0; vi < h; vi++) {
       var vrow = [];
       for (var vj = 0; vj < w; vj++) {
@@ -1801,6 +1806,10 @@ export default {
   },
 
   _updateExplorePercent() {
+    if (!this._exploreDirty) {
+      return;
+    }
+    this._exploreDirty = false;
     var total = 0;
     var visited = 0;
     for (var r = 0; r < this._height; r++) {
@@ -1990,6 +1999,7 @@ export default {
   },
 
   _revealAround() {
+    this._exploreDirty = true;
     var r = this._playerR, c = this._playerC;
     var R = 2 + (this._revealBonus || 0);
     for (var dr = -R; dr <= R; dr++) {
