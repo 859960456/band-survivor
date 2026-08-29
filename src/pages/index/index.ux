@@ -1751,6 +1751,8 @@ export default {
 
   _buildMinimap() {
     var cells = [];
+    var monMap = this._buildOccupancy(true);
+    var itemMap = this._buildOccupancy(false);
     for (var r = 0; r < this._height; r++) {
       for (var c = 0; c < this._width; c++) {
         var textVal = '';
@@ -1771,12 +1773,12 @@ export default {
           cls = 'mm-stairs';
           icon = '/common/icons/stairs.png';
         } else {
-          var mon = this._monsterAt(r, c);
+          var mon = monMap[r + '_' + c];
           if (mon) {
             cls = 'mm-monster';
             icon = '/common/icons/monster.png';
           } else {
-            var item = this._itemAt(r, c);
+            var item = itemMap[r + '_' + c];
             if (item) {
               cls = 'mm-item';
               var iconMap = {
@@ -1814,6 +1816,18 @@ export default {
     this.explorePercent = total > 0 ? Math.round(visited / total * 100) : 0;
   },
 
+  _buildOccupancy(isMonster) {
+    var map = {};
+    var arr = isMonster ? this._monsters : this._items;
+    for (var i = 0; i < arr.length; i++) {
+      var m = arr[i];
+      if (isMonster && !m.alive) { continue; }
+      var key = m.row + '_' + m.col;
+      if (!map[key]) { map[key] = m; }
+    }
+    return map;
+  },
+
   _renderMap() {
     this._updateCamera();
     var viewH = Math.min(this._viewH, this._height);
@@ -1821,6 +1835,8 @@ export default {
     this.mapViewH = viewH;
     this.mapViewW = viewW;
     var cells = [];
+    var monMap = this._buildOccupancy(true);
+    var itemMap = this._buildOccupancy(false);
     for (var vr = 0; vr < viewH; vr++) {
       var r = this._camR + vr;
       for (var vc = 0; vc < viewW; vc++) {
@@ -1840,11 +1856,11 @@ export default {
           if (cls === 'fog') {
             cls = 'floor';
           }
-          var mon = this._monsterAt(r, c);
+          var mon = monMap[r + '_' + c];
           if (mon) {
             cls = 'monster';
           } else {
-            var item = this._itemAt(r, c);
+            var item = itemMap[r + '_' + c];
             if (item) {
               cls = item.type;
             }
@@ -2055,7 +2071,6 @@ export default {
         return;
       }
       this._revealAround();
-      this._renderMap();
       if (this._hasteCharges > 0) {
         this._hasteCharges--;
         this._addLog('迅捷：本回合怪物未行动');
@@ -2071,7 +2086,6 @@ export default {
     this._moveCount += 1;
     if (this._moveCount >= 100) { this._unlockAchievement('meme_6'); }
     this._revealAround();
-    this._renderMap();
     if (this._hasteCharges > 0) {
       this._hasteCharges--;
       this._addLog('迅捷：本回合怪物未行动');
@@ -4330,13 +4344,13 @@ export default {
 }
 
 .h-sub {
-  color: #5a6a9a;
+  color: #8ea2d6;
   font-size: 12px;
   margin-top: 4px;
 }
 
 .h-label {
-  color: #4a5a7a;
+  color: #8494c4;
   font-size: 11px;
   margin-top: 14px;
   margin-bottom: 2px;
@@ -4383,7 +4397,7 @@ export default {
 }
 
 .h-best {
-  color: #555f70;
+  color: #97a3c2;
   font-size: 11px;
   margin-top: 16px;
 }
@@ -4429,7 +4443,7 @@ export default {
 
 .tip {
   margin-top: 10px;
-  color: #777777;
+  color: #a0a0a8;
   font-size: 12px;
 }
 
@@ -4456,7 +4470,7 @@ export default {
   border-radius: 8px;
   background-color: #20242f;
   border: 1px solid #2d3240;
-  color: #8890a3;
+  color: #a9b1c6;
   font-size: 12px;
   line-height: 26px;
   text-align: center;
@@ -4512,7 +4526,7 @@ export default {
 .best {
   position: absolute;
   bottom: 76px;
-  color: #666677;
+  color: #9c9cb2;
   font-size: 12px;
 }
 
@@ -4595,7 +4609,7 @@ export default {
 .map-msg {
   width: 192px;
   margin-top: 2px;
-  color: #8888aa;
+  color: #a6a6cc;
   font-size: 11px;
   text-align: left;
 }
@@ -4784,13 +4798,13 @@ export default {
 }
 
 .menu-sub {
-  color: #7d8496;
+  color: #a4abc0;
   font-size: 9px;
 }
 
 .map-tip {
   margin-top: 6px;
-  color: #6a6a7a;
+  color: #9c9cb0;
   font-size: 10px;
 }
 
@@ -4857,7 +4871,7 @@ export default {
 
 .monster-atk {
   margin-top: 6px;
-  color: #9999a3;
+  color: #b2b2be;
   font-size: 11px;
 }
 
@@ -4871,7 +4885,7 @@ export default {
 }
 
 .log-line {
-  color: #8a8a94;
+  color: #aaaab6;
   font-size: 11px;
   line-height: 18px;
 }
@@ -4969,7 +4983,7 @@ export default {
 }
 
 .ach-desc {
-  color: #8994b6;
+  color: #aab4d2;
   font-size: 11px;
   margin-top: 2px;
 }
@@ -5060,7 +5074,7 @@ export default {
 }
 
 .shop-desc {
-  color: #8994b6;
+  color: #aab4d2;
   font-size: 11px;
   margin-top: 2px;
 }
@@ -5108,7 +5122,7 @@ export default {
 }
 
 .bag-slot-label {
-  color: #8890a3;
+  color: #a9b1c6;
   font-size: 11px;
 }
 
@@ -5120,7 +5134,7 @@ export default {
 }
 
 .bag-slot-sub {
-  color: #7d8496;
+  color: #a4abc0;
   font-size: 9px;
   margin-top: 4px;
   max-width: 58px;
@@ -5163,7 +5177,7 @@ export default {
 }
 
 .map-preview-btn-text {
-  color: #5a7aaa;
+  color: #93b4e4;
   font-size: 11px;
 }
 
@@ -5213,7 +5227,7 @@ export default {
 .mm-item { background-color: #44cc88; }
 
 .map-preview-legend {
-  color: #445566;
+  color: #8595a8;
   font-size: 9px;
   margin-top: 4px;
 }
