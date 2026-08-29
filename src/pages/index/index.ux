@@ -1999,7 +1999,6 @@ export default {
   },
 
   _revealAround() {
-    this._exploreDirty = true;
     var r = this._playerR, c = this._playerC;
     var R = 2 + (this._revealBonus || 0);
     for (var dr = -R; dr <= R; dr++) {
@@ -2009,7 +2008,10 @@ export default {
           if (!this._visited[nr]) {
             this._visited[nr] = [];
           }
-          this._visited[nr][nc] = true;
+          if (!this._visited[nr][nc]) {
+            this._visited[nr][nc] = true;
+            this._exploreDirty = true;
+          }
         }
       }
     }
