@@ -112,9 +112,11 @@
         <div class="map-container" @swipe="onMapSwipe" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
              style="width: {{mapViewW * 18 + 8}}px; height: {{mapViewH * 20 + 8}}px;">
           <div for="{{mapCells}}" tid="k" class="cell {{$item.cls}}"
-               style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;">
+               style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;"></div>
+          <div for="{{entities}}" tid="id" class="cell {{$item.cls}}"
+               style="left: {{$item.x}}px; top: {{$item.y}}px;">
             <image if="{{$item.icon}}" class="cell-icon" src="{{$item.icon}}"></image>
-            <text if="{{$item.cls === 'player'}}" class="cell-text">我</text>
+            <text if="{{$item.text}}" class="cell-text">{{$item.text}}</text>
           </div>
         </div>
       </div>
@@ -600,6 +602,8 @@ export default {
     explorePercent: 0,
     showMapPreview: false,
     minimapCells: [],
+    mapCells: [],
+    entities: [],
     _damageTaken: 0,
     _maxCombo: 0,
     _mStatus: { poison: 0, burn: 0, ice: 0, shock: 0, bleed: 0 },
@@ -1906,80 +1910,81 @@ export default {
     var viewW = Math.min(this._viewW, this._width);
     this.mapViewH = viewH;
     this.mapViewW = viewW;
-    var cells = [];
-    var monMap = this._buildOccupancy(true);
-    var itemMap = this._buildOccupancy(false);
+    // ===== 底层格子：墙/地板/迷雾/暗门/楼梯底色 =====
+    // 类型未变的槽位复用同一对象引用，降低每步绑定更新量；静态期跳过整表赋值
+    if (!this._baseSlots) {
+      this._baseSlots = {};
+    }
+    var slots = this._baseSlots;
+    var out = [];
+    var sig = '';
     for (var vr = 0; vr < viewH; vr++) {
-      var r = this._camR + vr;
       for (var vc = 0; vc < viewW; vc++) {
+        var r = this._camR + vr;
         var c = this._camC + vc;
-        var cls = this._grid[r][c] === '#' ? 'wall' : 'floor';
-        if (this._grid[r][c] === 'S') {
-          cls = 'secret';
-        }
+        var key = vr + '_' + vc;
+        var ch = this._grid[r][c];
         var visited = this._visited && this._visited[r] && this._visited[r][c];
-        if (r === this._playerR && c === this._playerC) {
-          cls = 'player';
-        } else if (!visited && cls === 'floor') {
+        var cls;
+        if (ch === '#') {
+          cls = 'wall';
+        } else if (ch === 'S') {
+          cls = 'secret';
+        } else if (!visited) {
           cls = 'fog';
         } else if (r === this._stairsR && c === this._stairsC) {
           cls = 'stairs';
         } else {
-          if (cls === 'fog') {
-            cls = 'floor';
-          }
-          var mon = monMap[r + '_' + c];
-          if (mon) {
-            cls = 'monster';
-          } else {
-            var item = itemMap[r + '_' + c];
-            if (item) {
-              cls = item.type;
-            }
-          }
+          cls = 'floor';
         }
-        var icon = '';
-        if (cls === 'player') {
-          icon = '';
-        } else if (cls === 'fog') {
-          icon = '';
-        } else if (cls === 'monster') {
-          icon = '/common/icons/monster.png';
-        } else if (cls === 'stairs') {
-          icon = '/common/icons/stairs.png';
-        } else if (cls === 'gold') {
-          icon = '/common/icons/gold.png';
-        } else if (cls === 'potion') {
-          icon = '/common/icons/potion.png';
-        } else if (cls === 'weapon') {
-          icon = '/common/icons/weapon.png';
-        } else if (cls === 'armor') {
-          icon = '/common/icons/armor.png';
-        } else if (cls === 'event') {
-          icon = '';
-        } else if (cls === 'trap') {
-          icon = '';
-        } else if (cls === 'poison') {
-          icon = '';
-        } else if (cls === 'challenge') {
-          icon = '';
-        } else if (cls === 'chest') {
-          icon = '';
-        } else if (cls === 'altar') {
-          icon = '';
-        } else if (cls === 'rune') {
-          icon = '';
-        } else if (cls === 'ice') {
-          icon = '';
-        } else if (cls === 'lava') {
-          icon = '';
-        } else if (cls === 'portal') {
-          icon = '';
+        sig += cls === 'fog' ? 'f' : (cls === 'wall' ? 'w' : (cls === 'floor' ? '.' : (cls === 'stairs' ? 's' : 'S')));
+        var cur = slots[key];
+        if (!cur || cur.cls !== cls) {
+          cur = { r: vr, c: vc, k: key, cls: cls };
+          slots[key] = cur;
         }
-        cells.push({ r: vr, c: vc, k: vr + '_' + vc, cls: cls, icon: icon });
+        out.push(cur);
       }
     }
-    this.mapCells = cells;
+    if (sig !== this._baseSig) {
+      this._baseSig = sig;
+      this.mapCells = out;
+    }
+    // ===== 实体层：楼梯图标/玩家/怪物/物品 =====
+    // 稳定 id + 只更新坐标：移动不再销毁重建原生节点（真机卡顿根因）
+    var ents = [];
+    var camR = this._camR;
+    var camC = this._camC;
+    var ICONS = {
+      gold: '/common/icons/gold.png',
+      potion: '/common/icons/potion.png',
+      weapon: '/common/icons/weapon.png',
+      armor: '/common/icons/armor.png',
+      stairs: '/common/icons/stairs.png'
+    };
+    var stairsSeen = this._visited && this._visited[this._stairsR] && this._visited[this._stairsR][this._stairsC];
+    if (stairsSeen && this._stairsR >= camR && this._stairsR < camR + viewH && this._stairsC >= camC && this._stairsC < camC + viewW) {
+      ents.push({ id: 'st', cls: '', x: (this._stairsC - camC) * 18, y: (this._stairsR - camR) * 20, icon: ICONS.stairs });
+    }
+    ents.push({ id: 'p', cls: 'player', x: (this._playerC - camC) * 18, y: (this._playerR - camR) * 20, text: '我' });
+    var mons = this._monsters;
+    for (var mi = 0; mi < mons.length; mi++) {
+      var m = mons[mi];
+      if (!m.alive) { continue; }
+      if (m.row === this._stairsR && m.col === this._stairsC) { continue; }
+      if (m.row < camR || m.row >= camR + viewH || m.col < camC || m.col >= camC + viewW) { continue; }
+      if (!(this._visited[m.row] && this._visited[m.row][m.col])) { continue; }
+      ents.push({ id: 'm' + mi, cls: 'monster', x: (m.col - camC) * 18, y: (m.row - camR) * 20, icon: '/common/icons/monster.png' });
+    }
+    var items = this._items;
+    for (var ii = 0; ii < items.length; ii++) {
+      var it = items[ii];
+      if (it.row === this._stairsR && it.col === this._stairsC) { continue; }
+      if (it.row < camR || it.row >= camR + viewH || it.col < camC || it.col >= camC + viewW) { continue; }
+      if (!(this._visited[it.row] && this._visited[it.row][it.col])) { continue; }
+      ents.push({ id: 'i' + ii, cls: it.type, x: (it.col - camC) * 18, y: (it.row - camR) * 20, icon: ICONS[it.type] || '' });
+    }
+    this.entities = ents;
     this._updateExplorePercent();
   },
 
