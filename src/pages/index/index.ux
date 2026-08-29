@@ -93,30 +93,25 @@
       </div>
       <text class="hp-text">HP {{hp}}/{{maxHp}} · 探索{{explorePercent}}% · 武{{weaponName}}+{{weaponAtk}} · 防{{armorName}}+{{armorDef}}{{challengeMod ? ' · 词条:' : ''}}</text>
 
-      <div class="map-preview-btn" @click="toggleMapPreview">
-        <text class="map-preview-btn-text">🗺 楼层地图</text>
-      </div>
-      <div if="{{showMapPreview}}" class="map-preview-panel">
-        <text class="map-preview-title-text">第{{floor}}层 · {{areaName}}</text>
-        <div class="minimap-grid">
-          <div for="{{minimapCells}}" tid="k" class="minimap-cell {{$item.cls}}">
-            <text if="{{$item.text}}" class="minimap-me">{{$item.text}}</text>
-            <image if="{{$item.icon}}" class="minimap-img" src="{{$item.icon}}" />
-          </div>
-        </div>
-      </div>
-
       <text class="map-msg">{{lastLog}}</text>
 
       <div class="map-area">
         <div class="map-container" @swipe="onMapSwipe" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
              style="width: {{mapViewW * 18 + 8}}px; height: {{mapViewH * 20 + 8}}px;">
-          <div for="{{mapCells}}" tid="k" class="cell {{$item.cls}}"
-               style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;"></div>
-          <div for="{{entities}}" tid="id" class="cell {{$item.cls}}" show="{{$item.vis}}"
-               style="left: {{$item.x}}px; top: {{$item.y}}px;">
-            <image if="{{$item.icon}}" class="cell-icon" src="{{$item.icon}}"></image>
-            <text if="{{$item.text}}" class="cell-text">{{$item.text}}</text>
+          <!-- 地图全部用 canvas 命令式绘制：移动只重画 canvas，零模板节点重建，真机不卡 -->
+          <canvas if="{{!useDomMap}}" id="mapCanvas"
+                  width="{{mapCvW}}" height="{{mapCvH}}"
+                  style="width: {{mapCvW}}px; height: {{mapCvH}}px;"></canvas>
+          <!-- canvas 不可用时的兜底 -->
+          <div if="{{useDomMap}}" class="map-canvas" style="left: {{canvasLeft}}px; top: {{canvasTop}}px; width: {{canvasW}}px; height: {{canvasH}}px;">
+            <div for="{{gridLayers}}" tid="k" class="grid-layer">
+              <div for="{{mapCells}}" tid="ck" static class="cell {{$item.cls}}"
+                   style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;"></div>
+            </div>
+            <div for="{{entities}}" tid="id" class="cell {{$item.cls}}" show="{{$item.vis}}"
+                 style="left: {{$item.x}}px; top: {{$item.y}}px;">
+              <text if="{{$item.text}}" class="cell-text">{{$item.text}}</text>
+            </div>
           </div>
         </div>
       </div>
@@ -600,8 +595,6 @@ export default {
     dailyClaimed: false,
     dailyLabel: '击杀 5 个怪物',
     explorePercent: 0,
-    showMapPreview: false,
-    minimapCells: [],
     mapCells: [],
     entities: [],
     _damageTaken: 0,
@@ -609,6 +602,7 @@ export default {
     _mStatus: { poison: 0, burn: 0, ice: 0, shock: 0, bleed: 0 },
     _exploreDirty: false,
     _setBonusApplied: false,
+    _diagnose: true,
     _moveCount: 0,
     _eventSkipCount: 0,
     _restCount: 0,
@@ -659,8 +653,16 @@ export default {
 
     mapRows: [],
     mapCells: [],
+    gridLayers: [{ k: 0 }],
     mapViewW: 6,
-    mapViewH: 10
+    mapViewH: 10,
+    canvasLeft: 0,
+    canvasTop: 0,
+    canvasW: 180,
+    canvasH: 200,
+    useDomMap: false,
+    mapCvW: 180,
+    mapCvH: 200
   },
 
   onInit() {
@@ -1372,7 +1374,7 @@ export default {
     this._height = sizes[idx][0];
     this._width = sizes[idx][1];
     this._genMap();
-    // 新层镜头一次性对准玩家（之后走死区跟随）
+    // 新层镜头一次性居中玩家（之后每次移动 _updateCamera 持续居中跟随）
     this._camR = Math.max(0, Math.min(this._playerR - Math.floor(Math.min(this._viewH, this._height) / 2), this._height - Math.min(this._viewH, this._height)));
     this._camC = Math.max(0, Math.min(this._playerC - Math.floor(Math.min(this._viewW, this._width) / 2), this._width - Math.min(this._viewW, this._width)));
     if (this._stairVision && this._visited && this._visited[this._stairsR]) {
@@ -1811,83 +1813,13 @@ export default {
   },
 
   _updateCamera() {
+    // 玩家始终居中：镜头 = 玩家位置 - 视野一半，并夹在地图边界内（靠近边界时自然贴近边缘）
     var viewH = Math.min(this._viewH, this._height);
     var viewW = Math.min(this._viewW, this._width);
-    // 死区跟随：玩家离开中央区才平移镜头，底层格子仅此时才重排（多数步零底格更新）
-    var dzR = Math.max(1, Math.floor(viewH / 4));
-    var dzC = Math.max(1, Math.floor(viewW / 4));
     var maxR = this._height - viewH;
     var maxC = this._width - viewW;
-    if (this._playerR < this._camR + dzR) {
-      this._camR = Math.max(0, this._playerR - dzR);
-    } else if (this._playerR > this._camR + viewH - 1 - dzR) {
-      this._camR = Math.min(maxR, this._playerR - (viewH - 1 - dzR));
-    }
-    if (this._camR > maxR) { this._camR = maxR; }
-    if (this._playerC < this._camC + dzC) {
-      this._camC = Math.max(0, this._playerC - dzC);
-    } else if (this._playerC > this._camC + viewW - 1 - dzC) {
-      this._camC = Math.min(maxC, this._playerC - (viewW - 1 - dzC));
-    }
-    if (this._camC > maxC) { this._camC = maxC; }
-  },
-
-  toggleMapPreview() {
-    this.showMapPreview = !this.showMapPreview;
-    if (this.showMapPreview) {
-      this._buildMinimap();
-    }
-  },
-
-  _buildMinimap() {
-    var cells = [];
-    var monMap = this._buildOccupancy(true);
-    var itemMap = this._buildOccupancy(false);
-    for (var r = 0; r < this._height; r++) {
-      for (var c = 0; c < this._width; c++) {
-        var textVal = '';
-        var icon = '';
-        var isWall = this._grid[r][c] === '#' || this._grid[r][c] === 'S';
-        var visited = this._visited && this._visited[r] && this._visited[r][c];
-        var cls;
-        
-        // 优先级与主地图一致：玩家 > 楼梯 > 迷雾 > 怪物/物品 > 地板
-        if (isWall) {
-          cls = 'mm-wall';
-        } else if (r === this._playerR && c === this._playerC) {
-          cls = 'mm-player';
-          textVal = '我';
-        } else if (!visited) {
-          cls = 'mm-fog';
-        } else if (r === this._stairsR && c === this._stairsC) {
-          cls = 'mm-stairs';
-          icon = '/common/icons/stairs.png';
-        } else {
-          var mon = monMap[r + '_' + c];
-          if (mon) {
-            cls = 'mm-monster';
-            icon = '/common/icons/monster.png';
-          } else {
-            var item = itemMap[r + '_' + c];
-            if (item) {
-              cls = 'mm-item';
-              var iconMap = {
-                gold: '/common/icons/gold.png',
-                potion: '/common/icons/potion.png',
-                weapon: '/common/icons/weapon.png',
-                armor: '/common/icons/armor.png'
-              };
-              icon = iconMap[item.type] || '';
-              if (!icon) { cls = 'mm-floor'; }
-            } else {
-              cls = 'mm-floor';
-            }
-          }
-        }
-        cells.push({ r: r, c: c, k: r + '_' + c, cls: cls, icon: icon, text: textVal });
-      }
-    }
-    this.minimapCells = cells;
+    this._camR = Math.max(0, Math.min(this._playerR - Math.floor(viewH / 2), maxR));
+    this._camC = Math.max(0, Math.min(this._playerC - Math.floor(viewW / 2), maxC));
   },
 
   _updateExplorePercent() {
@@ -1910,69 +1842,151 @@ export default {
     this.explorePercent = total > 0 ? Math.round(visited / total * 100) : 0;
   },
 
-  _buildOccupancy(isMonster) {
-    var map = {};
-    var arr = isMonster ? this._monsters : this._items;
-    for (var i = 0; i < arr.length; i++) {
-      var m = arr[i];
-      if (isMonster && !m.alive) { continue; }
-      var key = m.row + '_' + m.col;
-      if (!map[key]) { map[key] = m; }
+  _renderMap() {
+    // 低频调用（换层/读档/升级/战斗结束等）：整层数据一次准备完成
+    this._updateCamera();
+    this.mapViewH = Math.min(this._viewH, this._height);
+    this.mapViewW = Math.min(this._viewW, this._width);
+    this.canvasW = this._width * 18;
+    this.canvasH = this._height * 20;
+    this.mapCvW = this.mapViewW * 18;
+    this.mapCvH = this.mapViewH * 20;
+    // 兜底 DOM 层数据（仅 canvas 不可用时生效）
+    var cells = [];
+    for (var r = 0; r < this._height; r++) {
+      for (var c = 0; c < this._width; c++) {
+        var ch = this._grid[r][c];
+        cells.push({ r: r, c: c, k: 'k' + r + '_' + c, cls: ch === '#' ? 'wall' : (ch === 'S' ? 'secret' : 'floor') });
+      }
     }
-    return map;
+    this.mapCells = cells;
+    this._gridEpoch = (this._gridEpoch || 0) + 1;
+    this.gridLayers = [{ k: this._gridEpoch }];
+    this._renderEntities();
+    this._applyPan();
+    this._canvasInit();
+    this._drawMap();
+    this._updateExplorePercent();
   },
 
-  _renderMap() {
-    this._updateCamera();
-    var viewH = Math.min(this._viewH, this._height);
-    var viewW = Math.min(this._viewW, this._width);
-    this.mapViewH = viewH;
-    this.mapViewW = viewW;
-    // ===== 底层格子：仅初始化/视野尺寸变化时重建，其余全部原地更新 =====
-    // 官方《内存优化》：页面对象更新尽量原地更新，不要重新赋值开辟新空间
-    var need = viewW * viewH;
-    if (this.mapCells.length !== need || this._baseW !== viewW) {
-      this._baseW = viewW;
-      this.mapCells.splice(0, this.mapCells.length);
-      for (var bi = 0; bi < need; bi++) {
-        this.mapCells.push({ r: Math.floor(bi / viewW), c: bi % viewW, k: 'k' + bi, cls: '' });
+  _canvasInit() {
+    if (this._canvasOk) { return; }
+    this._canvasTried = true;
+    try {
+      var el = this.$element('mapCanvas');
+      // 元素尚未挂载时下次再试，不视为失败
+      if (!el) { this._canvasTried = false; return; }
+      if (el.getContext) {
+        this._mapEl = el;
+        this._mapCtx = el.getContext('2d');
+        this._canvasOk = !!this._mapCtx;
       }
+      if (!this._canvasOk) { this.useDomMap = true; }
+    } catch (e) {
+      this.useDomMap = true;
     }
-    var idx = 0;
+  },
+
+  _drawMap() {
+    if (!this._mapCtx && !this.useDomMap) {
+      this._canvasInit();
+    }
+    var ctx = this._mapCtx;
+    if (!ctx) { return; }
+    var viewH = this.mapViewH, viewW = this.mapViewW;
+    var W = viewW * 18, H = viewH * 20;
+    var el = this._mapEl;
+    if (el && (el.width !== W || el.height !== H)) {
+      el.width = W;
+      el.height = H;
+    }
+    ctx.fillStyle = '#101016';
+    ctx.fillRect(0, 0, W, H);
+    var camR = this._camR, camC = this._camC;
+    // 地形 + 迷雾（命令式绘制，恢复逐格迷雾也无性能负担）
     for (var vr = 0; vr < viewH; vr++) {
       for (var vc = 0; vc < viewW; vc++) {
-        var r = this._camR + vr;
-        var c = this._camC + vc;
+        var r = camR + vr, c = camC + vc;
+        var x = vc * 18, y = vr * 20;
         var ch = this._grid[r][c];
-        var visited = this._visited && this._visited[r] && this._visited[r][c];
-        var cls;
-        if (ch === '#') {
-          cls = 'wall';
-        } else if (ch === 'S') {
-          cls = 'secret';
-        } else if (!visited) {
-          cls = 'fog';
-        } else if (r === this._stairsR && c === this._stairsC) {
-          cls = 'stairs';
-        } else {
-          cls = 'floor';
-        }
-        var cell = this.mapCells[idx];
-        if (cell.cls !== cls) {
-          cell.cls = cls;
-        }
-        idx++;
+        var visited = !!(this._visited && this._visited[r] && this._visited[r][c]);
+        var col;
+        if (!visited) { col = '#17171f'; }
+        else if (ch === '#') { col = '#14141c'; }
+        else if (ch === 'S') { col = '#3a3a2a'; }
+        else { col = '#34343e'; }
+        ctx.fillStyle = col;
+        ctx.fillRect(x, y, 18, 20);
       }
     }
-    // ===== 实体层：常驻节点 + show 显隐 + 坐标原地更新（零节点增删）=====
-    var camR = this._camR;
-    var camC = this._camC;
+    this._drawEntities(ctx, camR, camC);
+  },
+
+  _drawEntities(ctx, camR, camC) {
+    var vH = this.mapViewH, vW = this.mapViewW;
+    // 楼梯（探到才显示）
+    if (this._visited && this._visited[this._stairsR] && this._visited[this._stairsR][this._stairsC]) {
+      var sr = this._stairsR - camR, sc = this._stairsC - camC;
+      if (sr >= 0 && sr < vH && sc >= 0 && sc < vW) {
+        this._fillCell(ctx, sc * 18, sr * 20, '#ffd75e', '↓');
+      }
+    }
+    // 玩家（始终显示）
+    var pr = this._playerR - camR, pc = this._playerC - camC;
+    if (pr >= 0 && pr < vH && pc >= 0 && pc < vW) {
+      this._fillCell(ctx, pc * 18, pr * 20, '#3aa0ff', '我');
+    }
+    // 怪物（探到才显示）
+    var mons = this._monsters;
+    for (var mi = 0; mi < mons.length; mi++) {
+      var m = mons[mi];
+      if (!m.alive) { continue; }
+      var rr = m.row - camR, cc = m.col - camC;
+      if (rr < 0 || rr >= vH || cc < 0 || cc >= vW) { continue; }
+      if (!(this._visited[m.row] && this._visited[m.row][m.col])) { continue; }
+      this._fillCell(ctx, cc * 18, rr * 20, '#ff5a4e', '');
+    }
+    // 物品（探到才显示）
+    var items = this._items;
+    var COLORS = { gold: '#ffcc55', potion: '#ff7aa8', weapon: '#b8b8c8', armor: '#6ab0ff', rune: '#4fd0c0', chest: '#d9a441', trap: '#b86a4e', event: '#7a5fd0', altar: '#7a4fd0', portal: '#c04fd0', ice: '#a0d0e8', lava: '#ff4400' };
+    var TEXTS = { gold: '金', potion: '药', weapon: '武', armor: '甲' };
+    for (var ii = 0; ii < items.length; ii++) {
+      var it = items[ii];
+      var rr2 = it.row - camR, cc2 = it.col - camC;
+      if (rr2 < 0 || rr2 >= vH || cc2 < 0 || cc2 >= vW) { continue; }
+      if (!(this._visited[it.row] && this._visited[it.row][it.col])) { continue; }
+      this._fillCell(ctx, cc2 * 18, rr2 * 20, COLORS[it.type] || '#8a8a9a', TEXTS[it.type] || '');
+    }
+  },
+
+  _fillCell(ctx, x, y, color, text) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, 18, 20);
+    if (text) {
+      try {
+        ctx.fillStyle = '#000000';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x + 9, y + 10);
+      } catch (e) {}
+    }
+  },
+
+  _applyPan() {
+    // 兜底 DOM 层镜头平移（仅 canvas 不可用时使用）
+    this.canvasLeft = -(this._camC * 18);
+    this.canvasTop = -(this._camR * 20);
+  },
+
+  _renderEntities() {
+    // 兜底 DOM 层实体（仅 canvas 不可用时使用）
     var desired = [];
     var stairsSeen = this._visited && this._visited[this._stairsR] && this._visited[this._stairsR][this._stairsC];
     if (stairsSeen) {
-      desired.push({ id: 'st', cls: '', x: (this._stairsC - camC) * 18, y: (this._stairsR - camR) * 20, icon: '/common/icons/stairs.png', vis: true });
+      desired.push({ id: 'st', cls: 'stairs', x: this._stairsC * 18, y: this._stairsR * 20, text: '↓', vis: true });
     }
-    desired.push({ id: 'p', cls: 'player', x: (this._playerC - camC) * 18, y: (this._playerR - camR) * 20, icon: '', text: '我', vis: true });
+    desired.push({ id: 'p', cls: 'player', x: this._playerC * 18, y: this._playerR * 20, text: '我', vis: true });
     var mons = this._monsters;
     for (var mi = 0; mi < mons.length; mi++) {
       var m = mons[mi];
@@ -1980,47 +1994,33 @@ export default {
       if (m.row === this._stairsR && m.col === this._stairsC) { continue; }
       desired.push({
         id: 'm' + mi, cls: 'monster',
-        x: (m.col - camC) * 18, y: (m.row - camR) * 20,
-        icon: '/common/icons/monster.png',
+        x: m.col * 18, y: m.row * 20,
+        text: '',
         vis: !!(this._visited[m.row] && this._visited[m.row][m.col])
       });
     }
     var items = this._items;
-    var ICONS = { gold: '/common/icons/gold.png', potion: '/common/icons/potion.png', weapon: '/common/icons/weapon.png', armor: '/common/icons/armor.png' };
     for (var ii = 0; ii < items.length; ii++) {
       var it = items[ii];
       if (it.row === this._stairsR && it.col === this._stairsC) { continue; }
       desired.push({
         id: 'i' + ii, cls: it.type,
-        x: (it.col - camC) * 18, y: (it.row - camR) * 20,
-        icon: ICONS[it.type] || '',
+        x: it.col * 18, y: it.row * 20,
+        text: it.type === 'gold' ? '金' : (it.type === 'potion' ? '药' : (it.type === 'weapon' ? '武' : '甲')),
         vis: !!(this._visited[it.row] && this._visited[it.row][it.col])
       });
     }
-    if (!this._entMap) { this._entMap = {}; }
-    var entMap = this._entMap;
-    var seen = {};
-    for (var d = 0; d < desired.length; d++) {
-      var dd = desired[d];
-      seen[dd.id] = true;
-      var ex = entMap[dd.id];
-      if (ex) {
-        if (ex.x !== dd.x) { ex.x = dd.x; }
-        if (ex.y !== dd.y) { ex.y = dd.y; }
-        if (ex.vis !== dd.vis) { ex.vis = dd.vis; }
-      } else {
-        var obj = { id: dd.id, cls: dd.cls, x: dd.x, y: dd.y, icon: dd.icon, text: dd.text || '', vis: dd.vis };
-        entMap[dd.id] = obj;
-        this.entities.push(obj);
-      }
+    this.entities = desired;
+  },
+
+  _panMove() {
+    // 高频路径（每走一步）：只居中相机 → canvas 重画（命令式，无模板节点重建）
+    this._updateCamera();
+    if (this.useDomMap) {
+      this._applyPan();
+      this._renderEntities();
     }
-    for (var ri = this.entities.length - 1; ri >= 0; ri--) {
-      var eid = this.entities[ri].id;
-      if (!seen[eid]) {
-        delete entMap[eid];
-        this.entities.splice(ri, 1);
-      }
-    }
+    this._drawMap();
     this._updateExplorePercent();
   },
 
@@ -2069,6 +2069,7 @@ export default {
       return;
     }
     this._touchMoved = true;
+    this._tGest = Date.now();
     if (Math.abs(dx) > Math.abs(dy)) {
       this._tryMove(0, dx > 0 ? 1 : -1);
     } else {
@@ -2121,6 +2122,7 @@ export default {
   },
 
   _tryMove(dr, dc) {
+    this._tMove0 = Date.now();
     var nr = this._playerR + dr;
     var nc = this._playerC + dc;
     if (nr < 0 || nr >= this._height || nc < 0 || nc >= this._width) {
@@ -3647,8 +3649,18 @@ export default {
     if (this.phase === 'dead') {
       return;
     }
-    this._renderMap();
+    // 诊断计时：定位每步耗时（真机读数后移除）
+    var t0 = Date.now();
+    this._panMove();
+    var t1 = Date.now();
     this._saveRun(true);
+    var t2 = Date.now();
+    var gest = this._tGest || 0;
+    var total = t2 - (gest || t2);
+    var logic = t0 - (this._tMove0 || t0);
+    if (this._diagnose) {
+      this._addLog('步:总' + total + ' 逻辑' + logic + ' 画' + (t1 - t0) + ' 存' + (t2 - t1));
+    }
   },
 
   _die() {
@@ -4744,6 +4756,22 @@ export default {
   box-sizing: border-box;
 }
 
+/* 整层地图画布：移动时只平移此层，网格节点不复用/不重建 */
+.map-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* 静态格子层：随画布平移；节点标记 static 后不参与移动期重渲染 */
+.grid-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .cell {
   position: absolute;
   width: 18px;
@@ -4872,9 +4900,9 @@ export default {
   height: 20px;
   line-height: 20px;
   text-align: center;
-  background-color: #000000;
+  background-color: rgba(0, 0, 0, 0.35);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   border-radius: 2px;
 }
@@ -5275,109 +5303,4 @@ export default {
   text-align: center;
 }
 
-.map-preview-btn {
-  width: 176px;
-  height: 24px;
-  margin-top: 4px;
-  border-radius: 6px;
-  background-color: #1a2030;
-  border: 1px solid #2a3050;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-preview-btn-text {
-  color: #93b4e4;
-  font-size: 11px;
-}
-
-.map-preview-panel {
-  width: 192px;
-  border-radius: 8px;
-  background-color: #0d1118;
-  border: 1px solid #2a3050;
-  padding: 6px;
-  box-sizing: border-box;
-}
-
-.map-preview-title {
-  padding-bottom: 4px;
-}
-
-.map-preview-title-text {
-  color: #7aa2ff;
-  font-size: 12px;
-}
-
-.minimap-grid {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.minimap-cell {
-  width: 14px;
-  height: 14px;
-}
-
-.minimap-icon {
-  font-size: 10px;
-  text-align: center;
-  width: 14px;
-  height: 14px;
-  line-height: 14px;
-}
-
-.mm-wall { background-color: #0a0a0f; }
-.mm-fog { background-color: #111118; }
-.mm-floor { background-color: #2a2a38; }
-.mm-player { background-color: #3aa0ff; border-radius: 50%; }
-.mm-stairs { background-color: #ffd75e; }
-.mm-monster { background-color: #ff5555; border-radius: 50%; }
-.mm-item { background-color: #44cc88; }
-
-.map-preview-legend {
-  color: #8595a8;
-  font-size: 9px;
-  margin-top: 4px;
-}
-
-.minimap-img {
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  width: 14px;
-  height: 14px;
-}
-
-.minimap-cell {
-  width: 16px;
-  height: 16px;
-  position: relative;
-}
-
-.mm-chest { background-color: #d9a441; }
-
-.minimap-icon {
-  display: none !important;
-}
-
-.mm-wall { background-color: #2a2a35; }
-.mm-fog { background-color: #0a0a0a; }
-
-.minimap-me {
-  width: 14px;
-  height: 14px;
-  line-height: 14px;
-  text-align: center;
-  color: #000000;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.mm-player {
-  background-color: #ffffff !important;
-  border-radius: 3px;
-}
 </style>

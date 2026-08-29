@@ -12,3 +12,6 @@ sign/
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# 构建产物 RPK
+*.rpk
