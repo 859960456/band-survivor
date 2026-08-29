@@ -31,6 +31,7 @@ export function initDailyTask(vm) {
         if (d && d.date === todayStr()) {
           vm.dailyType = d.type; vm.dailyTarget = d.target;
           vm.dailyProgress = d.progress || 0; vm.dailyDone = d.done || false;
+          vm.dailyClaimed = d.claimed || false;
           refreshDailyLabel(vm); return;
         }
       } catch(e) {}
@@ -46,14 +47,14 @@ export function newDailyTask(vm) {
   var labels = { kill: [5,'击杀 5 个怪物'], floor: [3,'到达第 3 层'], boss: [1,'击败 1 个 BOSS'], level: [5,'达到 Lv.5'] };
   var cfg = labels[vm.dailyType] || labels.kill;
   vm.dailyTarget = cfg[0]; vm.dailyLabel = cfg[1];
-  vm.dailyProgress = 0; vm.dailyDone = false;
+  vm.dailyProgress = 0; vm.dailyDone = false; vm.dailyClaimed = false;
   save(vm);
 }
 
 function save(vm) {
   storage.set({ key: 'BAND_SURVIVOR_DAILYTASK', value: JSON.stringify({
     date: todayStr(), type: vm.dailyType, target: vm.dailyTarget,
-    progress: vm.dailyProgress, done: vm.dailyDone
+    progress: vm.dailyProgress, done: vm.dailyDone, claimed: vm.dailyClaimed || false
   })});
 }
 
@@ -64,15 +65,15 @@ export function refreshDailyLabel(vm) {
 
 export function advanceDaily(vm, amount) {
   if (vm.dailyDone) return;
-  vm.dailyProgress += amount || 1;
+  vm.dailyProgress += amount || 0;
   if (vm.dailyProgress >= vm.dailyTarget) { vm.dailyProgress = vm.dailyTarget; vm.dailyDone = true; }
   save(vm);
 }
 
 export function claimDailyTask(vm) {
-  if (!vm.dailyDone) return;
+  if (!vm.dailyDone || vm.dailyClaimed) return;
   vm.soul += 10; vm._saveMeta();
-  vm.dailyDone = false; vm.dailyProgress = 0;
+  vm.dailyClaimed = true;
   save(vm);
 }
 

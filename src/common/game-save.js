@@ -35,7 +35,9 @@ export function serializeRun(vm) {
     shieldReflect: vm._shieldReflect, revive: vm._revive,
     reviveUsed: vm._reviveUsed, comboPerStack: vm._comboPerStack,
     levelHp: vm._levelHp,
+    hp: vm.hp, maxHp: vm.maxHp,
     exp: vm.exp, expNext: vm.expNext, potions: vm.potions,
+    skillId: vm.skillId,
     mh: vm._height, mw: vm._width,
     pr: vm._playerR, pc: vm._playerC,
     sr: vm._stairsR, sc: vm._stairsC,
@@ -46,9 +48,17 @@ export function serializeRun(vm) {
   };
 }
 
-export function saveRun(vm) {
+// 高频路径（走格子）节流：8 秒内不重复全量写盘；关键节点用 force 强制落盘
+var SAVE_THROTTLE_MS = 8000;
+
+export function saveRun(vm, force) {
   if (vm.phase !== 'grid' || !vm._grid || vm._grid.length === 0) return;
   vm._recordBest();
+  var now = Date.now();
+  if (!force && vm._lastSaveAt && now - vm._lastSaveAt < SAVE_THROTTLE_MS) {
+    return;
+  }
+  vm._lastSaveAt = now;
   storage.set({ key: 'BAND_SURVIVOR_SAVE', value: JSON.stringify(serializeRun(vm)) });
   vm.hasSave = true;
   vm.saveFloor = vm.floor;

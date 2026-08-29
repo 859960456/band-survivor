@@ -1,7 +1,7 @@
 {
   "name": "band-survivor",
-  "version": "0.1.0",
-  "description": "小米手环10 快应用 - 肉鸽生存小游戏",
+  "version": "1.0.0",
+  "description": "小米手环10 快应用 - 暗渊行者：肉鸽生存地牢走格子",
   "scripts": {
     "start": "aiot server --watch --open-nuttx --enable-custom-component true",
     "build": "aiot build --enable-custom-component --enable-jsc",

@@ -1,4 +1,5 @@
 // 纯计算逻辑模块（不依赖组件状态，便于复用与测试）
+import { BALANCE } from './game-data.js';
 
 export function difficultyMul(difficulty, challengeMode) {
   if (challengeMode) {
@@ -13,13 +14,14 @@ export function difficultyMul(difficulty, challengeMode) {
 
 export function computeMonsterStats(base, floor, mul, endless, areaEffect) {
   var ae = areaEffect || { hp: 1, atk: 1, gold: 1, exp: 1 };
-  var scale = 1 + floor * (endless ? 0.09 : 0.06);
+  var scale = 1 + floor * (endless ? BALANCE.monsterHpScaleEndless : BALANCE.monsterHpScale);
+  var atkAdd = floor * (endless ? BALANCE.monsterAtkScaleEndless : BALANCE.monsterAtkBase);
   return {
     name: base.name,
     hp: Math.round(base.hp * scale * mul.hp * ae.hp),
-    atk: Math.round((base.atk + floor * 0.4) * mul.atk * ae.atk),
-    gold: Math.round((base.gold + floor * 2) * mul.gold * ae.gold),
-    exp: Math.round((base.exp + floor * 3) * mul.exp * ae.exp)
+    atk: Math.round((base.atk + atkAdd) * mul.atk * ae.atk),
+    gold: Math.round((base.gold + floor * BALANCE.monsterGoldBase) * mul.gold * ae.gold),
+    exp: Math.round((base.exp + floor * BALANCE.monsterExpBase) * mul.exp * ae.exp)
   };
 }
 
@@ -95,98 +97,331 @@ export function randPick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export function achievementName(achievements, id) {
-  for (var i = 0; i < achievements.length; i++) {
-    if (achievements[i].id === id) {
-      return achievements[i].name;
-    }
+export var UPGRADE_EFFECTS = {
+  'atk': function(vm) {
+      vm.baseAtk += 4;
+      vm.atk = vm.baseAtk + vm.weaponAtk;
+  },
+  'hp': function(vm) {
+      vm.maxHp += 25;
+      vm.hp = Math.min(vm.maxHp, vm.hp + 25);
+  },
+  'potion': function(vm) {
+      vm.potions += 1;
+  },
+  'heal': function(vm) {
+      vm.hp = Math.min(vm.maxHp, vm.hp + 40);
+  },
+  'gold': function(vm) {
+      vm.gold += 15;
+  },
+  'goldmul': function(vm) {
+      vm.goldMul += 0.15;
+  },
+  'expmul': function(vm) {
+      vm.expMul += 0.15;
+  },
+  'crit': function(vm) {
+      vm.critChance += 0.08;
+  },
+  'critdmg': function(vm) {
+      vm.critMult += 0.3;
+  },
+  'lifesteal': function(vm) {
+      vm.lifesteal += 2;
+  },
+  'burn': function(vm) {
+      vm.burnChance += 0.1;
+  },
+  'cd': function(vm) {
+      vm.skillCdMax = Math.max(1, vm.skillCdMax - 0.3);
+  },
+  'omni': function(vm) {
+      vm.baseAtk += 2;
+      vm.atk = vm.baseAtk + vm.weaponAtk;
+      vm.goldMul += 0.05;
+      vm.expMul += 0.05;
+  },
+  'shield': function(vm) {
+      vm._shield += 15;
+  },
+  'haste': function(vm) {
+      vm._hasteCharges += 1;
+  },
+  'dodgeup': function(vm) {
+      vm.dodge += 3;
+  },
+  'materials': function(vm) {
+      vm.materials += 3;
+  },
+  'gold100': function(vm) {
+      vm.gold += 20;
+  },
+  'regen': function(vm) {
+      vm._regen += 2;
+  },
+  'thorns': function(vm) {
+      vm._thorns += 3;
+  },
+  'holy': function(vm) {
+      vm._killHeal += 5;
+  },
+  'loot': function(vm) {
+      vm._goldSteal += 3;
+  },
+  'skillpower': function(vm) {
+      vm._skillPowerAdd += 0.5;
+  },
+  'freeze': function(vm) {
+      vm._freezeChance += 0.15;
+  },
+  'block': function(vm) {
+      vm._blockChance += 0.2;
+  },
+  'barrier': function(vm) {
+      vm._barrier += 8;
+  },
+  'berserk': function(vm) {
+      vm._berserk = true;
+  },
+  'skillcombo': function(vm) {
+      vm._skillCombo += 2;
+  },
+  'vision': function(vm) {
+      vm._revealBonus += 1;
+  },
+  'combocap': function(vm) {
+      vm._comboMaxAdd += 0.2;
+  },
+  'treasure': function(vm) {
+      vm._treasureBonus += 1;
+  },
+  'vigor': function(vm) {
+      vm._floorHeal += 8;
+  },
+  'ironhide': function(vm) {
+      vm._bonusDef += 2;
+  },
+  'bloodlust': function(vm) {
+      vm._bloodlust = 1;
+  },
+  'gale': function(vm) {
+      vm._startHaste += 1;
+  },
+  'lootmat': function(vm) {
+      vm._materialBonus += 1;
+  },
+  'healboost': function(vm) {
+      vm._healBoost += 10;
+  },
+  'intimidate': function(vm) {
+      vm._intimidate = true;
+  },
+  'resolve': function(vm) {
+      vm._resolve = true;
+  },
+  'stun': function(vm) {
+      vm._stunChance += 0.15;
+  },
+  'execute': function(vm) {
+      vm._execute = true;
+  },
+  'artisan': function(vm) {
+      vm._craftDiscount += 0.2;
+  },
+  'cdkill': function(vm) {
+      vm._cdkill = 1;
+  },
+  'clean': function(vm) {
+      vm._cleanChance += 0.25;
+  },
+  'opening': function(vm) {
+      vm._openingStrike += 8;
+  },
+  'thunder': function(vm) {
+      vm._thunderChance += 0.2;
+  },
+  'guarded': function(vm) {
+      vm._shieldGainChance += 0.25;
+      vm._shieldGainAmt += 4;
+  },
+  'critgold': function(vm) {
+      vm._critGold += 5;
+  },
+  'comboHit': function(vm) {
+      vm._comboOnHit += 0.2;
+  },
+  'haggle': function(vm) {
+      vm._haggle += 0.15;
+  },
+  'potionShield': function(vm) {
+      vm._potionShield += 8;
+  },
+  'potionCombo': function(vm) {
+      vm._potionCombo += 2;
+  },
+  'critCombo': function(vm) {
+      vm._critCombo += 1;
+  },
+  'soulKill': function(vm) {
+      vm._soulOnKillChance += 0.2;
+  },
+  'stairvision': function(vm) {
+      vm._stairVision = true;
+  },
+  'startCombo': function(vm) {
+      vm._startCombo += 2;
+  },
+  'comboHeal': function(vm) {
+      vm._comboHeal += 4;
+  },
+  'levelShield': function(vm) {
+      vm._levelShield += 10;
+  },
+  'warcry': function(vm) {
+      vm._warcry += 3;
+  },
+  'startShield': function(vm) {
+      vm._startShield += 10;
+  },
+  'fullvision': function(vm) {
+      vm._fullVision = true;
+  },
+  'forgeMaster': function(vm) {
+      vm._forgeBonus += 1;
+  },
+  'critMaster': function(vm) {
+      vm.critMult += 0.3;
+  },
+  'lifesteal2': function(vm) {
+      vm.lifesteal += 2;
+  },
+  'cd2': function(vm) {
+      vm.skillCdMax = Math.max(1, vm.skillCdMax - 0.3);
+  },
+  'goldMaster': function(vm) {
+      vm.goldMul += 0.15;
+  },
+  'expMaster': function(vm) {
+      vm.expMul += 0.15;
+  },
+  'luck': function(vm) {
+      vm._luck += 1;
+  },
+  'shieldReflect': function(vm) {
+      vm._shieldReflect += 0.5;
+  },
+  'revive': function(vm) {
+      vm._revive = true;
+  },
+  'comboPower': function(vm) {
+      vm._comboPerStack += 0.01;
+  },
+  'keenEye': function(vm) {
+      vm.critChance += 0.05;
+  },
+  'dodge2': function(vm) {
+      vm.dodge += 3;
+  },
+  'thorns2': function(vm) {
+      vm._thorns += 3;
+  },
+  'shieldgain2': function(vm) {
+      vm._shieldGainAmt += 4;
+  },
+  'burn2': function(vm) {
+      vm.burnChance += 0.05;
+  },
+  'thunder2': function(vm) {
+      vm._thunderChance += 0.2;
+  },
+  'freeze2': function(vm) {
+      vm._freezeChance += 0.15;
+  },
+  'stun2': function(vm) {
+      vm._stunChance += 0.15;
+  },
+  'block2': function(vm) {
+      vm._blockChance += 0.2;
+  },
+  'clean2': function(vm) {
+      vm._cleanChance += 0.25;
+  },
+  'healboost2': function(vm) {
+      vm._healBoost += 10;
+  },
+  'material2': function(vm) {
+      vm._materialBonus += 1;
+  },
+  'skillpower2': function(vm) {
+      vm._skillPowerAdd += 0.5;
+  },
+  'omni2': function(vm) {
+      vm.baseAtk += 1;
+      vm.atk = vm.baseAtk + vm.weaponAtk;
+      vm.maxHp += 5;
+      vm.goldMul += 0.02;
+      vm.expMul += 0.02;
+  },
+  'levelhp': function(vm) {
+      vm._levelHp += 5;
+  },
+  'hppct': function(vm) {
+      var gain = Math.round(vm.maxHp * 0.1);
+      vm.maxHp += gain;
+      vm.hp = Math.min(vm.maxHp, vm.hp + gain);
   }
-  return id;
-}
+};
 
-// 种子生长地牢生成算法
-// 从起始房间向外随机方向生长，每局产生完全不同的布局
-export function growDungeon(width, height, floor, roomTypeAssigner) {
-  var rooms = [];
+// 天赋效果表：stat -> 应用函数
+export var TALENT_EFFECTS = {
+  atk: function(vm, v) { vm.baseAtk += v; vm.atk = vm.baseAtk + vm.weaponAtk; },
+  hp: function(vm, v) { vm.maxHp += v; },
+  goldMul: function(vm, v) { vm.goldMul += v; },
+  expMul: function(vm, v) { vm.expMul += v; },
+  lifesteal: function(vm, v) { vm.lifesteal += v; },
+  burnChance: function(vm, v) { vm.burnChance += v; },
+  shield: function(vm, v) { vm._shield += v; },
+  haste: function(vm, v) { vm._hasteCharges += v; },
+  combo: function(vm, v) { vm._comboMaxAdd += v; },
+  floorHeal: function(vm, v) { vm._floorHeal += v; },
+  dodge: function(vm, v) { vm.dodge += v; },
+  critChance: function(vm, v) { vm.critChance += v; },
+  freezeChance: function(vm, v) { vm._freezeChance += v; },
+  stunChance: function(vm, v) { vm._stunChance += v; },
+  thunderChance: function(vm, v) { vm._thunderChance += v; },
+  blockChance: function(vm, v) { vm._blockChance += v; },
+  thorns: function(vm, v) { vm._thorns += v; },
+  healBoost: function(vm, v) { vm._healBoost += v; },
+  skillPowerAdd: function(vm, v) { vm._skillPowerAdd += v; },
+  cdkill: function(vm, v) { vm._cdkill += v; },
+  bloodlust: function(vm, v) { vm._bloodlust += v; },
+  goldSteal: function(vm, v) { vm._goldSteal += v; },
+  materialBonus: function(vm, v) { vm._materialBonus += v; },
+  openingStrike: function(vm, v) { vm._openingStrike += v; },
+  warcry: function(vm, v) { vm._warcry += v; },
+  startCombo: function(vm, v) { vm._startCombo += v; }
+};
 
-  // 起始房间在地图中央附近
-  var sw = 3 + Math.floor(Math.random() * 3);
-  var sh = 3 + Math.floor(Math.random() * 3);
-  var sx = Math.max(2, Math.floor(width / 2) - (sw >> 1));
-  var sy = Math.max(2, Math.floor(height / 2) - (sh >> 1));
-  sx = Math.min(sx, width - sw - 1); sy = Math.min(sy, height - sh - 1);
-  var first = { x: sx, y: sy, w: sw, h: sh, cx: 0, cy: 0, type: 'start', cleared: false, dist: 0 };
-  first.cx = first.x + (first.w >> 1);
-  first.cy = first.y + (first.h >> 1);
-  rooms.push(first);
-
-  // 从现有房间向外生长
-  var target = 4 + Math.floor(Math.random() * 5);
-  var tries = 80;
-  var dirs = [[0,-1],[0,1],[-1,0],[1,0]];
-
-  while (rooms.length < target && tries > 0) {
-    tries--;
-    var parent = rooms[Math.floor(Math.random() * rooms.length)];
-    var dir = dirs[Math.floor(Math.random() * 4)];
-    var rw = 2 + Math.floor(Math.random() * 6);
-    var rhh = 2 + Math.floor(Math.random() * 6);
-    var rx, ry;
-
-    if (dir[1] === -1) {
-      rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
-      ry = parent.y - rhh - 1;
-    } else if (dir[0] === 1) {
-      rx = parent.x + parent.w + 1;
-      ry = parent.y + Math.floor(Math.random() * parent.h) - (rhh >> 1);
-    } else if (dir[1] === 1) {
-      rx = parent.x + Math.floor(Math.random() * parent.w) - (rw >> 1);
-      ry = parent.y + parent.h + 1;
-    } else {
-      rx = parent.x - rw - 1;
-      ry = parent.y + Math.floor(Math.random() * parent.h) - (rhh >> 1);
-    }
-    if (rx < 1 || ry < 1 || rx + rw > width - 1 || ry + rhh > height - 1) continue;
-    var ok = true;
-    for (var k = 0; k < rooms.length; k++) {
-      if (rx < rooms[k].x + rooms[k].w && rx + rw > rooms[k].x &&
-          ry < rooms[k].y + rooms[k].h && ry + rhh > rooms[k].y) { ok = false; break; }
-    }
-    if (!ok) continue;
-    var nr = { x: rx, y: ry, w: rw, h: rhh, cx: rx+(rw>>1), cy: ry+(rhh>>1),
-               type: 'combat', cleared: false, dist: 0 };
-    rooms.push(nr);
-  }
-
-  // 保底至少3个
-  if (rooms.length < 3) {
-    for (var fi = 0; fi < 4 && rooms.length < 3; fi++) {
-      var fd = dirs[fi];
-      var fx = rooms[0].cx + fd[0] * (rooms[0].w + 2);
-      var fy = rooms[0].cy + fd[1] * (rooms[0].h + 2);
-      fx = Math.max(1, Math.min(fx, width - 4)); fy = Math.max(1, Math.min(fy, height - 4));
-      var fok = true;
-      for (var fk = 0; fk < rooms.length; fk++) {
-        if (fx < rooms[fk].x + rooms[fk].w && fx + 3 > rooms[fk].x && fy < rooms[fk].y + rooms[fk].h && fy + 3 > rooms[fk].y) { fok = false; break; }
-      }
-      if (fok) {
-        var nr2 = { x: fx, y: fy, w: 3, h: 3, cx: fx+1, cy: fy+1,
-                    type: 'combat', cleared: false, dist: 0 };
-        rooms.push(nr2);
-      }
-    }
-  }
-
-  // 计算距离并分配房间类型
-  for (var i = 0; i < rooms.length; i++) {
-    rooms[i].dist = Math.sqrt((rooms[i].cx-rooms[0].cx)*(rooms[i].cx-rooms[0].cx)+(rooms[i].cy-rooms[0].cy)*(rooms[i].cy-rooms[0].cy));
-  }
-  var sorted = rooms.slice().sort(function(a,b){return a.dist-b.dist;});
-  sorted[0].type = 'start';
-  var farthest = sorted[sorted.length-1];
-  if (roomTypeAssigner) roomTypeAssigner(farthest, sorted);
-
-  return rooms;
-}
-
-
+// 遗物效果表：stat -> 应用函数
+export var RELIC_EFFECTS = {
+  atk: function(vm, v) { vm.baseAtk += v; vm.atk = vm.baseAtk + vm.weaponAtk; },
+  hp: function(vm, v) { vm.maxHp += v; },
+  goldMul: function(vm, v) { vm.goldMul += v; },
+  expMul: function(vm, v) { vm.expMul += v; },
+  cd: function(vm, v) { vm.skillCdMax = Math.max(1, vm.skillCdMax - v); },
+  shield: function(vm, v) { vm._shield += v; },
+  haste: function(vm, v) { vm._hasteCharges += v; },
+  combo: function(vm, v) { vm._comboMaxAdd += v; },
+  critChance: function(vm, v) { vm.critChance += v; },
+  floorHeal: function(vm, v) { vm._floorHeal += v; },
+  thorns: function(vm, v) { vm._thorns += v; },
+  goldSteal: function(vm, v) { vm._goldSteal += v; },
+  blockChance: function(vm, v) { vm._blockChance += v; },
+  revive: function(vm) { vm._revive = true; vm._reviveUsed = false; },
+  skillPowerAdd: function(vm, v) { vm._skillPowerAdd += v; },
+  killHeal: function(vm, v) { vm._killHeal += v; },
+  lifesteal: function(vm, v) { vm.lifesteal += v; },
+  bloodlust: function(vm, v) { vm._bloodlust += v; },
+  omni: function(vm, v) { var flat = Math.round(v * 100); vm.baseAtk += flat; vm.atk = vm.baseAtk + vm.weaponAtk; vm.maxHp += flat * 5; vm.goldMul += v; vm.expMul += v; }
+};

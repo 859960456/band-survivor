@@ -2,18 +2,18 @@
   <div class="page">
     <!-- 首页 -->
     <div if="{{phase === 'home'}}" class="screen">
-      <scroll class="home-scroll" scroll-y="true">
+      <scroll class="home-scroll" scroll-y="{{true}}">
         <div class="home-content">
         <text class="h-title">暗渊行者</text>
         <text class="h-sub">地牢走格子肉鸽</text>
 
-        <div if="{{dailyDone}}" class="h-row h-gold" @click="claimDailyTask">
-          <text class="h-row-l">领每日任务奖励</text>
-          <text class="h-row-r">+10魂</text>
+        <div if="{{dailyDone && !dailyClaimed}}" class="h-row h-gold" @click="claimDailyTask">
+          <text class="h-row-l h-gold-l">领每日任务奖励</text>
+          <text class="h-row-r h-gold-r">+10魂</text>
         </div>
         <div if="{{canClaimDaily}}" class="h-row h-gold" @click="claimDaily">
-          <text class="h-row-l">每日签到</text>
-          <text class="h-row-r">+8魂</text>
+          <text class="h-row-l h-gold-l">每日签到</text>
+          <text class="h-row-r h-gold-r">+8魂</text>
         </div>
 
         <div class="btn big-btn primary" @click="startGame">
@@ -65,6 +65,10 @@
         <div class="h-row" @click="openMeta">
           <text class="h-row-l">永久强化</text>
           <text class="h-row-r">灵魂{{soul}}</text>
+        </div>
+        <div class="h-row" @click="openAbout">
+          <text class="h-row-l">关于</text>
+          <text class="h-row-r">v1.0.0</text>
         </div>
 
         <text class="h-best">{{title}} · 最佳第{{best}}层</text>
@@ -118,7 +122,8 @@
       <text class="map-tip">滑动地图移动 · 撞怪进战斗</text>
 
       <!-- 底部可滚动菜单栏 -->
-      <scroll class="menu-scroll" scroll-y="true">
+      <scroll class="menu-scroll" scroll-y="{{true}}">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
         <div class="menu-item" @click="openBag">
           <text class="menu-label">背包</text>
           <text class="menu-sub">装备物品</text>
@@ -139,6 +144,7 @@
           <text class="menu-label">暂停</text>
           <text class="menu-sub">菜单/设置</text>
         </div>
+      </div>
       </scroll>
     </div>
 
@@ -176,11 +182,13 @@
     <div if="{{phase === 'talents'}}" class="overlay dead-overlay">
       <text class="dead-title">天赋</text>
       <text class="dead-text">可用点数：{{talentPoints}}</text>
-      <scroll class="shop-scroll" scroll-y="true">
+      <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 300px;">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
         <div for="{{talentList}}" class="ach-item {{$item.bought ? 'done' : ''}}" @click="buyTalent($item.id)">
           <text class="ach-name">{{$item.name}}</text>
           <text class="ach-desc">{{$item.desc}}</text>
         </div>
+      </div>
       </scroll>
       <div class="btn" @click="resetTalents">
         <text class="btn-text">重置天赋（返还点数）</text>
@@ -194,11 +202,13 @@
     <div if="{{phase === 'codex'}}" class="overlay dead-overlay">
       <text class="dead-title">怪物图鉴</text>
       <text class="dead-text">区域探索：{{visitedAreas.length}}/4</text>
-      <scroll class="shop-scroll" scroll-y="true">
+      <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 300px;">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
         <div for="{{codexList}}" class="ach-item {{$item.found ? 'done' : ''}}">
           <text class="ach-name">{{$item.name || $item.id}}</text>
           <text class="ach-desc">{{$item.found ? '已收录' : '未发现'}}</text>
         </div>
+      </div>
       </scroll>
       <div class="btn" @click="closeCodex">
         <text class="btn-text">关闭</text>
@@ -239,14 +249,37 @@
     <!-- 成就 -->
     <div if="{{phase === 'achievements'}}" class="overlay dead-overlay">
       <text class="dead-title">成就</text>
-      <scroll class="shop-scroll" scroll-y="true">
+      <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 300px;">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
         <div for="{{achievementList}}" class="ach-item {{$item.done ? 'done' : ''}}">
           <text class="ach-name">{{$item.name}}</text>
           <text class="ach-desc">{{$item.desc}}</text>
         </div>
+      </div>
       </scroll>
       <div class="btn" @click="closeAchievements">
         <text class="btn-text">关闭</text>
+      </div>
+    </div>
+
+    <!-- 关于 -->
+    <div if="{{phase === 'about'}}" class="overlay dead-overlay">
+      <text class="dead-title">暗渊行者</text>
+      <text class="dead-text">版本：1.0.0</text>
+      <text class="dead-text">作者：Yuan</text>
+      <text class="dead-text">平台：小米手环 10 · Vela 快应用</text>
+      <text class="dead-text">类型：肉鸽生存 · 地牢走格子</text>
+      <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 220px;">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
+        <text class="about-line">联系方式：QQ 2651261063</text>
+        <text class="about-line">邮箱：2651261063@qq.com</text>
+        <text class="about-line">声明：本游戏为个人开发作品，仅供学习交流使用；</text>
+        <text class="about-line">所有热梗素材来源于网络，版权归原作者所有；</text>
+        <text class="about-line">请勿用于商业用途；数据仅存储于设备本地。</text>
+      </div>
+      </scroll>
+      <div class="btn" @click="closeAbout">
+        <text class="btn-text">返回</text>
       </div>
     </div>
 
@@ -306,95 +339,111 @@
 
     <!-- 商店 -->
     <div if="{{phase === 'shop'}}" class="overlay shop-overlay">
-      <text class="shop-title">旅行商店</text>
-      <text class="shop-gold">金币 {{gold}}</text>
-      <scroll class="shop-scroll" scroll-y="true">
+      <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 470px;">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
+        <text class="shop-title">旅行商店</text>
+        <text class="shop-gold">金币 {{gold}}</text>
         <div for="{{shopItems}}" class="shop-item" @click="buyItem($item.id)">
           <text class="shop-name">{{$item.name}}</text>
           <text class="shop-desc">{{$item.desc}} · {{$item.price}}金{{$item.discount ? '（折）' : ''}}</text>
         </div>
+        <div class="btn shop-close {{gold < weaponUpgradeCost ? 'disabled' : ''}}" @click="upgradeWeapon">
+          <text class="btn-text">强化武器（{{weaponUpgradeCost}}金）</text>
+          <text class="btn-sub">当前 +{{weaponAtk}}</text>
+        </div>
+        <div class="btn shop-close {{gold < armorUpgradeCost ? 'disabled' : ''}}" @click="upgradeArmor">
+          <text class="btn-text">强化防具（{{armorUpgradeCost}}金）</text>
+          <text class="btn-sub">当前 +{{armorDef}}</text>
+        </div>
+        <div class="btn shop-close {{materials < 3 || gold < 20 ? 'disabled' : ''}}" @click="craftItem">
+          <text class="btn-text">打造装备（3材料+20金）</text>
+          <text class="btn-sub">材料 {{materials}}</text>
+        </div>
+        <div class="btn shop-close {{gold < 40 ? 'disabled' : ''}}" @click="gambleEquip">
+          <text class="btn-text">赌装备（40金）</text>
+          <text class="btn-sub">高概率高品质</text>
+        </div>
+        <div class="btn shop-close {{gold < 5 ? 'disabled' : ''}}" @click="refreshShop">
+          <text class="btn-text">刷新商品（5金）</text>
+        </div>
+        <div class="btn shop-close {{materials <= 0 ? 'disabled' : ''}}" @click="sellMaterials">
+          <text class="btn-text">出售材料（{{materials}}个）</text>
+          <text class="btn-sub">每个 +8金</text>
+        </div>
+        <div class="btn shop-close {{gold < 50 ? 'disabled' : ''}}" @click="enchantWeapon">
+          <text class="btn-text">附魔武器（50金）</text>
+          <text class="btn-sub">随机附加效果</text>
+        </div>
+        <div class="btn shop-close {{gold < 30 ? 'disabled' : ''}}" @click="socketGem">
+          <text class="btn-text">镶嵌宝石（30金）</text>
+          <text class="btn-sub">随机宝石属性</text>
+        </div>
+        <div class="btn shop-close" @click="closeShop">
+          <text class="btn-text">离开商店</text>
+        </div>
+        <div class="scroll-pad"></div>
+      </div>
       </scroll>
-      <div class="btn shop-close {{gold < weaponUpgradeCost ? 'disabled' : ''}}" @click="upgradeWeapon">
-        <text class="btn-text">强化武器（{{weaponUpgradeCost}}金）</text>
-        <text class="btn-sub">当前 +{{weaponAtk}}</text>
-      </div>
-      <div class="btn shop-close {{gold < armorUpgradeCost ? 'disabled' : ''}}" @click="upgradeArmor">
-        <text class="btn-text">强化防具（{{armorUpgradeCost}}金）</text>
-        <text class="btn-sub">当前 +{{armorDef}}</text>
-      </div>
-      <div class="btn shop-close {{materials < 3 || gold < 20 ? 'disabled' : ''}}" @click="craftItem">
-        <text class="btn-text">打造装备（3材料+20金）</text>
-        <text class="btn-sub">材料 {{materials}}</text>
-      </div>
-      <div class="btn shop-close {{gold < 40 ? 'disabled' : ''}}" @click="gambleEquip">
-        <text class="btn-text">赌装备（40金）</text>
-        <text class="btn-sub">高概率高品质</text>
-      </div>
-      <div class="btn shop-close {{gold < 5 ? 'disabled' : ''}}" @click="refreshShop">
-        <text class="btn-text">刷新商品（5金）</text>
-      </div>
-      <div class="btn shop-close {{materials <= 0 ? 'disabled' : ''}}" @click="sellMaterials">
-        <text class="btn-text">出售材料（{{materials}}个）</text>
-        <text class="btn-sub">每个 +8金</text>
-      </div>
-      <div class="btn shop-close" @click="closeShop">
-        <text class="btn-text">离开商店</text>
-      </div>
     </div>
 
     <!-- 背包 -->
     <div if="{{phase === 'bag'}}" class="overlay bag-overlay">
-      <text class="bag-title">背包</text>
-      <div class="bag-grid">
-        <div class="bag-slot">
-          <text class="bag-slot-label">武器</text>
-          <text class="bag-slot-value">+{{weaponAtk}}</text>
-          <text class="bag-slot-sub">{{weaponName}}</text>
+      <scroll class="bag-scroll" scroll-y="{{true}}" style="height: 480px;">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
+        <text class="bag-title">背包</text>
+        <div class="bag-grid">
+          <div class="bag-slot">
+            <text class="bag-slot-label">武器</text>
+            <text class="bag-slot-value">+{{weaponAtk}}</text>
+            <text class="bag-slot-sub">{{weaponName}}</text>
+          </div>
+          <div class="bag-slot">
+            <text class="bag-slot-label">防具</text>
+            <text class="bag-slot-value">+{{armorDef}}</text>
+            <text class="bag-slot-sub">{{armorName}}</text>
+          </div>
+          <div class="bag-slot">
+            <text class="bag-slot-label">药水</text>
+            <text class="bag-slot-value">×{{potions}}</text>
+            <text class="bag-slot-sub">回复</text>
+          </div>
+          <div class="bag-slot">
+            <text class="bag-slot-label">材料</text>
+            <text class="bag-slot-value">×{{materials}}</text>
+            <text class="bag-slot-sub">打造</text>
+          </div>
+          <div class="bag-slot">
+            <text class="bag-slot-label">遗物</text>
+            <text class="bag-slot-value">×{{relics.length}}</text>
+            <text class="bag-slot-sub">被动</text>
+          </div>
+          <div class="bag-slot">
+            <text class="bag-slot-label">天赋点</text>
+            <text class="bag-slot-value">×{{talentPoints}}</text>
+            <text class="bag-slot-sub">强化</text>
+          </div>
         </div>
-        <div class="bag-slot">
-          <text class="bag-slot-label">防具</text>
-          <text class="bag-slot-value">+{{armorDef}}</text>
-          <text class="bag-slot-sub">{{armorName}}</text>
+        <text class="bag-line">⚔ {{weaponName}} +{{weaponAtk}}</text>
+        <text class="bag-line">   技能:{{skillName}} · 吸血:{{lifesteal}} · 暴击率:{{critChance}}%</text>
+        <text class="bag-line">🛡 {{armorName}} +{{armorDef}} · 减伤:{{_bonusDef}} · 闪避:{{dodge}}%</text>
+        <text class="bag-line">护盾:{{_shield}} · 材料:{{materials}} · 药水:{{potions}}</text>
+        <text class="bag-line">历史最佳: 武+{{bestWeaponAtk}} / 防+{{bestArmorDef}}</text>
+        <text class="bag-line">遗物图鉴 {{relicCodex.length}}/{{relicTotal}} · 装备图鉴 {{equipCodex.length}}/{{equipTotal}}</text>
+        <div class="btn" @click="usePotionFromBag">
+          <text class="btn-text">使用药水</text>
         </div>
-        <div class="bag-slot">
-          <text class="bag-slot-label">药水</text>
-          <text class="bag-slot-value">×{{potions}}</text>
-          <text class="bag-slot-sub">回复</text>
+        <div class="btn" @click="salvageWeapon">
+          <text class="btn-text">分解武器（+{{weaponAtk * 2}}材料）</text>
         </div>
-        <div class="bag-slot">
-          <text class="bag-slot-label">材料</text>
-          <text class="bag-slot-value">×{{materials}}</text>
-          <text class="bag-slot-sub">打造</text>
+        <div class="btn" @click="salvageArmor">
+          <text class="btn-text">分解防具（+{{armorDef * 2}}材料）</text>
         </div>
-        <div class="bag-slot">
-          <text class="bag-slot-label">遗物</text>
-          <text class="bag-slot-value">×{{relics.length}}</text>
-          <text class="bag-slot-sub">被动</text>
+        <div class="btn" @click="closeBag">
+          <text class="btn-text">关闭背包</text>
         </div>
-        <div class="bag-slot">
-          <text class="bag-slot-label">天赋点</text>
-          <text class="bag-slot-value">×{{talentPoints}}</text>
-          <text class="bag-slot-sub">强化</text>
-        </div>
+        <div class="scroll-pad"></div>
       </div>
-      <text class="bag-line">⚔ {{weaponName}} +{{weaponAtk}}</text>
-      <text class="bag-line">   技能:{{skillName}} · 吸血:{{lifesteal}} · 暴击率:{{critChance}}%</text>
-      <text class="bag-line">🛡 {{armorName}} +{{armorDef}} · 减伤:{{_bonusDef}} · 闪避:{{dodge}}%</text>
-      <text class="bag-line">护盾:{{_shield}} · 材料:{{materials}} · 药水:{{potions}}</text>
-      <text class="bag-line">历史最佳: 武+{{bestWeaponAtk}} / 防+{{bestArmorDef}}</text>
-      <text class="bag-line">遗物图鉴 {{relicCodex.length}}/{{relicTotal}} · 装备图鉴 {{equipCodex.length}}/{{equipTotal}}</text>
-      <div class="btn" @click="usePotionFromBag">
-        <text class="btn-text">使用药水</text>
-      </div>
-      <div class="btn" @click="salvageWeapon">
-        <text class="btn-text">分解武器（+{{weaponAtk * 2}}材料）</text>
-      </div>
-      <div class="btn" @click="salvageArmor">
-        <text class="btn-text">分解防具（+{{armorDef * 2}}材料）</text>
-      </div>
-      <div class="btn" @click="closeBag">
-        <text class="btn-text">关闭背包</text>
-      </div>
+      </scroll>
     </div>
 
     <!-- 战斗界面 -->
@@ -410,7 +459,8 @@
       </div>
       <text class="hp-text">HP {{hp}}/{{maxHp}} · 连击{{combo}}</text>
 
-      <scroll class="battle-scroll" scroll-y="true">
+      <scroll class="battle-scroll" scroll-y="{{true}}" style="height: 300px;">
+      <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
         <div class="monster-card">
           <text class="monster-name">{{monsterName}}</text>
           <text class="monster-hp-text">{{monsterHp}}/{{monsterMaxHp}}</text>
@@ -425,6 +475,7 @@
         <div class="log-box">
           <text for="{{logLines}}" class="log-line">{{$item}}</text>
         </div>
+      </div>
       </scroll>
 
       <div class="actions">
@@ -448,13 +499,15 @@
 <script>
 import storage from '@system.storage';
 import vibrator from '@system.vibrator';
-import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, RARITY_COLOR, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS, RANGED_MONSTERS, AREA_LORE, ENEMY_AFFIXES, KILL_FLAVORS, PICK_FLAVORS, EVENT_FLAVORS, BOSS_QUOTES } from '../../common/game-data.js';
-import { computeMonsterStats, difficultyMul, randInt, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor, randPick, achievementName } from '../../common/game-core.js';
+import { AREAS, MONSTERS, UPGRADES, WEAPONS, ARMORS, SHOP_ITEMS, BASE_PLAYER, SKILL_CD, HEAL_AMOUNT, QUALITIES, WEAPON_AFFIXES, ARMOR_AFFIXES, ACHIEVEMENTS, RELICS, TALENTS, CLASSES, CHALLENGE_MODS, AREA_LORE, ENEMY_AFFIXES, KILL_FLAVORS, BOSS_QUOTES, BALANCE, SKILLS, SUMMONS } from '../../common/game-data.js';
+import { computeMonsterStats, difficultyMul, areaByFloor, isBossFloor, healAmount, skillName, skillMult, moveThreshold, sensLabel, classById, bestKey, rollWeapon, rollArmor, randPick, UPGRADE_EFFECTS, TALENT_EFFECTS, RELIC_EFFECTS } from '../../common/game-core.js';
 import * as GameSave from '../../common/game-save.js';
 import * as GameProgress from '../../common/game-progress.js';
 
 const MAX_LOG = 6;
 const BOSS_EVERY = 5;
+
+// 升级效果表：由原 chooseUpgrade if-else 链等价转换，id 与 game-data UPGRADES 对应
 
 export default {
   private: {
@@ -490,6 +543,9 @@ export default {
     metaHp: 0,
     metaPotion: 0,
     metaAtk: 0,
+    metaUpgradeCostHp: 20,
+    metaUpgradeCostPotion: 25,
+    metaUpgradeCostAtk: 30,
     eventTitle: '',
     eventDesc: '',
     eventOptions: [],
@@ -516,6 +572,11 @@ export default {
     goldMul: 1,
     expMul: 1,
     skillCdMax: SKILL_CD,
+    skillId: 'base_slash',
+    _summonId: '',
+    _summonHp: 0,
+    _summonMaxHp: 0,
+    _summonName: '',
     burnChance: 0,
     dodge: 0,
     combo: 0,
@@ -528,18 +589,27 @@ export default {
     ngLevel: 0,
     promoted: false,
     ngActive: false,
-    ngLevel: 0,
     promoteName: '',
     dailyType: 'kill',
     dailyTarget: 5,
     dailyProgress: 0,
     dailyDone: false,
+    dailyClaimed: false,
     dailyLabel: '击杀 5 个怪物',
     explorePercent: 0,
     showMapPreview: false,
     minimapCells: [],
     _damageTaken: 0,
     _maxCombo: 0,
+    _mStatus: { poison: 0, burn: 0, ice: 0, shock: 0, bleed: 0 },
+    _setBonusApplied: false,
+    _moveCount: 0,
+    _eventSkipCount: 0,
+    _restCount: 0,
+    _gambleMissCount: 0,
+    _deathCount: 0,
+    _consecutiveLevels: 0,
+    _stolenGoldCount: 0,
     _bossEnraged: false,
     _poisonDmg: 0,
     _burnTurns: 0,
@@ -755,8 +825,9 @@ export default {
     return GameSave.serializeRun(this);
   },
 
-  _saveRun() {
-    GameSave.saveRun(this);
+  _saveRun(throttled) {
+    // 默认强制落盘；走格子高频路径传 true 启用 8s 节流
+    GameSave.saveRun(this, !throttled);
   },
 
   _saveBackup() {
@@ -820,6 +891,7 @@ export default {
         that.goldMul = s.goldMul || 1;
         that.expMul = s.expMul || 1;
         that.skillCdMax = s.skillCdMax || SKILL_CD;
+        that.skillId = s.skillId || 'base_slash';
         that.burnChance = s.burnChance || 0;
         that.dodge = s.dodge || 0;
         that.skillName = s.skillName || that._skillName();
@@ -933,6 +1005,11 @@ export default {
     this.goldMul = 1;
     this.expMul = 1;
     this.skillCdMax = SKILL_CD;
+    this.skillId = 'base_slash';
+    this._summonId = '';
+    this._summonHp = 0;
+    this._summonMaxHp = 0;
+    this._summonName = '';
     this.burnChance = 0;
     this.dodge = 0;
     this.combo = 0;
@@ -966,6 +1043,8 @@ export default {
     this._stunned = false;
     this._stunChance = 0;
     this._execute = false;
+    this._mStatus = { poison: 0, burn: 0, ice: 0, shock: 0, bleed: 0 };
+    this._setBonusApplied = false;
     this._craftDiscount = 0;
     this._cdkill = 0;
     this._cleanChance = 0;
@@ -1004,6 +1083,13 @@ export default {
     this.ngActive = this.ngLevel > 0;
     this._maxCombo = 0;
     this._comboMaxAdd = 0;
+    this._moveCount = 0;
+    this._eventSkipCount = 0;
+    this._restCount = 0;
+    this._gambleMissCount = 0;
+    this._deathCount = 0;
+    this._consecutiveLevels = 0;
+    this._stolenGoldCount = 0;
     this._bossEnraged = false;
     this._poisonDmg = 0;
     this._burnTurns = 0;
@@ -1181,7 +1267,7 @@ export default {
     var base = MONSTERS[id] || MONSTERS.slime;
     var area = this._areaByFloor(this.floor);
     var result = computeMonsterStats(base, this.floor, this._difficultyMul(), this.endless, area.effect);
-    var ngMul = 1 + (this.ngLevel || 0) * 0.5;
+    var ngMul = 1 + (this.ngLevel || 0) * BALANCE.ngPlusScale;
     result.hp = Math.round(result.hp * ngMul);
     result.atk = Math.round(result.atk * ngMul);
     result.gold = Math.round(result.gold * ngMul);
@@ -1451,7 +1537,7 @@ export default {
       this._visited.push(vrow);
     }
     var first = rooms[0];
-    var last = rooms[rooms.length - 1];
+    var last = sortedByDist[sortedByDist.length - 1];
     // 避免出生点和楼梯同一个格子
     if (last.x === first.x && last.y === first.y) {
       last = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[0];
@@ -1475,15 +1561,17 @@ export default {
     this._items = [];
 
     // ===== 按房间类型放置内容 =====
-    var combatRooms = rooms.filter(function(r) { return r.type === 'combat'; });
     var bossRoom = rooms.find(function(r) { return r.type === 'boss'; });
     
     // 怪物只放在战斗房和Boss房
     var monsterCount = Math.min(2 + Math.floor(this.floor / 2), 6);
+    var bossPlaced = false;
     for (var m = 0; m < monsterCount; m++) {
       var targetRoom = null;
-      if (this._isBossFloor(this.floor) && bossRoom) {
+      var isBossSpawn = false;
+      if (this._isBossFloor(this.floor) && bossRoom && !bossPlaced) {
         targetRoom = bossRoom;
+        isBossSpawn = true;
       } else {
         // 肉鸽随机：怪物可以出现在任何非出生/非宝藏房间
         var validRooms = rooms.filter(function(r) { return r.type !== 'start'; });
@@ -1498,9 +1586,10 @@ export default {
         if (this._grid[mr] && this._grid[mr][mc] === '.' &&
             !(mr === this._playerR && mc === this._playerC) &&
             !this._monsterAt(mr, mc)) {
-          var id = this._isBossFloor(this.floor) ? this._areaByFloor(this.floor).boss : this._randomMonsterForArea();
+          var id = isBossSpawn ? this._areaByFloor(this.floor).boss : this._randomMonsterForArea();
           this._monsters.push({ id: id, row: mr, col: mc, alive: true });
           placed = true;
+          if (isBossSpawn) { bossPlaced = true; }
         }
       }
     }
@@ -1545,10 +1634,13 @@ export default {
       } else if (roll < 0.985) {
         type = 'rune';
         icon = '◆';
-      } else if (roll < 0.985) {
+      } else if (roll < 0.99) {
         type = 'portal';
         icon = '◎';
-      } else if (roll < 0.99) {
+      } else if (roll < 0.993) {
+        type = 'skillbook';
+        icon = '📖';
+      } else if (roll < 0.998) {
         type = Math.random() < 0.5 ? 'ice' : 'lava';
         icon = type === 'ice' ? '❄' : '♨';
       }
@@ -1797,10 +1889,7 @@ export default {
         cells.push({ r: vr, c: vc, cls: cls, icon: icon });
       }
     }
-    this.mapCells = [];
-    for (var ci = 0; ci < cells.length; ci++) {
-      this.mapCells.push(cells[ci]);
-    }
+    this.mapCells = cells;
     this._updateExplorePercent();
   },
 
@@ -1850,6 +1939,7 @@ export default {
     } else {
       this._tryMove(dy > 0 ? 1 : -1, 0);
     }
+    this._lastMoveAt = Date.now();
     // 重置起点，方便连续滑动
     this._touchStartX = tx;
     this._touchStartY = ty;
@@ -1863,6 +1953,10 @@ export default {
 
   onMapSwipe(e) {
     if (this.phase !== 'grid') {
+      return;
+    }
+    // touchmove 已处理移动时忽略随后的 swipe，防止一步变两步
+    if (Date.now() - (this._lastMoveAt || 0) < 400) {
       return;
     }
     var dir = e.direction;
@@ -1946,6 +2040,8 @@ export default {
     if (item) {
       this._playerR = nr;
       this._playerC = nc;
+      this._moveCount += 1;
+      if (this._moveCount >= 100) { this._unlockAchievement('meme_6'); }
       this._pickItem(item);
       this._removeItem(item);
       if (this._portalNext) {
@@ -1970,6 +2066,8 @@ export default {
 
     this._playerR = nr;
     this._playerC = nc;
+    this._moveCount += 1;
+    if (this._moveCount >= 100) { this._unlockAchievement('meme_6'); }
     this._revealAround();
     this._renderMap();
     if (this._hasteCharges > 0) {
@@ -2004,15 +2102,7 @@ export default {
       this._addLog('拾取药水，现有 ' + this.potions + ' 瓶');
     } else if (item.type === 'weapon') {
       var weapon = this._rollWeapon();
-      if (weapon.atk > this.weaponAtk) {
-        this.weaponAtk = weapon.atk;
-        this.weaponName = weapon.name;
-        this.atk = this.baseAtk + this.weaponAtk;
-        this.skillName = this._skillName();
-        this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
-      } else {
-        this._addLog('获得 ' + weapon.name + '，但不如当前武器');
-      }
+      this._equipRolled(weapon);
     } else if (item.type === 'challenge') {
       this._startChallenge();
     } else if (item.type === 'portal') {
@@ -2081,16 +2171,23 @@ export default {
       }
     } else if (item.type === 'event') {
       this._openEvent();
+    } else if (item.type === 'skillbook') {
+      var newSkills = [];
+      for (var si = 0; si < SKILLS.length; si++) {
+        if (SKILLS[si].id !== this.skillId && SKILLS[si].id !== 'base_slash') {
+          newSkills.push(SKILLS[si]);
+        }
+      }
+      if (newSkills.length > 0) {
+        var picked = newSkills[Math.floor(Math.random() * newSkills.length)];
+        this.skillId = picked.id;
+        this._addLog('习得技能：' + picked.name + '！');
+      } else {
+        this._addLog('技能书：你已经会所有技能了');
+      }
     } else if (item.type === 'armor') {
       var armor = this._rollArmor();
-      if (armor.def > this.armorDef) {
-        this.armorDef = armor.def;
-        this.armorName = armor.name;
-        this.dodge = armor.dodge || 0;
-        this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
-      } else {
-        this._addLog('获得 ' + armor.name + '，但不如当前防具');
-      }
+      this._equipRolledArmor(armor);
     }
   },
 
@@ -2137,7 +2234,8 @@ export default {
     this._enemyAffix = ea;
     this._enemyAffixName = ea.name;
     if (ea.stat === 'atkMul') {
-      elite.atk = Math.round(elite.atk * ea.value);
+      // 修正：原实现修改的是局部对象，对已赋值的 monsterAtk 无效
+      this.monsterAtk = Math.max(1, Math.round(this.monsterAtk * ea.value));
     }
     this.phase = 'battle';
     this._addLog('遭遇精英 ' + elite.name + ' [' + ea.name + ']');
@@ -2146,10 +2244,32 @@ export default {
   _startBattle(mon) {
     this._battleMonsterR = mon.row;
     this._battleMonsterC = mon.col;
-    this._spawnMonster(mon.id, false);
+    // Boss 层的 BOSS 怪以 isBoss 进入战斗（狂暴/台词/遗物与战利品掉落）
+    var isBossFight = this._isBossFloor(this.floor) && mon.id === this._areaByFloor(this.floor).boss;
+    this._spawnMonster(mon.id, isBossFight);
   },
 
   _spawnMonster(monsterId, isBoss) {
+    // 每场战斗重置敌人词缀，防止上一场精英/Boss 的词缀残留
+    this._enemyAffix = null;
+    this._enemyAffixName = '';
+    this._enemyDoubleAct = false;
+    this._mStatus = { poison: 0, burn: 0, ice: 0, shock: 0, bleed: 0 };
+    // 初始化召唤物
+    this._summonHp = 0;
+    this._summonMaxHp = 0;
+    this._summonName = '';
+    if (this._summonId) {
+      for (var smi = 0; smi < SUMMONS.length; smi++) {
+        if (SUMMONS[smi].id === this._summonId) {
+          this._summonName = SUMMONS[smi].name;
+          this._summonMaxHp = Math.max(1, Math.round(this.maxHp * SUMMONS[smi].hpRatio));
+          this._summonHp = this._summonMaxHp;
+          this._addLog(SUMMONS[smi].name + ' 被召唤出来挡在前面！');
+          break;
+        }
+      }
+    }
     var stats = this._monsterStats(monsterId);
     this.monsterId = monsterId;
     this.monsterAlive = true;
@@ -2230,17 +2350,41 @@ export default {
         return cls.skillBonus;
       }
     }
+    for (var i = 0; i < SKILLS.length; i++) {
+      if (SKILLS[i].id === this.skillId) {
+        return SKILLS[i].name;
+      }
+    }
     return skillName(this.weaponAtk);
   },
 
   _skillMult() {
-    var base = skillMult(this.weaponAtk) + this._skillPowerAdd;
+    var base = skillMult(this.weaponAtk);
+    for (var i = 0; i < SKILLS.length; i++) {
+      if (SKILLS[i].id === this.skillId) {
+        base = SKILLS[i].mult;
+        break;
+      }
+    }
+    base += this._skillPowerAdd;
+    // 武器类型影响技能倍率：锤重击、法杖稳、拳轻快、伞防御、刀锋利、弓精准、剑标准
+    var typeBase = { '锤': 0.3, '法杖': 0.15, '拳': -0.1, '伞': -0.2, '刀': 0.1, '弓': 0.2, '剑': 0 };
+    base += typeBase[this._weaponType] || 0;
     if (this.promoted) {
       if (this.charClass === 'warrior') base *= 1.3;
       else if (this.charClass === 'ranger') base *= 1.5;
       else if (this.charClass === 'mage') base *= 1.8;
     }
     return base;
+  },
+
+  _skillCdMax() {
+    for (var i = 0; i < SKILLS.length; i++) {
+      if (SKILLS[i].id === this.skillId) {
+        return SKILLS[i].cd;
+      }
+    }
+    return this.skillCdMax;
   },
 
   doSkill() {
@@ -2250,7 +2394,7 @@ export default {
     if (this.skillCd > 0) {
       return;
     }
-    this.skillCd = this.skillCdMax;
+    this.skillCd = this._skillCdMax();
     this._addLog('释放 ' + this._skillName());
     if (this._skillCombo > 0) {
       this.combo += this._skillCombo;
@@ -2280,7 +2424,71 @@ export default {
     this._monsterAttack();
   },
 
+  _applyMonsterStatus(type, stacks) {
+    if (!this._mStatus) {
+      this._mStatus = { poison: 0, burn: 0, ice: 0, shock: 0, bleed: 0 };
+    }
+    this._mStatus[type] = (this._mStatus[type] || 0) + stacks;
+    var names = { poison: '中毒', burn: '灼烧', ice: '冰冻', shock: '感电', bleed: '流血' };
+    this._addLog('怪物' + names[type] + '叠层 +' + stacks);
+    if (this._mStatus.poison > 0 && this._mStatus.burn > 0) {
+      var boom = (this._mStatus.poison + this._mStatus.burn) * 2;
+      this.monsterHp -= boom;
+      this._updateMonsterHp();
+      this._addLog('火毒爆炸！造成 ' + boom + ' 伤害');
+      this._mStatus.poison = 0;
+      this._mStatus.burn = 0;
+      if (this.monsterHp <= 0) {
+        this.monsterHp = 0;
+        this._updateMonsterHp();
+        this.monsterAlive = false;
+        this._onMonsterDead();
+        return;
+      }
+    }
+    if (this._mStatus.ice > 0 && this._mStatus.shock > 0) {
+      this._stunned = true;
+      this._addLog('冰电麻痹！怪物下一回合无法行动');
+      this._mStatus.ice = 0;
+      this._mStatus.shock = 0;
+    }
+  },
+
   _playerAction(multiplier) {
+    if (this.monsterAlive && this._mStatus) {
+      var tickDmg = 0;
+      if (this._mStatus.poison > 0) {
+        tickDmg += this._mStatus.poison * 2;
+        this._mStatus.poison--;
+      }
+      if (this._mStatus.burn > 0) {
+        tickDmg += this._mStatus.burn * 3;
+        this._mStatus.burn--;
+      }
+      if (this._mStatus.bleed > 0) {
+        tickDmg += this._mStatus.bleed * 2;
+        this._mStatus.bleed--;
+      }
+      if (tickDmg > 0) {
+        this.monsterHp -= tickDmg;
+        this._updateMonsterHp();
+        this._addLog('状态伤害 ' + tickDmg);
+        if (this.monsterHp <= 0) {
+          this.monsterHp = 0;
+          this._updateMonsterHp();
+          this.monsterAlive = false;
+          this._onMonsterDead();
+          return;
+        }
+      }
+      if (this._mStatus.ice > 0) {
+        this.monsterAtk = Math.max(1, this.monsterAtk - this._mStatus.ice);
+      }
+      if (this._mStatus.shock > 0 && Math.random() < this._mStatus.shock * 0.15) {
+        this._stunned = true;
+        this._addLog('感电触发麻痹！');
+      }
+    }
     if (this._burnTurns > 0) {
       this.monsterHp -= this._burnPower;
       this._updateMonsterHp();
@@ -2301,6 +2509,39 @@ export default {
     }
     this.combo += 1;
     this._maxCombo = Math.max(this._maxCombo, this.combo);
+    if (this.combo >= 6) { this._unlockAchievement('meme_dog'); }
+    if (this.combo >= 66) { this._unlockAchievement('meme_666'); }
+    // 装备 proc 触发
+    var wp = this._weaponProc;
+    if (wp && this.monsterAlive) {
+      if (wp.poison && Math.random() < wp.poison) {
+        this._applyMonsterStatus('poison', 1);
+      }
+      if (wp.comboChance && Math.random() < wp.comboChance) {
+        this.combo += 2;
+        this._addLog('六六六！连击 +2');
+      }
+      if (wp.stealGold && Math.random() < wp.stealGold && this.monsterGold > 0) {
+        var stealAmt = Math.max(1, Math.round(this.monsterGold * 0.1));
+        this.monsterGold -= stealAmt;
+        this.gold += Math.round(stealAmt * this.goldMul);
+        this._addLog('栓Q！偷取 ' + stealAmt + ' 金币');
+      }
+      if (wp.shieldOnHit && Math.random() < wp.shieldOnHit) {
+        this._shield += 5;
+        this._addLog('我不李姐！获得 5 护盾');
+      }
+      if (wp.healOnHit && this.hp < this.maxHp) {
+        this.hp = Math.min(this.maxHp, this.hp + wp.healOnHit);
+        this._updateHp();
+        this._addLog('绷不住了！回复 ' + wp.healOnHit + ' 生命');
+      }
+      if (wp.doubleHit && Math.random() < wp.doubleHit) {
+        this.combo += 1;
+        this._addLog('好家伙！触发双倍连击');
+      }
+    }
+
     if (this.combo === 5 || this.combo === 10 || this.combo === 15) {
       this._vibrate(200);
       this._addLog('连击 x' + this.combo + '！');
@@ -2309,10 +2550,11 @@ export default {
         this._updateHp();
       }
     }
-    var comboBonus = 1 + Math.min(this.combo * this._comboPerStack, 0.6 + this._comboMaxAdd);
+    var comboBonus = 1 + Math.min(this.combo * this._comboPerStack, BALANCE.comboMax + this._comboMaxAdd);
     var isCrit = Math.random() < this.critChance;
-    var effectiveAtk = this.atk + this._bloodlust - 1 + (this._battleAtkBonus || 0);
-    var dmg = Math.max(1, Math.round(effectiveAtk * multiplier * comboBonus * (0.9 + Math.random() * 0.2) * (isCrit ? this.critMult : 1)));
+    // 注：bloodlustOffset 抵消血怒初始值 1，首次攻击不加成，之后每击杀 +1
+    var effectiveAtk = this.atk + this._bloodlust - BALANCE.bloodlustOffset + (this._battleAtkBonus || 0);
+    var dmg = Math.max(1, Math.round(effectiveAtk * multiplier * comboBonus * (BALANCE.playerDmgMin + Math.random() * (BALANCE.playerDmgMax - BALANCE.playerDmgMin)) * (isCrit ? this.critMult : 1)));
     if (this._berserk && this.maxHp > 0) {
       var missing = 1 - this.hp / this.maxHp;
       dmg = Math.max(1, Math.round(dmg * (1 + missing * 0.3)));
@@ -2383,17 +2625,29 @@ export default {
     if (this.isBoss && !this._bossEnraged && this.monsterHp < this.monsterMaxHp * 0.5) {
       this._bossEnraged = true;
       this._addLog(this.monsterName + ' 狂暴了！攻击大幅提升');
-      this.monsterAtk = Math.round(this.monsterAtk * 1.4);
+      this.monsterAtk = Math.round(this.monsterAtk * BALANCE.bossEnrageAtk);
     }
     if (this.dodge > 0 && Math.random() * 100 < this.dodge) {
       this._addLog('你闪避了 ' + this.monsterName + ' 的攻击');
       return;
     }
-    var dmg = Math.max(1, Math.round((this.monsterAtk - this.armorDef - this._bonusDef) * (0.85 + Math.random() * 0.3)));
-    var blocked = false;
+    var dmg = Math.max(1, Math.round((this.monsterAtk - this.armorDef - this._bonusDef) * (BALANCE.monsterDmgMin + Math.random() * (BALANCE.monsterDmgMax - BALANCE.monsterDmgMin))));
+    // 召唤物挡刀
+    if (this._summonHp > 0) {
+      var absorbedSum = Math.min(this._summonHp, dmg);
+      this._summonHp -= absorbedSum;
+      dmg -= absorbedSum;
+      this._addLog(this._summonName + ' 抵挡了 ' + absorbedSum + ' 伤害');
+      if (this._summonHp <= 0) {
+        this._summonHp = 0;
+        this._addLog(this._summonName + ' 倒下了！');
+      }
+      if (dmg <= 0) {
+        dmg = 0;
+      }
+    }
     if (this._blockChance > 0 && Math.random() < this._blockChance) {
       dmg = Math.max(1, Math.round(dmg * 0.5));
-      blocked = true;
       this._addLog('你格挡了部分伤害');
     }
     var absorbed = Math.min(this._shield, dmg);
@@ -2505,11 +2759,14 @@ export default {
     if (this.monsterId === 'goblin' && Math.random() < 0.2 && this.gold > 0) {
       var steal = Math.min(this.gold, Math.max(1, Math.round(this.gold * 0.1)));
       this.gold -= steal;
+      this._stolenGoldCount += 1;
+      if (this._stolenGoldCount >= 10) { this._unlockAchievement('meme_leek'); }
       this._addLog('哥布林偷走了 ' + steal + ' 金币');
     }
     if (this.monsterId === 'yeti' && Math.random() < 0.3) {
       var cold = Math.max(2, Math.round(dmg * 0.4));
       this.hp -= cold;
+      this._damageTaken += cold;
       this._updateHp();
       this._addLog('雪怪的寒气造成额外 ' + cold + ' 伤害');
       if (this.hp <= 0) {
@@ -2550,6 +2807,7 @@ export default {
     if ((this.monsterId === 'fire_imp' || this.monsterId === 'lava_golem' || this.monsterId === 'inferno_lord') && Math.random() < 0.3) {
       var burn = Math.max(2, Math.round(dmg * 0.5));
       this.hp -= burn;
+      this._damageTaken += burn;
       this._updateHp();
       this._addLog('灼热气息造成额外 ' + burn + ' 伤害');
       if (this.hp <= 0) {
@@ -2557,6 +2815,76 @@ export default {
         this._updateHp();
         this._die();
       }
+    }
+
+    // ===== 新怪物机制 =====
+    // 卷王：概率连击（额外攻击一次）
+    if (this.monsterId === 'juan_wang' && Math.random() < 0.25) {
+      var juanDmg = Math.max(1, Math.round(dmg * 0.6));
+      this.hp -= juanDmg;
+      this._damageTaken += juanDmg;
+      this._updateHp();
+      this._addLog('卷王卷起来了！追加 ' + juanDmg + ' 伤害');
+      if (this.hp <= 0) { this.hp = 0; this._updateHp(); this._die(); }
+    }
+    // 鸽子精：有概率咕掉（不攻击）
+    if (this.monsterId === 'gezi' && Math.random() < 0.2) {
+      this._addLog('鸽子精咕了……什么都没做');
+    }
+    // 杠精/碰瓷怪：反弹伤害
+    if ((this.monsterId === 'gangjing' || this.monsterId === 'pengci') && Math.random() < 0.3) {
+      var gangDmg = Math.max(1, Math.round(dmg * 0.2));
+      this.hp -= gangDmg;
+      this._updateHp();
+      this._addLog('杠精/碰瓷怪反弹 ' + gangDmg + ' 伤害');
+      if (this.hp <= 0) { this.hp = 0; this._updateHp(); this._die(); }
+    }
+    // 键盘侠：远程打击，额外伤害
+    if (this.monsterId === 'jianpanxia' && Math.random() < 0.3) {
+      var jpDmg = Math.max(1, Math.round(dmg * 0.4));
+      this.hp -= jpDmg;
+      this._damageTaken += jpDmg;
+      this._updateHp();
+      this._addLog('键盘侠疯狂输出！追加 ' + jpDmg + ' 伤害');
+      if (this.hp <= 0) { this.hp = 0; this._updateHp(); this._die(); }
+    }
+    // 老板：血量低于 50% 时画饼狂暴
+    if (this.monsterId === 'laoban' && this.monsterHp < this.monsterMaxHp * 0.5 && !this._bossEnraged) {
+      this._bossEnraged = true;
+      this.monsterAtk = Math.round(this.monsterAtk * 1.3);
+      this._addLog('老板开始画饼！攻击提升');
+    }
+    // 土豪：偷金币
+    if (this.monsterId === 'tuhao' && Math.random() < 0.25 && this.gold > 0) {
+      var thSteal = Math.min(this.gold, Math.max(1, Math.round(this.gold * 0.08)));
+      this.gold -= thSteal;
+      this._addLog('土豪拿走 ' + thSteal + ' 金币');
+    }
+    // 水军：额外伤害（人多势众，简化版）
+    var shuiJunCount = this._monsters ? this._monsters.length : 0;
+    if (this.monsterId === 'shui_jun' && shuiJunCount > 0) {
+      var sjDmg = Math.max(1, Math.round(dmg * Math.min(0.5, shuiJunCount * 0.08)));
+      this.hp -= sjDmg;
+      this._damageTaken += sjDmg;
+      this._updateHp();
+      this._addLog('水军来了！追加 ' + sjDmg + ' 伤害');
+      if (this.hp <= 0) { this.hp = 0; this._updateHp(); this._die(); }
+    }
+    // 小红书精：种草回血
+    if (this.monsterId === 'xiaohongshu' && Math.random() < 0.3 && this.monsterAlive) {
+      var xhsHeal = Math.max(1, Math.round(this.monsterMaxHp * 0.05));
+      this.monsterHp = Math.min(this.monsterMaxHp, this.monsterHp + xhsHeal);
+      this._updateMonsterHp();
+      this._addLog('小红书精种草成功，回复 ' + xhsHeal);
+    }
+    // 抖音精：刷屏连击
+    if (this.monsterId === 'douyin' && Math.random() < 0.3) {
+      var dyDmg = Math.max(1, Math.round(dmg * 0.3));
+      this.hp -= dyDmg;
+      this._damageTaken += dyDmg;
+      this._updateHp();
+      this._addLog('抖音精刷屏！追加 ' + dyDmg + ' 伤害');
+      if (this.hp <= 0) { this.hp = 0; this._updateHp(); this._die(); }
     }
 
     if (this.hp <= 0) {
@@ -2662,15 +2990,7 @@ export default {
       return;
     }
     var weapon = this._rollWeapon();
-    if (weapon.atk > this.weaponAtk) {
-      this.weaponAtk = weapon.atk;
-      this.weaponName = weapon.name;
-      this.atk = this.baseAtk + this.weaponAtk;
-      this.skillName = this._skillName();
-      this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
-    } else {
-      this._addLog('获得 ' + weapon.name + '，但不如当前武器');
-    }
+    this._equipRolled(weapon);
   },
 
   _dropArmor() {
@@ -2678,14 +2998,7 @@ export default {
       return;
     }
     var armor = this._rollArmor();
-    if (armor.def > this.armorDef) {
-      this.armorDef = armor.def;
-      this.armorName = armor.name;
-      this.dodge = armor.dodge || 0;
-      this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
-    } else {
-      this._addLog('获得 ' + armor.name + '，但不如当前防具');
-    }
+    this._equipRolledArmor(armor);
   },
 
   closeTutorial() {
@@ -2851,7 +3164,11 @@ export default {
         this._playerR = this._stairsR;
         this._playerC = this._stairsC;
         this._revealAround();
-        this._addLog('精灵将你传送至楼梯处');
+        this._addLog('精灵将你传送至楼梯处，直接下潜！');
+        // 传送到楼梯即进入下一层（原实现站在楼梯格上不触发下楼）
+        this.phase = 'grid';
+        this._genFloor(this.floor + 1);
+        return;
       } else if (opt.effect === 'curse') {
         var cr = Math.random();
         if (cr < 0.4) {
@@ -2889,6 +3206,10 @@ export default {
           this.atk = this.baseAtk + this.weaponAtk;
           this._addLog('井水赐予力量，攻击 +2');
         }
+      } else if (opt.effect === 'none' || (opt.label && (opt.label.indexOf('离开') >= 0 || opt.label.indexOf('无视') >= 0 || opt.label.indexOf('拒绝') >= 0))) {
+        this._eventSkipCount += 1;
+        if (this._eventSkipCount >= 3) { this._unlockAchievement('meme_pigeon'); }
+        if (this._eventSkipCount >= 5) { this._unlockAchievement('meme_gezi'); }
       } else if (opt.effect === 'trap') {
         var trapDmg = Math.max(3, Math.round(8 + this.floor * 0.6));
         this.hp -= trapDmg;
@@ -2930,25 +3251,9 @@ export default {
   },
 
   _applyTalent(t) {
-    if (t.stat === 'atk') {
-      this.baseAtk += t.value;
-      this.atk = this.baseAtk + this.weaponAtk;
-    } else if (t.stat === 'hp') {
-      this.maxHp += t.value;
-    } else if (t.stat === 'goldMul') {
-      this.goldMul += t.value;
-    } else if (t.stat === 'expMul') {
-      this.expMul += t.value;
-    } else if (t.stat === 'lifesteal') {
-      this.lifesteal += t.value;
-    } else if (t.stat === 'burnChance') {
-      this.burnChance += t.value;
-    } else if (t.stat === 'shield') {
-      this._shield += t.value;
-    } else if (t.stat === 'haste') {
-      this._hasteCharges += t.value;
-    } else if (t.stat === 'combo') {
-      this._comboMaxAdd += t.value;
+    var fn = TALENT_EFFECTS[t.stat];
+    if (fn) {
+      fn(this, t.value);
     }
   },
 
@@ -2988,6 +3293,40 @@ export default {
       this._hasteCharges = Math.max(0, this._hasteCharges - t.value);
     } else if (t.stat === 'combo') {
       this._comboMaxAdd = Math.max(0, this._comboMaxAdd - t.value);
+    } else if (t.stat === 'floorHeal') {
+      this._floorHeal = Math.max(0, this._floorHeal - t.value);
+    } else if (t.stat === 'dodge') {
+      this.dodge = Math.max(0, this.dodge - t.value);
+    } else if (t.stat === 'critChance') {
+      this.critChance = Math.max(0, this.critChance - t.value);
+    } else if (t.stat === 'freezeChance') {
+      this._freezeChance = Math.max(0, this._freezeChance - t.value);
+    } else if (t.stat === 'stunChance') {
+      this._stunChance = Math.max(0, this._stunChance - t.value);
+    } else if (t.stat === 'thunderChance') {
+      this._thunderChance = Math.max(0, this._thunderChance - t.value);
+    } else if (t.stat === 'blockChance') {
+      this._blockChance = Math.max(0, this._blockChance - t.value);
+    } else if (t.stat === 'thorns') {
+      this._thorns = Math.max(0, this._thorns - t.value);
+    } else if (t.stat === 'healBoost') {
+      this._healBoost = Math.max(0, this._healBoost - t.value);
+    } else if (t.stat === 'skillPowerAdd') {
+      this._skillPowerAdd = Math.max(0, this._skillPowerAdd - t.value);
+    } else if (t.stat === 'cdkill') {
+      this._cdkill = Math.max(0, this._cdkill - t.value);
+    } else if (t.stat === 'bloodlust') {
+      this._bloodlust = Math.max(0, this._bloodlust - t.value);
+    } else if (t.stat === 'goldSteal') {
+      this._goldSteal = Math.max(0, this._goldSteal - t.value);
+    } else if (t.stat === 'materialBonus') {
+      this._materialBonus = Math.max(0, this._materialBonus - t.value);
+    } else if (t.stat === 'openingStrike') {
+      this._openingStrike = Math.max(0, this._openingStrike - t.value);
+    } else if (t.stat === 'warcry') {
+      this._warcry = Math.max(0, this._warcry - t.value);
+    } else if (t.stat === 'startCombo') {
+      this._startCombo = Math.max(0, this._startCombo - t.value);
     }
     this._updateHp();
   },
@@ -3053,23 +3392,11 @@ export default {
         this._unlockAchievement('relic_master');
       }
     }
-    if (relic.stat === 'atk') {
-      this.baseAtk += relic.value;
-      this.atk = this.baseAtk + this.weaponAtk;
-    } else if (relic.stat === 'hp') {
-      this.maxHp += relic.value;
-    } else if (relic.stat === 'goldMul') {
-      this.goldMul += relic.value;
-    } else if (relic.stat === 'expMul') {
-      this.expMul += relic.value;
-    } else if (relic.stat === 'cd') {
-      this.skillCdMax = Math.max(1, this.skillCdMax - relic.value);
-    } else if (relic.stat === 'shield') {
-      this._shield += relic.value;
-    } else if (relic.stat === 'haste') {
-      this._hasteCharges += relic.value;
-    } else if (relic.stat === 'combo') {
-      this._comboMaxAdd += relic.value;
+    var rfn = RELIC_EFFECTS[relic.stat];
+    if (rfn) {
+      rfn(this, relic.value);
+    } else if (relic.stat === 'summon') {
+      this._summonId = relic.value;
     }
     this._addLog('获得遗物：' + relic.name + '（' + relic.desc + '）');
   },
@@ -3086,196 +3413,15 @@ export default {
   },
 
   chooseUpgrade(id) {
-    if (id === 'atk') {
-      this.baseAtk += 4;
-      this.atk = this.baseAtk + this.weaponAtk;
-    } else if (id === 'hp') {
-      this.maxHp += 25;
-      this.hp = Math.min(this.maxHp, this.hp + 25);
-    } else if (id === 'potion') {
-      this.potions += 1;
-    } else if (id === 'heal') {
-      this.hp = Math.min(this.maxHp, this.hp + 40);
-    } else if (id === 'gold') {
-      this.gold += 15;
-    } else if (id === 'goldmul') {
-      this.goldMul += 0.15;
-    } else if (id === 'expmul') {
-      this.expMul += 0.15;
-    } else if (id === 'crit') {
-      this.critChance += 0.08;
-    } else if (id === 'critdmg') {
-      this.critMult += 0.3;
-    } else if (id === 'lifesteal') {
-      this.lifesteal += 2;
-    } else if (id === 'burn') {
-      this.burnChance += 0.1;
-    } else if (id === 'cd') {
-      this.skillCdMax = Math.max(1, this.skillCdMax - 0.3);
-    } else if (id === 'omni') {
-      this.baseAtk += 2;
-      this.atk = this.baseAtk + this.weaponAtk;
-      this.goldMul += 0.05;
-      this.expMul += 0.05;
-    } else if (id === 'shield') {
-      this._shield += 15;
-    } else if (id === 'haste') {
-      this._hasteCharges += 1;
-    } else if (id === 'dodgeup') {
-      this.dodge += 3;
-    } else if (id === 'materials') {
-      this.materials += 3;
-    } else if (id === 'gold100') {
-      this.gold += 20;
-    } else if (id === 'regen') {
-      this._regen += 2;
-    } else if (id === 'thorns') {
-      this._thorns += 3;
-    } else if (id === 'holy') {
-      this._killHeal += 5;
-    } else if (id === 'loot') {
-      this._goldSteal += 3;
-    } else if (id === 'skillpower') {
-      this._skillPowerAdd += 0.5;
-    } else if (id === 'freeze') {
-      this._freezeChance += 0.15;
-    } else if (id === 'block') {
-      this._blockChance += 0.2;
-    } else if (id === 'barrier') {
-      this._barrier += 8;
-    } else if (id === 'berserk') {
-      this._berserk = true;
-    } else if (id === 'skillcombo') {
-      this._skillCombo += 2;
-    } else if (id === 'vision') {
-      this._revealBonus += 1;
-    } else if (id === 'combocap') {
-      this._comboMaxAdd += 0.2;
-    } else if (id === 'treasure') {
-      this._treasureBonus += 1;
-    } else if (id === 'vigor') {
-      this._floorHeal += 8;
-    } else if (id === 'ironhide') {
-      this._bonusDef += 2;
-    } else if (id === 'bloodlust') {
-      this._bloodlust = 1;
-    } else if (id === 'gale') {
-      this._startHaste += 1;
-    } else if (id === 'lootmat') {
-      this._materialBonus += 1;
-    } else if (id === 'healboost') {
-      this._healBoost += 10;
-    } else if (id === 'intimidate') {
-      this._intimidate = true;
-    } else if (id === 'resolve') {
-      this._resolve = true;
-    } else if (id === 'stun') {
-      this._stunChance += 0.15;
-    } else if (id === 'execute') {
-      this._execute = true;
-    } else if (id === 'artisan') {
-      this._craftDiscount += 0.2;
-    } else if (id === 'cdkill') {
-      this._cdkill = 1;
-    } else if (id === 'clean') {
-      this._cleanChance += 0.25;
-    } else if (id === 'opening') {
-      this._openingStrike += 8;
-    } else if (id === 'thunder') {
-      this._thunderChance += 0.2;
-    } else if (id === 'guarded') {
-      this._shieldGainChance += 0.25;
-      this._shieldGainAmt += 4;
-    } else if (id === 'critgold') {
-      this._critGold += 5;
-    } else if (id === 'comboHit') {
-      this._comboOnHit += 0.2;
-    } else if (id === 'haggle') {
-      this._haggle += 0.15;
-    } else if (id === 'potionShield') {
-      this._potionShield += 8;
-    } else if (id === 'potionCombo') {
-      this._potionCombo += 2;
-    } else if (id === 'critCombo') {
-      this._critCombo += 1;
-    } else if (id === 'soulKill') {
-      this._soulOnKillChance += 0.2;
-    } else if (id === 'stairvision') {
-      this._stairVision = true;
-    } else if (id === 'startCombo') {
-      this._startCombo += 2;
-    } else if (id === 'comboHeal') {
-      this._comboHeal += 4;
-    } else if (id === 'levelShield') {
-      this._levelShield += 10;
-    } else if (id === 'warcry') {
-      this._warcry += 3;
-    } else if (id === 'startShield') {
-      this._startShield += 10;
-    } else if (id === 'fullvision') {
-      this._fullVision = true;
-    } else if (id === 'forgeMaster') {
-      this._forgeBonus += 1;
-    } else if (id === 'critMaster') {
-      this.critMult += 0.3;
-    } else if (id === 'lifesteal2') {
-      this.lifesteal += 2;
-    } else if (id === 'cd2') {
-      this.skillCdMax = Math.max(1, this.skillCdMax - 0.3);
-    } else if (id === 'goldMaster') {
-      this.goldMul += 0.15;
-    } else if (id === 'expMaster') {
-      this.expMul += 0.15;
-    } else if (id === 'luck') {
-      this._luck += 1;
-    } else if (id === 'shieldReflect') {
-      this._shieldReflect += 0.5;
-    } else if (id === 'revive') {
-      this._revive = true;
-    } else if (id === 'comboPower') {
-      this._comboPerStack += 0.01;
-    } else if (id === 'keenEye') {
-      this.critChance += 0.05;
-    } else if (id === 'dodge2') {
-      this.dodge += 3;
-    } else if (id === 'thorns2') {
-      this._thorns += 3;
-    } else if (id === 'shieldgain2') {
-      this._shieldGainAmt += 4;
-    } else if (id === 'burn2') {
-      this.burnChance += 0.05;
-    } else if (id === 'thunder2') {
-      this._thunderChance += 0.2;
-    } else if (id === 'freeze2') {
-      this._freezeChance += 0.15;
-    } else if (id === 'stun2') {
-      this._stunChance += 0.15;
-    } else if (id === 'block2') {
-      this._blockChance += 0.2;
-    } else if (id === 'clean2') {
-      this._cleanChance += 0.25;
-    } else if (id === 'healboost2') {
-      this._healBoost += 10;
-    } else if (id === 'material2') {
-      this._materialBonus += 1;
-    } else if (id === 'skillpower2') {
-      this._skillPowerAdd += 0.5;
-    } else if (id === 'omni2') {
-      this.baseAtk += 1;
-      this.atk = this.baseAtk + this.weaponAtk;
-      this.maxHp += 5;
-      this.goldMul += 0.02;
-      this.expMul += 0.02;
-    } else if (id === 'levelhp') {
-      this._levelHp += 5;
-    } else if (id === 'hppct') {
-      var gain = Math.round(this.maxHp * 0.1);
-      this.maxHp += gain;
-      this.hp = Math.min(this.maxHp, this.hp + gain);
+    var fn = UPGRADE_EFFECTS[id];
+    if (fn) {
+      fn(this);
     }
 
     this.level += 1;
     this.talentPoints += 1;
+    this._consecutiveLevels += 1;
+    if (this._consecutiveLevels >= 5) { this._unlockAchievement('meme_wuhu'); }
     if (this._levelHp > 0) {
       this.maxHp += this._levelHp;
     }
@@ -3307,10 +3453,14 @@ export default {
       if (Math.abs(dr) + Math.abs(dc) === 1) {
         // 相邻攻击
         var stats = this._monsterStats(mon.id);
-        var dmg = Math.max(1, Math.round((stats.atk - this.armorDef) * (0.85 + Math.random() * 0.3)));
+        var dmg = Math.max(1, Math.round((stats.atk - this.armorDef - (this._bonusDef || 0)) * (BALANCE.monsterDmgMin + Math.random() * (BALANCE.monsterDmgMax - BALANCE.monsterDmgMin))));
+        var absorbed = Math.min(this._shield, dmg);
+        this._shield -= absorbed;
+        dmg -= absorbed;
         this.hp -= dmg;
+        this._damageTaken += dmg;
         this._updateHp();
-        this._addLog(stats.name + ' 攻击你 ' + dmg);
+        this._addLog(stats.name + ' 攻击你 ' + dmg + (absorbed > 0 ? '（护盾吸收 ' + absorbed + '）' : ''));
         if (this.hp <= 0) {
           this.hp = 0;
           this._updateHp();
@@ -3380,7 +3530,7 @@ export default {
       return;
     }
     this._renderMap();
-    this._saveRun();
+    this._saveRun(true);
   },
 
   _die() {
@@ -3397,6 +3547,9 @@ export default {
     }
     this.phase = 'dead';
     this._vibrate(200);
+    this._deathCount += 1;
+    if (this._deathCount >= 3) { this._unlockAchievement('meme_bbq'); }
+    if (this.gold === 0) { this._unlockAchievement('meme_poor'); }
     this._clearSave();
     if (this.floor >= 15 && this.ngLevel < 5) {
       this.ngLevel += 1;
@@ -3434,6 +3587,8 @@ export default {
     this.hp = Math.min(this.maxHp, this.hp + heal);
     this._updateHp();
     this._addLog('休息片刻，回复 ' + heal + ' 生命');
+    this._restCount += 1;
+    if (this._restCount >= 10) { this._unlockAchievement('meme_tangping'); }
     this._monstersTurn();
     this._afterMonstersTurn();
     this._saveRun();
@@ -3511,6 +3666,8 @@ export default {
     if (this.floor >= 15) { this._unlockAchievement('floor_15'); }
     if (this.gold >= 500) { this._unlockAchievement('rich_500'); }
     if (this.bossKills >= 5) { this._unlockAchievement('boss_5'); }
+    if (this.kills >= 30) { this._unlockAchievement('meme_juan'); }
+    if (this.gold >= 1000) { this._unlockAchievement('meme_rich'); }
   },
 
   openAchievements() {
@@ -3526,44 +3683,8 @@ export default {
     GameProgress.initDailyTask(this);
   },
 
-  _newDailyTask() {
-    var types = ['kill', 'floor', 'boss', 'level'];
-    this.dailyType = types[Math.floor(Math.random() * types.length)];
-    if (this.dailyType === 'kill') {
-      this.dailyTarget = 5;
-      this.dailyLabel = '击杀 5 个怪物';
-    } else if (this.dailyType === 'floor') {
-      this.dailyTarget = 3;
-      this.dailyLabel = '到达第 3 层';
-    } else if (this.dailyType === 'boss') {
-      this.dailyTarget = 1;
-      this.dailyLabel = '击败 1 个 BOSS';
-    } else {
-      this.dailyTarget = 5;
-      this.dailyLabel = '达到 Lv.5';
-    }
-    this.dailyProgress = 0;
-    this.dailyDone = false;
-    storage.set({
-      key: 'BAND_SURVIVOR_DAILYTASK',
-      value: JSON.stringify({ date: this._todayStr(), type: this.dailyType, target: this.dailyTarget, progress: this.dailyProgress, done: this.dailyDone })
-    });
-  },
-
-  _refreshDailyLabel() {
-    if (this.dailyType === 'kill') {
-      this.dailyLabel = '击杀 5 个怪物';
-    } else if (this.dailyType === 'boss') {
-      this.dailyLabel = '击败 1 个 BOSS';
-    } else if (this.dailyType === 'level') {
-      this.dailyLabel = '达到 Lv.5';
-    } else {
-      this.dailyLabel = '到达第 3 层';
-    }
-  },
-
   _advanceDaily(amount) {
-    GameProgress.advanceDaily(this, amount || 1);
+    GameProgress.advanceDaily(this, amount || 0);
   },
 
   claimDailyTask() {
@@ -3605,6 +3726,14 @@ export default {
     this.phase = this._lastPhase || 'pause';
   },
 
+  openAbout() {
+    this.phase = 'about';
+  },
+
+  closeAbout() {
+    this.phase = 'home';
+  },
+
   openMeta() {
     this._updateMetaList();
     this.phase = 'meta';
@@ -3636,16 +3765,6 @@ export default {
     this.metaAtk += 2;
     this._saveMeta();
     this._updateMetaList();
-  },
-
-  _updateClassLabel() {
-    for (var i = 0; i < CLASSES.length; i++) {
-      if (CLASSES[i].id === this.charClass) {
-        this.classLabel = CLASSES[i].name;
-        return;
-      }
-    }
-    this.classLabel = '战士';
   },
 
   _classBase() {
@@ -3750,6 +3869,14 @@ export default {
   },
 
   endRun() {
+    // 主动结束也记录最佳层数（原实现直接清档丢纪录）
+    if (this.floor > this.best) {
+      this.best = this.floor;
+      storage.set({
+        key: this._bestKey(),
+        value: String(this.floor)
+      });
+    }
     this._clearSave();
     this.phase = 'home';
   },
@@ -3791,13 +3918,101 @@ export default {
     this._addLog('商店已刷新（-5金）');
   },
 
+  _applyEquipBonus(bonus, sign) {
+    if (!bonus) return;
+    var mul = sign || 1;
+    var map = {
+      atk: function(v, x) { v.baseAtk += x; v.atk = v.baseAtk + v.weaponAtk; },
+      def: function(v, x) { v.armorDef += x; },
+      hp: function(v, x) { v.maxHp += x; },
+      goldMul: function(v, x) { v.goldMul += x; },
+      expMul: function(v, x) { v.expMul += x; },
+      lifesteal: function(v, x) { v.lifesteal += x; },
+      burnChance: function(v, x) { v.burnChance += x; },
+      freezeChance: function(v, x) { v._freezeChance += x; },
+      stunChance: function(v, x) { v._stunChance += x; },
+      thunderChance: function(v, x) { v._thunderChance += x; },
+      blockChance: function(v, x) { v._blockChance += x; },
+      thorns: function(v, x) { v._thorns += x; },
+      dodge: function(v, x) { v.dodge += x; },
+      critChance: function(v, x) { v.critChance += x; },
+      critMult: function(v, x) { v.critMult += x; },
+      comboMaxAdd: function(v, x) { v._comboMaxAdd += x; },
+      skillPowerAdd: function(v, x) { v._skillPowerAdd += x; },
+      floorHeal: function(v, x) { v._floorHeal += x; },
+      shield: function(v, x) { v._shield += x; },
+      healOnHit: function(v, x) { v._healOnHit = (v._healOnHit || 0) + x; },
+      haste: function(v, x) { v._hasteCharges += x; },
+      revive: function(v, x) { if (x > 0) { v._revive = true; v._reviveUsed = false; } },
+      killHeal: function(v, x) { v._killHeal += x; },
+      goldSteal: function(v, x) { v._goldSteal += x; },
+      cdkill: function(v, x) { v._cdkill += x; },
+      bloodlust: function(v, x) { v._bloodlust += x; },
+      materialBonus: function(v, x) { v._materialBonus += x; },
+      openingStrike: function(v, x) { v._openingStrike += x; },
+      warcry: function(v, x) { v._warcry += x; },
+      startCombo: function(v, x) { v._startCombo += x; },
+      omni: function(v, x) { var flat = Math.round(x * 100); v.baseAtk += flat; v.atk = v.baseAtk + v.weaponAtk; v.maxHp += flat * 5; v.goldMul += x; v.expMul += x; }
+    };
+    for (var k in bonus) {
+      if (map[k]) {
+        map[k](this, bonus[k] * mul);
+      }
+    }
+  },
+
+  _applySetBonus() {
+    if (this._setBonusApplied) return;
+    var wTags = this._weaponTags || [];
+    var aTags = this._armorTags || [];
+    var shared = [];
+    for (var i = 0; i < wTags.length; i++) {
+      if (aTags.indexOf(wTags[i]) >= 0 && shared.indexOf(wTags[i]) < 0) {
+        shared.push(wTags[i]);
+      }
+    }
+    if (shared.length > 0) {
+      var bonuses = {
+        '暴击': { critChance: 0.03 },
+        '金币': { goldMul: 0.08 },
+        '连击': { comboMaxAdd: 0.05 },
+        '防御': { blockChance: 0.05 },
+        '吸血': { lifesteal: 1 },
+        '闪避': { dodge: 2 },
+        '毒': { burnChance: 0.02 },
+        '技能': { skillPowerAdd: 0.15 },
+        '回复': { floorHeal: 2 },
+        '反伤': { thorns: 1 }
+      };
+      var tag = shared[0];
+      var b = bonuses[tag];
+      if (b) {
+        this._applyEquipBonus(b, 1);
+        this._setBonusApplied = true;
+        this._addLog('套装协同：' + tag + ' 2 件套生效！');
+      }
+    }
+  },
+
   _equipRolled(weapon) {
     if (weapon) {
-      if (weapon.atk > this.weaponAtk) {
+      if (weapon.atk > this.weaponAtk || (this._weaponNameOld && weapon.name !== this._weaponNameOld)) {
+        // 换装时先移除旧武器效果
+        if (this._weaponBonus) {
+          this._applyEquipBonus(this._weaponBonus, -1);
+        }
         this.weaponAtk = weapon.atk;
         this.weaponName = weapon.name;
+        this._weaponBonus = weapon.bonus || null;
+        this._weaponPenalty = weapon.penalty || null;
+        this._weaponProc = weapon.proc || null;
+        this._weaponType = weapon.type || '剑';
+        this._weaponTags = weapon.tags || [];
         this.atk = this.baseAtk + this.weaponAtk;
         this.skillName = this._skillName();
+        this._applyEquipBonus(weapon.bonus, 1);
+        this._applyEquipBonus(weapon.penalty, 1);
+        this._applySetBonus();
         this._addLog('获得武器 ' + weapon.name + '，攻击 +' + weapon.atk);
         return true;
       }
@@ -3809,10 +4024,20 @@ export default {
 
   _equipRolledArmor(armor) {
     if (armor) {
-      if (armor.def > this.armorDef) {
+      if (armor.def > this.armorDef || (this._armorNameOld && armor.name !== this._armorNameOld)) {
+        if (this._armorBonus) {
+          this._applyEquipBonus(this._armorBonus, -1);
+        }
         this.armorDef = armor.def;
         this.armorName = armor.name;
+        this._armorBonus = armor.bonus || null;
+        this._armorPenalty = armor.penalty || null;
+        this._armorProc = armor.proc || null;
+        this._armorTags = armor.tags || [];
         this.dodge = armor.dodge || 0;
+        this._applyEquipBonus(armor.bonus, 1);
+        this._applyEquipBonus(armor.penalty, 1);
+        this._applySetBonus();
         this._addLog('获得防具 ' + armor.name + '，防御 +' + armor.def);
         return true;
       }
@@ -3857,7 +4082,15 @@ export default {
     // 保底高品质：直接取最高两档品质
     var weapon = this._rollWeapon();
     var armor = this._rollArmor();
-    if (Math.random() < 0.5) {
+    var chosen = Math.random() < 0.5 ? weapon : armor;
+    if (chosen.q && chosen.q.id === 'purple') {
+      this._unlockAchievement('meme_ou');
+      this._gambleMissCount = 0;
+    } else {
+      this._gambleMissCount += 1;
+      if (this._gambleMissCount >= 10) { this._unlockAchievement('meme_fei'); }
+    }
+    if (chosen === weapon) {
       this._equipRolled(weapon);
     } else {
       this._equipRolledArmor(armor);
@@ -3918,6 +4151,35 @@ export default {
     this._updateUpgradeCosts();
   },
 
+  enchantWeapon() {
+    if (this.phase !== 'shop' || this.gold < 50) return;
+    this.gold -= 50;
+    var pool = ['atk', 'hp', 'critChance', 'lifesteal', 'goldMul', 'expMul', 'dodge', 'blockChance', 'thorns', 'burnChance', 'freezeChance', 'stunChance', 'thunderChance', 'skillPowerAdd', 'comboMaxAdd'];
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    var values = { atk: 2, hp: 10, critChance: 0.02, lifesteal: 1, goldMul: 0.03, expMul: 0.03, dodge: 2, blockChance: 0.05, thorns: 1, burnChance: 0.02, freezeChance: 0.02, stunChance: 0.02, thunderChance: 0.02, skillPowerAdd: 0.15, comboMaxAdd: 0.05 };
+    var bonus = {}; bonus[pick] = values[pick];
+    this._applyEquipBonus(bonus, 1);
+    this._addLog('附魔成功！获得随机效果');
+    this._updateUpgradeCosts();
+  },
+
+  socketGem() {
+    if (this.phase !== 'shop' || this.gold < 30) return;
+    this.gold -= 30;
+    var gems = [
+      { name: '红宝石', stat: 'atk', value: 2 },
+      { name: '蓝宝石', stat: 'hp', value: 10 },
+      { name: '绿宝石', stat: 'dodge', value: 2 },
+      { name: '黄宝石', stat: 'goldMul', value: 0.05 },
+      { name: '钻石', stat: 'omni', value: 0.02 }
+    ];
+    var gem = gems[Math.floor(Math.random() * gems.length)];
+    var bonus = {}; bonus[gem.stat] = gem.value;
+    this._applyEquipBonus(bonus, 1);
+    this._addLog('镶嵌 ' + gem.name + '！属性提升');
+    this._updateUpgradeCosts();
+  },
+
   closeShop() {
     this.phase = 'grid';
     this._renderMap();
@@ -3953,11 +4215,7 @@ export default {
       }
       if (weapon && weapon.atk > this.weaponAtk) {
         this.gold -= item.price;
-        this.weaponAtk = weapon.atk;
-        this.weaponName = weapon.name;
-        this.atk = this.baseAtk + this.weaponAtk;
-        this.skillName = this._skillName();
-        this._addLog('购买武器 ' + weapon.name + '，攻击 +' + weapon.atk);
+        this._equipRolled(weapon);
       } else {
         this._addLog('你已经拥有更好的武器');
       }
@@ -3971,9 +4229,7 @@ export default {
       }
       if (armor && armor.def > this.armorDef) {
         this.gold -= item.price;
-        this.armorDef = armor.def;
-        this.armorName = armor.name;
-        this._addLog('购买防具 ' + armor.name + '，防御 +' + armor.def);
+        this._equipRolledArmor(armor);
       } else {
         this._addLog('你已经拥有更好的防具');
       }
@@ -3995,10 +4251,19 @@ export default {
 
   salvageWeapon() {
     if (this.phase !== 'bag' || this.weaponAtk <= 0) return;
+    if (this._weaponBonus) {
+      this._applyEquipBonus(this._weaponBonus, -1);
+    }
+    if (this._weaponPenalty) {
+      this._applyEquipBonus(this._weaponPenalty, -1);
+    }
     var mats = this.weaponAtk * 2;
     this.materials += mats;
     this.weaponAtk = 0;
     this.weaponName = '无';
+    this._weaponBonus = null;
+    this._weaponPenalty = null;
+    this._weaponProc = null;
     this.atk = this.baseAtk + this.weaponAtk;
     this._addLog('分解武器，获得材料 +' + mats);
     this._saveRun();
@@ -4006,10 +4271,19 @@ export default {
 
   salvageArmor() {
     if (this.phase !== 'bag' || this.armorDef <= 0) return;
+    if (this._armorBonus) {
+      this._applyEquipBonus(this._armorBonus, -1);
+    }
+    if (this._armorPenalty) {
+      this._applyEquipBonus(this._armorPenalty, -1);
+    }
     var mats = this.armorDef * 2;
     this.materials += mats;
     this.armorDef = 0;
     this.armorName = '无';
+    this._armorBonus = null;
+    this._armorPenalty = null;
+    this._armorProc = null;
     this._addLog('分解防具，获得材料 +' + mats);
     this._saveRun();
   },
@@ -4045,7 +4319,13 @@ export default {
   position: relative;
 }
 
+.home-scroll {
+  width: 192px;
+  height: 450px;
+}
+
 .home-content {
+  position: absolute;
   width: 192px;
   display: flex;
   flex-direction: column;
@@ -4105,11 +4385,11 @@ export default {
   border-color: #ffd75e;
 }
 
-.h-gold .h-row-l {
+.h-gold-l {
   color: #ffd75e;
 }
 
-.h-gold .h-row-r {
+.h-gold-r {
   color: #ffd75e;
 }
 
@@ -4120,6 +4400,7 @@ export default {
 }
 
 .btn.primary {
+  background-color: #3a5db8;
   background: linear-gradient(135deg, #3a5db8, #2a3f7f);
 }
 
@@ -4167,6 +4448,7 @@ export default {
   margin-top: 26px;
   width: 152px;
   height: 42px;
+  background-color: #3a5db8;
   background: linear-gradient(135deg, #3a5db8, #2a3f7f);
   border-radius: 10px;
 }
@@ -4270,6 +4552,7 @@ export default {
 
 .exp-fill {
   height: 100%;
+  background-color: #7aa2ff;
   background: linear-gradient(90deg, #7aa2ff, #4a6fd0);
 }
 
@@ -4308,6 +4591,7 @@ export default {
 }
 
 .hp-fill {
+  background-color: #2ed477;
   background: linear-gradient(90deg, #2ed477, #35a86e);
 }
 
@@ -4486,9 +4770,6 @@ export default {
   height: 96px;
   margin-top: 6px;
   margin-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .menu-item {
@@ -4575,6 +4856,7 @@ export default {
 }
 
 .monster-fill {
+  background-color: #e05a4e;
   background: linear-gradient(90deg, #e05a4e, #c23b2f);
 }
 
@@ -4745,7 +5027,7 @@ export default {
 }
 
 .shop-overlay {
-  padding-top: 40px;
+  padding-top: 20px;
 }
 
 .shop-title {
@@ -4763,13 +5045,14 @@ export default {
 
 .shop-scroll {
   width: 192px;
-  height: 300px;
+  height: 470px;
 }
+
 
 .shop-item {
   width: 192px;
-  height: 48px;
-  margin-bottom: 10px;
+  height: 60px;
+  margin-bottom: 12px;
   border-radius: 10px;
   background-color: #22273a;
   border: 1px solid #34405f;
@@ -4777,6 +5060,8 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: 6px 4px;
 }
 
 .shop-name {
@@ -4792,13 +5077,24 @@ export default {
 }
 
 .shop-close {
-  margin-top: 20px;
+  margin-top: 14px;
   width: 152px;
 }
 
-.bag-overlay {
-  padding-top: 50px;
+.scroll-pad {
+  width: 192px;
+  height: 24px;
 }
+
+.bag-overlay {
+  padding-top: 16px;
+}
+
+.bag-scroll {
+  width: 192px;
+  height: 480px;
+}
+
 
 .bag-grid {
   width: 192px;
@@ -4808,8 +5104,8 @@ export default {
 }
 
 .bag-slot {
-  width: 60px;
-  height: 70px;
+  width: 62px;
+  height: 88px;
   margin-bottom: 8px;
   border-radius: 8px;
   background-color: #22273a;
@@ -4818,6 +5114,8 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: 4px 2px;
 }
 
 .bag-slot-label {
@@ -4835,20 +5133,32 @@ export default {
 .bag-slot-sub {
   color: #7d8496;
   font-size: 9px;
-  margin-top: 2px;
+  margin-top: 4px;
+  max-width: 58px;
+  text-align: center;
+  word-break: break-all;
 }
 
 .bag-title {
   color: #7aa2ff;
   font-size: 22px;
   font-weight: bold;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .bag-line {
   color: #e8e8f0;
   font-size: 14px;
   margin-top: 12px;
+}
+
+.about-line {
+  width: 192px;
+  color: #c8d0e8;
+  font-size: 12px;
+  line-height: 20px;
+  margin-top: 6px;
+  text-align: center;
 }
 
 .map-preview-btn {

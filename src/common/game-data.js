@@ -55,6 +55,33 @@ export const AREAS = [
     boss: 'inferno_lord',
     effect: { hp: 1.4, atk: 1.35, gold: 1.5, exp: 1.5 },
     effDesc: '炼狱生物攻击骇人，奖励极为丰厚'
+  },
+  {
+    id: 'cyber',
+    name: '赛博都市',
+    desc: '霓虹闪烁，代码与数据在城市中流动。',
+    monsters: ['jianpanxia', 'juan_wang', 'mofayu', 'gangjing', 'shui_jun', 'yuzhou'],
+    boss: 'laoban',
+    effect: { hp: 1.35, atk: 1.25, gold: 1.5, exp: 1.5 },
+    effDesc: '赛博居民攻高血厚，但金币爆多'
+  },
+  {
+    id: 'watermelon',
+    name: '西瓜宇宙',
+    desc: '一切皆西瓜，连空气都是甜的。',
+    monsters: ['xi_guazi', 'mofayu', 'gezi', 'ling0hou', 'pengci', 'tuhao'],
+    boss: 'shangdi',
+    effect: { hp: 1.45, atk: 1.35, gold: 1.6, exp: 1.6 },
+    effDesc: '西瓜宇宙的敌人强大但回报丰厚'
+  },
+  {
+    id: 'internet',
+    name: '互联网深渊',
+    desc: '信息洪流在这里汇聚成实体。',
+    monsters: ['zhihu', 'xiaohongshu', 'douyin', 'tuhao', 'zhuanqian', 'kuaizi'],
+    boss: 'bing_xiang',
+    effect: { hp: 1.5, atk: 1.4, gold: 1.7, exp: 1.7 },
+    effDesc: '互联网的黑暗深渊，奖励与危险并存'
   }
 ];
 
@@ -87,7 +114,28 @@ export const MONSTERS = {
   cursed_knight:{ name: '受诅骑士', hp: 52, atk: 13, gold: 14, exp: 30 },
   void_walker:  { name: '虚空行者', hp: 62, atk: 16, gold: 18, exp: 38 },
   frost_wolf:   { name: '冰原狼',   hp: 56, atk: 15, gold: 17, exp: 36 },
-  magma_spider: { name: '熔岩蛛',   hp: 60, atk: 17, gold: 19, exp: 40 }
+  magma_spider: { name: '熔岩蛛',   hp: 60, atk: 17, gold: 19, exp: 40 },
+
+  juan_wang:    { name: '卷王',     hp: 54, atk: 14, gold: 10, exp: 22 },
+  gezi:         { name: '鸽子精',   hp: 48, atk: 12, gold: 12, exp: 20 },
+  gangjing:     { name: '杠精',     hp: 52, atk: 14, gold: 11, exp: 24 },
+  mofayu:       { name: '摸鱼怪',   hp: 42, atk: 10, gold: 6,  exp: 14 },
+  jianpanxia:   { name: '键盘侠',   hp: 56, atk: 16, gold: 14, exp: 30 },
+  ling0hou:     { name: '00后整顿者', hp: 62, atk: 17, gold: 18, exp: 36 },
+  shangdi:      { name: '上帝之手', hp: 140, atk: 25, gold: 22, exp: 42 },
+  xi_guazi:     { name: '吃瓜群众', hp: 40, atk: 10, gold: 9,  exp: 18 },
+  pengci:       { name: '碰瓷怪',   hp: 48, atk: 12, gold: 15, exp: 26 },
+  laoban:       { name: '老板',     hp: 120, atk: 22, gold: 25, exp: 45 },
+  tuhao:        { name: '土豪',     hp: 65, atk: 17, gold: 30, exp: 35 },
+  shui_jun:     { name: '水军',     hp: 46, atk: 11, gold: 8,  exp: 16 },
+  zhuanqian:    { name: '赚钱机器', hp: 54, atk: 15, gold: 20, exp: 28 },
+  yuzhou:       { name: '营销号',   hp: 58, atk: 16, gold: 18, exp: 32 },
+  kuaizi:       { name: '筷子精',   hp: 38, atk: 9,  gold: 5,  exp: 12 },
+  bing_xiang:   { name: '冰箱精',   hp: 160, atk: 26, gold: 20, exp: 40 },
+  dianshi:      { name: '电视精',   hp: 60, atk: 17, gold: 16, exp: 34 },
+  zhihu:        { name: '知乎大神', hp: 62, atk: 18, gold: 22, exp: 38 },
+  xiaohongshu:  { name: '小红书精', hp: 68, atk: 20, gold: 24, exp: 44 },
+  douyin:       { name: '抖音精',   hp: 72, atk: 21, gold: 28, exp: 48 }
 };
 
 export const UPGRADES = [
@@ -200,6 +248,16 @@ export const BASE_PLAYER = {
 export const SKILL_CD = 3;
 export const HEAL_AMOUNT = 30;
 
+export const SKILLS = [
+  { id: 'base_slash', name: '重击', mult: 2.5, cd: 3, desc: '基础技能' },
+  { id: 'wuhu', name: '芜湖起飞', mult: 3.5, cd: 3, desc: '芜湖！伤害更高' },
+  { id: 'bbq', name: '芭比Q', mult: 3.0, cd: 4, desc: '给敌人烤个火' },
+  { id: 'liuliu', name: '六六六连击', mult: 2.0, cd: 4, desc: '连击 +6' },
+  { id: 'wobuli', name: '我不李姐盾', mult: 0, cd: 5, desc: '获得护盾' },
+  { id: 'aoligei', name: '奥利给斩', mult: 4.0, cd: 4, desc: '奥利给！' }
+];
+
+
 export const WEAPONS = [
   { name: '铁短剑', atk: 3 },
   { name: '猎刀', atk: 4 },
@@ -215,7 +273,27 @@ export const WEAPONS = [
   { name: '熔岩之刃', atk: 18 },
   { name: '龙牙枪', atk: 20 },
   { name: '裁决之刃', atk: 22 },
-  { name: '苍穹法杖', atk: 19 }
+  { name: '苍穹法杖', atk: 19 },
+  { name: '毒鸡汤', atk: 8, type: '法杖', tags: ['毒'], proc: { poison: 0.3 }, penalty: { atk: -1 } },
+  { name: '摸鱼铲', atk: 12, type: '锤', tags: ['摸鱼'], bonus: { expMul: 0.05 } },
+  { name: '卷王键盘', atk: 16, type: '拳', tags: ['内卷','连击'], bonus: { comboMaxAdd: 0.1 }, penalty: { expMul: -0.1 } },
+  { name: '躺平枕头', atk: 10, type: '伞', tags: ['防御'], bonus: { blockChance: 0.05 }, penalty: { atk: -2 } },
+  { name: '老板画的饼', atk: 14, type: '锤', tags: ['金币'], bonus: { goldMul: 0.1 }, penalty: { atk: -2 } },
+  { name: '黄金精神之剑', atk: 20, type: '剑', tags: ['暴击'], bonus: { critChance: 0.02, critMult: 0.3 } },
+  { name: '韭菜盒子', atk: 13, type: '刀', tags: ['吸血'], bonus: { lifesteal: 1 } },
+  { name: '芜湖起飞器', atk: 22, type: '法杖', tags: ['技能'], bonus: { skillPowerAdd: 0.5 } },
+  { name: '六六六', atk: 18, type: '拳', tags: ['连击'], proc: { comboChance: 0.3 } },
+  { name: '栓Q', atk: 15, type: '剑', tags: ['金币'], proc: { stealGold: 0.2 } },
+  { name: '绝绝子', atk: 17, type: '刀', tags: ['暴击'], bonus: { critMult: 0.5 } },
+  { name: '我不李姐', atk: 19, type: '法杖', tags: ['防御'], proc: { shieldOnHit: 0.2 } },
+  { name: '破防锤', atk: 21, type: '锤', tags: ['破甲'], bonus: { stunChance: 0.1 } },
+  { name: '绷不住了', atk: 6, type: '伞', tags: ['回复'], proc: { healOnHit: 2 } },
+  { name: '退退退', atk: 11, type: '剑', tags: ['闪避'], bonus: { dodge: 10 }, penalty: { atk: -1 } },
+  { name: '拿来吧你', atk: 23, type: '刀', tags: ['金币'], bonus: { goldMul: 0.2 } },
+  { name: '奥利给巨剑', atk: 24, type: '剑', tags: ['暴击'], bonus: { critChance: 0.05 }, penalty: { comboMaxAdd: -0.1 } },
+  { name: '皮皮虾我们走', atk: 24, type: '锤', tags: ['迅捷'], bonus: { haste: 1 } },
+  { name: '好家伙', atk: 20, type: '法杖', tags: ['随机'], proc: { doubleHit: 0.1 } },
+  { name: '有无搞错', atk: 24, type: '拳', tags: ['暴击','连击'], bonus: { critChance: 0.05 }, penalty: { critMult: -0.3 } }
 ];
 
 export const ARMORS = [
@@ -230,7 +308,27 @@ export const ARMORS = [
   { name: '熔岩甲', def: 13 },
   { name: '龙鳞甲', def: 16 },
   { name: '神谕甲', def: 18 },
-  { name: '星界甲', def: 15 }
+  { name: '星界甲', def: 15 },
+  { name: '社畜工牌', def: 5, tags: ['金币'], bonus: { goldMul: 0.1 }, penalty: { expMul: -0.05 } },
+  { name: '摆烂睡袋', def: 8, tags: ['回复'], bonus: { floorHeal: 6 }, penalty: { atk: -1 } },
+  { name: '防卷铠甲', def: 11, tags: ['防御'], bonus: { blockChance: 0.15 }, penalty: { dodge: -5 } },
+  { name: '老板的饼盾', def: 9, tags: ['防御','金币'], bonus: { shield: 15 }, penalty: { floorHeal: -2 } },
+  { name: '锦鲤马甲', def: 13, tags: ['暴击'], bonus: { critChance: 0.05 }, penalty: { hp: -10 } },
+  { name: '祖安护符', def: 12, tags: ['反伤'], bonus: { thorns: 3 } },
+  { name: '韭菜根甲', def: 15, tags: ['吸血'], bonus: { lifesteal: 2 }, penalty: { goldMul: -0.05 } },
+  { name: '欧皇背心', def: 18, tags: ['闪避'], bonus: { dodge: 5 }, penalty: { def: -3 } },
+  { name: '鸽子毛披风', def: 6, tags: ['闪避'], bonus: { dodge: 8 } },
+  { name: '杠精反甲', def: 14, tags: ['反伤'], bonus: { thorns: 5 } },
+  { name: '划水救生衣', def: 10, tags: ['回复'], bonus: { floorHeal: 5 } },
+  { name: '内卷头盔', def: 16, tags: ['内卷'], bonus: { atk: 3 }, penalty: { hp: -15 } },
+  { name: '躺平拖鞋', def: 7, tags: ['躺平'], bonus: { hp: 25 }, penalty: { atk: -2 } },
+  { name: '摸鱼眼镜', def: 12, tags: ['摸鱼'], bonus: { expMul: 0.08 }, penalty: { goldMul: -0.05 } },
+  { name: '锦鲤之鳞', def: 17, tags: ['暴击'], bonus: { critChance: 0.08 }, penalty: { dodge: -3 } },
+  { name: '韭菜护腿', def: 14, tags: ['金币'], bonus: { goldMul: 0.12 }, penalty: { hp: -20 } },
+  { name: '键盘护腕', def: 15, tags: ['连击'], bonus: { comboMaxAdd: 0.2 }, penalty: { critMult: -0.2 } },
+  { name: '老板的皮座椅', def: 19, tags: ['防御'], bonus: { blockChance: 0.05 } },
+  { name: '欧皇光环', def: 20, tags: ['全能'], bonus: { critChance: 0.02, dodge: 2 } },
+  { name: '女娲补天披风', def: 20, tags: ['复活'], bonus: { revive: 1 } }
 ];
 
 export const SHOP_ITEMS = [
@@ -278,7 +376,22 @@ export const ACHIEVEMENTS = [
   { id: 'boss_5',     name: '屠龙者',     desc: '击败 5 个 BOSS' },
   { id: 'codex_master', name: '图鉴大师',   desc: '集齐所有怪物图鉴' },
   { id: 'equip_master', name: '武器收藏家', desc: '集齐所有装备图鉴' },
-  { id: 'relic_master', name: '遗物收藏家', desc: '集齐所有遗物图鉴' }
+  { id: 'relic_master', name: '遗物收藏家', desc: '集齐所有遗物图鉴' },
+  { id: 'meme_666',   name: '六六大顺',   desc: '连击达到 66' },
+  { id: 'meme_ou',    name: '欧皇附体',   desc: '一次赌博开出传说品质' },
+  { id: 'meme_fei',   name: '非酋本酋',   desc: '连续 10 次赌博未出货' },
+  { id: 'meme_pigeon',name: '鸽子王',     desc: '累计鸽掉 3 次事件' },
+  { id: 'meme_tangping',name: '躺平大师', desc: '休息 10 次' },
+  { id: 'meme_juan',  name: '卷王之王',   desc: '一局内击杀 30 只怪' },
+  { id: 'meme_meow',  name: '摸鱼达人',   desc: '连续 3 回合不杀怪' },
+  { id: 'meme_6',     name: '溜了溜了',   desc: '一局移动 100 步' },
+  { id: 'meme_rich',  name: '富可敌国',   desc: '持有 1000 金币' },
+  { id: 'meme_poor',  name: '一贫如洗',   desc: '金币为 0 时通关' },
+  { id: 'meme_gezi',  name: '鸽子精',     desc: '累计跳过 5 次事件' },
+  { id: 'meme_bbq',   name: '芭比Q',     desc: '一局内被击杀 3 次' },
+  { id: 'meme_wuhu',  name: '芜湖起飞',   desc: '一局内连续 5 次升级' },
+  { id: 'meme_leek',  name: '韭菜',       desc: '累计被偷金币 10 次' },
+  { id: 'meme_dog',   name: '单走一个6',  desc: '连击达到 6' }
 ];
 
 export const RELICS = [
@@ -289,9 +402,35 @@ export const RELICS = [
   { id: 'swift',    name: '疾风靴',   desc: '技能冷却 -0.4s', stat: 'cd',     value: 0.4 },
   { id: 'iron',     name: '铁壁',     desc: '获得 20 点护盾',   stat: 'shield', value: 20 },
   { id: 'haste',    name: '疾行者',   desc: '获得 1 迅捷次数',  stat: 'haste',  value: 1 },
-  { id: 'combo',    name: '连击之心', desc: '连击上限 +0.2',    stat: 'combo',  value: 0.2 }
+  { id: 'combo',    name: '连击之心', desc: '连击上限 +0.2',    stat: 'combo',  value: 0.2 },
+  { id: 'leek',     name: '韭菜盒子', desc: '攻击 +2',       stat: 'atk',      value: 2 },
+  { id: 'koi',      name: '锦鲤',     desc: '暴击 +3%',      stat: 'critChance', value: 0.03 },
+  { id: 'african',  name: '非洲酋长面具', desc: '金币 +10%，闪避 -2%', stat: 'goldMul', value: 0.1 },
+  { id: 'pigeon',   name: '鸽子蛋',   desc: '每层回复 3 生命', stat: 'floorHeal', value: 3 },
+  { id: 'zuan',     name: '祖安之魂', desc: '反伤 +3',       stat: 'thorns',   value: 3 },
+  { id: 'lott',     name: '彩票',     desc: '击杀概率 +5 金币', stat: 'goldSteal', value: 5 },
+  { id: 'shield2',  name: '反甲',     desc: '格挡 +15%',     stat: 'blockChance', value: 0.15 },
+  { id: 'revive',   name: '复活币',   desc: '死亡重生一次 20% 血', stat: 'revive', value: 1 },
+  { id: 'wuhu',     name: '芜湖火箭', desc: '技能伤害 +0.5', stat: 'skillPowerAdd', value: 0.5 },
+  { id: 'six',      name: '六六大顺', desc: '连击上限 +0.2', stat: 'combo',    value: 0.2 },
+  { id: 'yyds',     name: '永远滴神', desc: '全属性 +2%',    stat: 'omni',     value: 0.02 },
+  { id: 'bbq',      name: '芭比Q',   desc: '击杀回复 5 生命', stat: 'killHeal', value: 5 },
+  { id: 'shrek',    name: '栓Q',     desc: '吸血 +2',       stat: 'lifesteal', value: 2 },
+  { id: 'juan',     name: '卷王戒指', desc: '每层攻击 +1',   stat: 'bloodlust', value: 1 },
+  { id: 'tangping', name: '躺平护身符', desc: '每层回复 5 生命', stat: 'floorHeal', value: 5 },
+  { id: 'coder',    name: '码农护腕', desc: '冷却 -0.3s',    stat: 'cd',       value: 0.3 },
+  { id: 'summon_slime', name: '史莱姆瓶', desc: '战斗开始召唤史莱姆', stat: 'summon', value: 'slime' },
+  { id: 'summon_shadow', name: '影分身术', desc: '战斗开始召唤影分身', stat: 'summon', value: 'shadow' },
+  { id: 'summon_meow', name: '猫罐头', desc: '战斗开始召唤喵星人', stat: 'summon', value: 'meow' }
 ];
 
+
+export const SUMMONS = [
+  { id: 'slime', name: '史莱姆', atkRatio: 0.5, hpRatio: 0.5 },
+  { id: 'shadow', name: '影分身', atkRatio: 0.8, hpRatio: 0.3 },
+  { id: 'fire_el', name: '火元素', atkRatio: 0.7, hpRatio: 0.4 },
+  { id: 'meow', name: '喵星人', atkRatio: 0.9, hpRatio: 0.6 }
+];
 export const TALENTS = [
   { id: 't_atk',      name: '武力', desc: '攻击 +2',        stat: 'atk',        value: 2 },
   { id: 't_hp',       name: '强健', desc: '生命上限 +15',    stat: 'hp',         value: 15 },
@@ -301,7 +440,32 @@ export const TALENTS = [
   { id: 't_burn',     name: '焚心', desc: '点燃几率 +5%',    stat: 'burnChance', value: 0.05 },
   { id: 't_shield',   name: '铁躯', desc: '获得 10 点护盾',   stat: 'shield',    value: 10 },
   { id: 't_haste',    name: '轻灵', desc: '获得 1 迅捷次数',  stat: 'haste',     value: 1 },
-  { id: 't_combo',    name: '连击', desc: '连击上限 +0.1',    stat: 'combo',     value: 0.1 }
+  { id: 't_combo',    name: '连击', desc: '连击上限 +0.1',    stat: 'combo',     value: 0.1 },
+  { id: 't_meow',     name: '摸鱼', desc: '每层回复 2 生命',   stat: 'floorHeal', value: 2 },
+  { id: 't_juan',     name: '内卷', desc: '攻击 +2',          stat: 'atk',       value: 2 },
+  { id: 't_tangping', name: '躺平', desc: '生命 +20',         stat: 'hp',        value: 20 },
+  { id: 't_rich',     name: '氪金', desc: '金币获取 +8%',     stat: 'goldMul',   value: 0.08 },
+  { id: 't_exp2',     name: '卷王', desc: '经验获取 +8%',     stat: 'expMul',    value: 0.08 },
+  { id: 't_dodge2',   name: '欧皇', desc: '闪避 +3%',         stat: 'dodge',     value: 3 },
+  { id: 't_crit2',    name: '锦鲤', desc: '暴击 +3%',         stat: 'critChance', value: 0.03 },
+  { id: 't_shield2',  name: '乌龟壳', desc: '开局护盾 +10',   stat: 'shield',    value: 10 },
+  { id: 't_lifesteal2',name: '吸血鬼', desc: '吸血 +1',       stat: 'lifesteal', value: 1 },
+  { id: 't_combo2',   name: '连击王', desc: '连击上限 +0.1',  stat: 'combo',     value: 0.1 },
+  { id: 't_burn2',    name: '火娃', desc: '点燃几率 +5%',      stat: 'burnChance', value: 0.05 },
+  { id: 't_freeze2',  name: '冰娃', desc: '冰冻几率 +5%',      stat: 'freezeChance', value: 0.05 },
+  { id: 't_stun',     name: '电娃', desc: '眩晕几率 +5%',      stat: 'stunChance', value: 0.05 },
+  { id: 't_thunder',  name: '雷公', desc: '雷击几率 +5%',      stat: 'thunderChance', value: 0.05 },
+  { id: 't_block2',   name: '铁壁', desc: '格挡 +10%',         stat: 'blockChance', value: 0.1 },
+  { id: 't_thorns2',  name: '刺猬', desc: '反伤 +2',           stat: 'thorns',  value: 2 },
+  { id: 't_healboost',name: '奶妈', desc: '药水回复 +10',      stat: 'healBoost', value: 10 },
+  { id: 't_skillpower',name: '学霸', desc: '技能伤害 +0.3',    stat: 'skillPowerAdd', value: 0.3 },
+  { id: 't_cdkill',   name: '杀手', desc: '击杀后冷却 -1',     stat: 'cdkill',  value: 1 },
+  { id: 't_bloodlust',name: '狂战士', desc: '每击杀攻击 +1',   stat: 'bloodlust', value: 1 },
+  { id: 't_goldsteal',name: '扒手', desc: '击杀额外 +3 金币',  stat: 'goldSteal', value: 3 },
+  { id: 't_material', name: '拾荒者', desc: '材料掉落 +1',     stat: 'materialBonus', value: 1 },
+  { id: 't_opening',  name: '先手', desc: '战斗开始先手 8 伤害', stat: 'openingStrike', value: 8 },
+  { id: 't_warcry',   name: '战吼', desc: '战斗开始攻击 +2',    stat: 'warcry',  value: 2 },
+  { id: 't_startcombo',name: '起手式', desc: '战斗开始 +2 连击', stat: 'startCombo', value: 2 }
 ];
 
 export const CLASSES = [
@@ -317,21 +481,23 @@ export const CLASSES = [
 export const KILL_FLAVORS = [
   '应声倒地！', '化为灰烬！', '发出最后哀嚎……', '轰然崩碎！',
   '化作血水。', '不甘消散。', '倒在你面前。', '痛苦嘶吼后倒下。',
-  '灵魂被撕裂。', '身体碎成无数碎片。', '发出绝望的惨叫。', '化为虚无。'
+  '灵魂被撕裂。', '身体碎成无数碎片。', '发出绝望的惨叫。', '化为虚无。',
+  '芜湖，起飞！', '拿来吧你！', '这就是六！', '退退退！', '我直接一个滑铲。',
+  '好家伙，寄了。', '破防了。', '你礼貌吗？', '栓Q。', '我谢谢你啊。'
 ];
 
 // 拾取风味文本
 export const PICK_FLAVORS = {
-  gold: ['闪亮的金币！', '意外之财！', '沉甸甸的钱袋。'],
-  potion: ['一瓶泛着荧光的药水。', '闻起来很提神。'],
-  weapon: ['一把趁手的武器。', '刀刃上还残留着前主人的气息。'],
-  armor: ['一套坚固的护甲。', '虽然有些破旧但依然可靠。']
+  gold: ['闪亮的金币！', '意外之财！', '沉甸甸的钱袋。', '老板大气！', '这是另外的价钱！'],
+  potion: ['一瓶泛着荧光的药水。', '闻起来很提神。', '喝了这瓶，芜湖起飞！'],
+  weapon: ['一把趁手的武器。', '刀刃上还残留着前主人的气息。', '你获得了一件好家伙！'],
+  armor: ['一套坚固的护甲。', '虽然有些破旧但依然可靠。', '穿上它，直接开摆！']
 };
 
 // 事件风味文本
 export const EVENT_FLAVORS = {
-  good: ['你感到一阵暖流。', '幸运女神在微笑。', '空气中弥漫着希望的气息。'],
-  bad: ['一阵寒意袭来……', '黑暗在低语。', '厄运降临了。']
+  good: ['你感到一阵暖流。', '幸运女神在微笑。', '空气中弥漫着希望的气息。', '欧气来了挡都挡不住！', '芜湖起飞！'],
+  bad: ['一阵寒意袭来……', '黑暗在低语。', '厄运降临了。', '芭比Q了……', '破防了，家人们。']
 };
 
 // BOSS 开场台词
@@ -341,7 +507,41 @@ export const BOSS_QUOTES = {
   ruin_golem: '尘封千年的守护者苏醒了。',
   abyss_lord: '"凡人，你的灵魂将成为我的养分。"',
   frost_king: '寒气瞬间冻结了周围的空气。',
-  inferno_lord: '"让我看看你的灵魂能燃烧多久！"'
+  inferno_lord: '"让我看看你的灵魂能燃烧多久！"',
+  laoban: '"年轻人，这是福报！"',
+  shangdi: '"我就是规则本身。"',
+  bing_xiang: '"冷死了冷死了，你们也一起冷吧！"'
+};
+
+
+// 全局平衡参数
+export const BALANCE = {
+  monsterHpScale: 0.065,      // 每层怪物 HP 增长系数
+  monsterAtkBase: 0.4,        // 每层怪物攻击固定加成
+  monsterGoldBase: 2,         // 每层怪物金币固定加成
+  monsterExpBase: 3,          // 每层怪物经验固定加成
+  monsterHpScaleEndless: 0.09,// 无尽模式每层怪物 HP 增长系数
+  monsterAtkScaleEndless: 0.6,// 无尽模式每层怪物攻击固定加成
+  playerDmgMin: 0.85,         // 玩家伤害波动下限
+  playerDmgMax: 1.15,         // 玩家伤害波动上限
+  monsterDmgMin: 0.85,        // 怪物伤害波动下限
+  monsterDmgMax: 1.3,         // 怪物伤害波动上限
+  comboBase: 0.03,            // 每层连击加成
+  comboMax: 0.6,              // 连击加成上限
+  critBase: 2,                // 基础暴击倍率
+  bossEnrageAtk: 1.4,         // BOSS 狂暴攻击倍率
+  bossFloorEvery: 5,          // 每几层出现 BOSS
+  ngPlusScale: 0.25,          // NG+ 每级怪物增强系数
+  healPotionBase: 30,         // 药水基础回复
+  healPotionPercent: 0.05,    // 药水回复百分比
+  restPercent: 0.25,          // 休息回复百分比
+  healMaxHp: 0.1,             // 升级 hppct 百分比
+  skillComboBase: 0.03,       // 连击精通加成
+  skillComboMax: 0.6,         // 连击精通上限
+  bloodlustOffset: 1,         // 血怒初始值偏移
+  berserkMissing: 0.3,        // 狂怒每 1% 血量损失增伤
+  executeThreshold: 0.3,      // 处决血量阈值
+  executeMult: 1.5            // 处决倍率
 };
 
 export const RANGED_MONSTERS = ['wraith', 'void_walker', 'imp', 'fire_imp'];
@@ -352,7 +552,10 @@ export const AREA_LORE = {
   ruins:   { intro: '古遗迹的石柱上刻满失落文字，空气中弥漫禁忌魔法。', boss: '遗迹巨像眼中亮起蓝光，将你视为入侵者。' },
   abyss:   { intro: '深渊入口展开，光线无法到达，只有绝望回荡。', boss: '深渊领主浮现："你的灵魂将成为我的养分。"' },
   tundra:  { intro: '风雪割裂皮肤，冰山上有什么在移动……', boss: '霜冻王从冰棺挣脱，寒气冻结了空气。' },
-  lava:    { intro: '热浪扑面，脚下随时可能崩塌坠入岩浆。', boss: '炼狱领主张开双臂："让我看看你的灵魂能燃烧多久！"' }
+  lava:    { intro: '热浪扑面，脚下随时可能崩塌坠入岩浆。', boss: '炼狱领主张开双臂："让我看看你的灵魂能燃烧多久！"' },
+  cyber:   { intro: '霓虹灯下，打工人和键盘侠川流不息。', boss: '老板开口了："这是福报！"' },
+  watermelon: { intro: '西瓜宇宙里，一切都圆滚滚、甜滋滋。', boss: '上帝之手缓缓降下："瓜分时刻到。"' },
+  internet:   { intro: '信息洪流汇聚成实体，谣言与真相互相撕咬。', boss: '冰箱精冷冷开口："让我给你降降温。"' }
 };
 
 export const CHALLENGE_MODS = [
