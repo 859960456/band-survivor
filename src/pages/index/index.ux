@@ -113,7 +113,7 @@
              style="width: {{mapViewW * 18 + 8}}px; height: {{mapViewH * 20 + 8}}px;">
           <div for="{{mapCells}}" tid="k" class="cell {{$item.cls}}"
                style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;"></div>
-          <div for="{{entities}}" tid="id" class="cell {{$item.cls}}"
+          <div for="{{entities}}" tid="id" class="cell {{$item.cls}}" show="{{$item.vis}}"
                style="left: {{$item.x}}px; top: {{$item.y}}px;">
             <image if="{{$item.icon}}" class="cell-icon" src="{{$item.icon}}"></image>
             <text if="{{$item.text}}" class="cell-text">{{$item.text}}</text>
@@ -1372,6 +1372,9 @@ export default {
     this._height = sizes[idx][0];
     this._width = sizes[idx][1];
     this._genMap();
+    // 新层镜头一次性对准玩家（之后走死区跟随）
+    this._camR = Math.max(0, Math.min(this._playerR - Math.floor(Math.min(this._viewH, this._height) / 2), this._height - Math.min(this._viewH, this._height)));
+    this._camC = Math.max(0, Math.min(this._playerC - Math.floor(Math.min(this._viewW, this._width) / 2), this._width - Math.min(this._viewW, this._width)));
     if (this._stairVision && this._visited && this._visited[this._stairsR]) {
       var svR = this._stairsR, svC = this._stairsC;
       for (var sd = -1; sd <= 1; sd++) {
@@ -1810,8 +1813,23 @@ export default {
   _updateCamera() {
     var viewH = Math.min(this._viewH, this._height);
     var viewW = Math.min(this._viewW, this._width);
-    this._camR = Math.max(0, Math.min(this._playerR - Math.floor(viewH / 2), this._height - viewH));
-    this._camC = Math.max(0, Math.min(this._playerC - Math.floor(viewW / 2), this._width - viewW));
+    // 死区跟随：玩家离开中央区才平移镜头，底层格子仅此时才重排（多数步零底格更新）
+    var dzR = Math.max(1, Math.floor(viewH / 4));
+    var dzC = Math.max(1, Math.floor(viewW / 4));
+    var maxR = this._height - viewH;
+    var maxC = this._width - viewW;
+    if (this._playerR < this._camR + dzR) {
+      this._camR = Math.max(0, this._playerR - dzR);
+    } else if (this._playerR > this._camR + viewH - 1 - dzR) {
+      this._camR = Math.min(maxR, this._playerR - (viewH - 1 - dzR));
+    }
+    if (this._camR > maxR) { this._camR = maxR; }
+    if (this._playerC < this._camC + dzC) {
+      this._camC = Math.max(0, this._playerC - dzC);
+    } else if (this._playerC > this._camC + viewW - 1 - dzC) {
+      this._camC = Math.min(maxC, this._playerC - (viewW - 1 - dzC));
+    }
+    if (this._camC > maxC) { this._camC = maxC; }
   },
 
   toggleMapPreview() {
@@ -1910,19 +1928,21 @@ export default {
     var viewW = Math.min(this._viewW, this._width);
     this.mapViewH = viewH;
     this.mapViewW = viewW;
-    // ===== 底层格子：墙/地板/迷雾/暗门/楼梯底色 =====
-    // 类型未变的槽位复用同一对象引用，降低每步绑定更新量；静态期跳过整表赋值
-    if (!this._baseSlots) {
-      this._baseSlots = {};
+    // ===== 底层格子：仅初始化/视野尺寸变化时重建，其余全部原地更新 =====
+    // 官方《内存优化》：页面对象更新尽量原地更新，不要重新赋值开辟新空间
+    var need = viewW * viewH;
+    if (this.mapCells.length !== need || this._baseW !== viewW) {
+      this._baseW = viewW;
+      this.mapCells.splice(0, this.mapCells.length);
+      for (var bi = 0; bi < need; bi++) {
+        this.mapCells.push({ r: Math.floor(bi / viewW), c: bi % viewW, k: 'k' + bi, cls: '' });
+      }
     }
-    var slots = this._baseSlots;
-    var out = [];
-    var sig = '';
+    var idx = 0;
     for (var vr = 0; vr < viewH; vr++) {
       for (var vc = 0; vc < viewW; vc++) {
         var r = this._camR + vr;
         var c = this._camC + vc;
-        var key = vr + '_' + vc;
         var ch = this._grid[r][c];
         var visited = this._visited && this._visited[r] && this._visited[r][c];
         var cls;
@@ -1937,54 +1957,70 @@ export default {
         } else {
           cls = 'floor';
         }
-        sig += cls === 'fog' ? 'f' : (cls === 'wall' ? 'w' : (cls === 'floor' ? '.' : (cls === 'stairs' ? 's' : 'S')));
-        var cur = slots[key];
-        if (!cur || cur.cls !== cls) {
-          cur = { r: vr, c: vc, k: key, cls: cls };
-          slots[key] = cur;
+        var cell = this.mapCells[idx];
+        if (cell.cls !== cls) {
+          cell.cls = cls;
         }
-        out.push(cur);
+        idx++;
       }
     }
-    if (sig !== this._baseSig) {
-      this._baseSig = sig;
-      this.mapCells = out;
-    }
-    // ===== 实体层：楼梯图标/玩家/怪物/物品 =====
-    // 稳定 id + 只更新坐标：移动不再销毁重建原生节点（真机卡顿根因）
-    var ents = [];
+    // ===== 实体层：常驻节点 + show 显隐 + 坐标原地更新（零节点增删）=====
     var camR = this._camR;
     var camC = this._camC;
-    var ICONS = {
-      gold: '/common/icons/gold.png',
-      potion: '/common/icons/potion.png',
-      weapon: '/common/icons/weapon.png',
-      armor: '/common/icons/armor.png',
-      stairs: '/common/icons/stairs.png'
-    };
+    var desired = [];
     var stairsSeen = this._visited && this._visited[this._stairsR] && this._visited[this._stairsR][this._stairsC];
-    if (stairsSeen && this._stairsR >= camR && this._stairsR < camR + viewH && this._stairsC >= camC && this._stairsC < camC + viewW) {
-      ents.push({ id: 'st', cls: '', x: (this._stairsC - camC) * 18, y: (this._stairsR - camR) * 20, icon: ICONS.stairs });
+    if (stairsSeen) {
+      desired.push({ id: 'st', cls: '', x: (this._stairsC - camC) * 18, y: (this._stairsR - camR) * 20, icon: '/common/icons/stairs.png', vis: true });
     }
-    ents.push({ id: 'p', cls: 'player', x: (this._playerC - camC) * 18, y: (this._playerR - camR) * 20, text: '我' });
+    desired.push({ id: 'p', cls: 'player', x: (this._playerC - camC) * 18, y: (this._playerR - camR) * 20, icon: '', text: '我', vis: true });
     var mons = this._monsters;
     for (var mi = 0; mi < mons.length; mi++) {
       var m = mons[mi];
       if (!m.alive) { continue; }
       if (m.row === this._stairsR && m.col === this._stairsC) { continue; }
-      if (m.row < camR || m.row >= camR + viewH || m.col < camC || m.col >= camC + viewW) { continue; }
-      if (!(this._visited[m.row] && this._visited[m.row][m.col])) { continue; }
-      ents.push({ id: 'm' + mi, cls: 'monster', x: (m.col - camC) * 18, y: (m.row - camR) * 20, icon: '/common/icons/monster.png' });
+      desired.push({
+        id: 'm' + mi, cls: 'monster',
+        x: (m.col - camC) * 18, y: (m.row - camR) * 20,
+        icon: '/common/icons/monster.png',
+        vis: !!(this._visited[m.row] && this._visited[m.row][m.col])
+      });
     }
     var items = this._items;
+    var ICONS = { gold: '/common/icons/gold.png', potion: '/common/icons/potion.png', weapon: '/common/icons/weapon.png', armor: '/common/icons/armor.png' };
     for (var ii = 0; ii < items.length; ii++) {
       var it = items[ii];
       if (it.row === this._stairsR && it.col === this._stairsC) { continue; }
-      if (it.row < camR || it.row >= camR + viewH || it.col < camC || it.col >= camC + viewW) { continue; }
-      if (!(this._visited[it.row] && this._visited[it.row][it.col])) { continue; }
-      ents.push({ id: 'i' + ii, cls: it.type, x: (it.col - camC) * 18, y: (it.row - camR) * 20, icon: ICONS[it.type] || '' });
+      desired.push({
+        id: 'i' + ii, cls: it.type,
+        x: (it.col - camC) * 18, y: (it.row - camR) * 20,
+        icon: ICONS[it.type] || '',
+        vis: !!(this._visited[it.row] && this._visited[it.row][it.col])
+      });
     }
-    this.entities = ents;
+    if (!this._entMap) { this._entMap = {}; }
+    var entMap = this._entMap;
+    var seen = {};
+    for (var d = 0; d < desired.length; d++) {
+      var dd = desired[d];
+      seen[dd.id] = true;
+      var ex = entMap[dd.id];
+      if (ex) {
+        if (ex.x !== dd.x) { ex.x = dd.x; }
+        if (ex.y !== dd.y) { ex.y = dd.y; }
+        if (ex.vis !== dd.vis) { ex.vis = dd.vis; }
+      } else {
+        var obj = { id: dd.id, cls: dd.cls, x: dd.x, y: dd.y, icon: dd.icon, text: dd.text || '', vis: dd.vis };
+        entMap[dd.id] = obj;
+        this.entities.push(obj);
+      }
+    }
+    for (var ri = this.entities.length - 1; ri >= 0; ri--) {
+      var eid = this.entities[ri].id;
+      if (!seen[eid]) {
+        delete entMap[eid];
+        this.entities.splice(ri, 1);
+      }
+    }
     this._updateExplorePercent();
   },
 
@@ -4699,6 +4735,7 @@ export default {
 }
 
 .map-container {
+  overflow: hidden;
   padding: 4px;
   background-color: #101016;
   border: 1px solid #26262e;
