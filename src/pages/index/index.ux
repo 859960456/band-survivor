@@ -2012,6 +2012,10 @@ export default {
     if (this.phase !== 'grid') {
       return;
     }
+    // 一次手势只走一步：防止一次滑动连走多格、渲染请求堆积导致卡顿
+    if (this._touchMoved) {
+      return;
+    }
     var touch = e.touches && e.touches[0];
     if (!touch) {
       return;
@@ -2030,15 +2034,10 @@ export default {
       this._tryMove(dy > 0 ? 1 : -1, 0);
     }
     this._lastMoveAt = Date.now();
-    // 重置起点，方便连续滑动
-    this._touchStartX = tx;
-    this._touchStartY = ty;
   },
 
   onTouchEnd() {
-    if (this._touchMoved) {
-      this._touchMoved = false;
-    }
+    this._touchMoved = false;
   },
 
   onMapSwipe(e) {
