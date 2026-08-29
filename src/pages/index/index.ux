@@ -678,44 +678,123 @@ export default {
     this._checkDaily();
     this._initDailyTask();
     var that = this;
+    // 新版：单 key 档案读取（9 个旧存储 key 合并）；老数据首次启动自动迁移
+    storage.get({
+      key: 'BAND_SURVIVOR_PROFILE',
+      success: function(data) {
+        var p = null;
+        try { p = data ? JSON.parse(data) : null; } catch (e) { p = null; }
+        if (p && typeof p.soul === 'number') {
+          that.challengeMode = p.challenge === 1;
+          that.endless = p.endless === 1;
+          if (typeof p.diff === 'number' && p.diff >= 0 && p.diff <= 2) { that.difficulty = p.diff; }
+          if (p.cls) { that.charClass = p.cls; }
+          that.tutorialSeen = p.tut === 1;
+          if (typeof p.vibrate === 'boolean') { that.vibrateOn = p.vibrate; }
+          if (typeof p.sens === 'number') { that.sensitivity = p.sens; }
+          that.soul = p.soul;
+          that.metaHp = p.metaHp || 0;
+          that.metaPotion = p.metaPotion || 0;
+          that.metaAtk = p.metaAtk || 0;
+          that.bestWeaponAtk = p.bestWeaponAtk || 0;
+          that.bestArmorDef = p.bestArmorDef || 0;
+          that.relicCodex = p.relicCodex || [];
+          that.equipCodex = p.equipCodex || [];
+          that.ngLevel = p.ngLevel || 0;
+          if (p.codex && p.codex.length) { that.codex = p.codex; }
+          if (p.ach && p.ach.length) { that.unlockedAchievements = p.ach; }
+          that._updateClassLabel();
+          that._updateDifficultyLabel();
+          that._updateSensLabel();
+          that._updateCodexCount();
+          that._updateAchievementCount();
+          that._loadBest();
+        } else {
+          that._loadLegacyProfile();
+        }
+      },
+      fail: function() { that._loadLegacyProfile(); }
+    });
+    // 存档探测（是否显示"继续冒险"），兼容新旧两种格式
+    storage.get({
+      key: 'BAND_SURVIVOR_SAVE',
+      success: function(data) {
+        try {
+          var s = JSON.parse(data);
+          if (s && ((s.gridS && s.gridS.length) || (s.grid && s.grid.length > 0))) {
+            that.hasSave = true;
+            that.saveFloor = s.floor || 0;
+            that.saveLevel = s.level || 1;
+          }
+        } catch (e) {}
+      }
+    });
+  },
+
+  _saveProfile() {
+    storage.set({
+      key: 'BAND_SURVIVOR_PROFILE',
+      value: JSON.stringify({
+        challenge: this.challengeMode ? 1 : 0,
+        endless: this.endless ? 1 : 0,
+        diff: this.difficulty,
+        cls: this.charClass,
+        tut: this.tutorialSeen ? 1 : 0,
+        vibrate: this.vibrateOn,
+        sens: this.sensitivity,
+        soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk,
+        bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef,
+        relicCodex: this.relicCodex, equipCodex: this.equipCodex, ngLevel: this.ngLevel,
+        codex: this.codex, ach: this.unlockedAchievements
+      })
+    });
+  },
+
+  _loadLegacyProfile() {
+    // 老版本：9 个独立 key 逐个读取，全部完成后合并写入 PROFILE（一次性迁移）
+    var that = this;
+    var pending = { n: 9 };
+    var done = function() {
+      pending.n -= 1;
+      if (pending.n === 0) { that._saveProfile(); }
+    };
     storage.get({
       key: 'BAND_SURVIVOR_CHALLENGE',
       success: function(data) {
-        if (data === '1') {
-          that.challengeMode = true;
-        }
-      }
+        if (data === '1') { that.challengeMode = true; }
+        done();
+      },
+      fail: done
     });
     storage.get({
       key: 'BAND_SURVIVOR_CLASS',
       success: function(data) {
-        if (data) {
-          that.charClass = data;
-          that._updateClassLabel();
-        }
-      }
+        if (data) { that.charClass = data; that._updateClassLabel(); }
+        done();
+      },
+      fail: done
     });
     storage.get({
       key: 'BAND_SURVIVOR_ENDLESS',
       success: function(data) {
-        if (data === '1') {
-          that.endless = true;
-        }
-      }
+        if (data === '1') { that.endless = true; }
+        done();
+      },
+      fail: done
     });
     storage.get({
       key: 'BAND_SURVIVOR_DIFF',
       success: function(data) {
         var d = parseInt(data, 10);
-        if (!isNaN(d) && d >= 0 && d <= 2) {
-          that.difficulty = d;
-        }
+        if (!isNaN(d) && d >= 0 && d <= 2) { that.difficulty = d; }
         that._updateDifficultyLabel();
         that._loadBest();
+        done();
       },
       fail: function() {
         that._updateDifficultyLabel();
         that._loadBest();
+        done();
       }
     });
     storage.get({
@@ -723,15 +802,12 @@ export default {
       success: function(data) {
         try {
           var s = JSON.parse(data);
-          if (s && typeof s.vibrate === 'boolean') {
-            that.vibrateOn = s.vibrate;
-          }
-          if (s && typeof s.sensitivity === 'number') {
-            that.sensitivity = s.sensitivity;
-            that._updateSensLabel();
-          }
+          if (s && typeof s.vibrate === 'boolean') { that.vibrateOn = s.vibrate; }
+          if (s && typeof s.sensitivity === 'number') { that.sensitivity = s.sensitivity; that._updateSensLabel(); }
         } catch (e) {}
-      }
+        done();
+      },
+      fail: done
     });
     storage.get({
       key: 'BAND_SURVIVOR_META',
@@ -750,51 +826,46 @@ export default {
             that.ngLevel = m.ngLevel || 0;
           }
         } catch (e) {}
-      }
+        done();
+      },
+      fail: done
     });
     storage.get({
       key: 'BAND_SURVIVOR_TUT',
       success: function(data) {
-        if (data === '1') {
-          that.tutorialSeen = true;
-        }
-      }
+        if (data === '1') { that.tutorialSeen = true; }
+        done();
+      },
+      fail: done
     });
     storage.get({
       key: 'BAND_SURVIVOR_CODEX',
       success: function(data) {
         try {
           var arr = JSON.parse(data);
-          if (arr && arr.length) {
-            that.codex = arr;
-          }
+          if (arr && arr.length) { that.codex = arr; }
         } catch (e) {}
         that._updateCodexCount();
+        done();
+      },
+      fail: function() {
+        that._updateCodexCount();
+        done();
       }
     });
     storage.get({
       key: 'BAND_SURVIVOR_ACH',
       success: function(data) {
         try {
-          var arr = JSON.parse(data);
-          if (arr && arr.length) {
-            that.unlockedAchievements = arr;
-          }
+          var arr2 = JSON.parse(data);
+          if (arr2 && arr2.length) { that.unlockedAchievements = arr2; }
         } catch (e) {}
         that._updateAchievementCount();
-      }
-    });
-    storage.get({
-      key: 'BAND_SURVIVOR_SAVE',
-      success: function(data) {
-        try {
-          var s = JSON.parse(data);
-          if (s && s.grid && s.grid.length > 0) {
-            that.hasSave = true;
-            that.saveFloor = s.floor || 0;
-            that.saveLevel = s.level || 1;
-          }
-        } catch (e) {}
+        done();
+      },
+      fail: function() {
+        that._updateAchievementCount();
+        done();
       }
     });
   },
@@ -807,7 +878,7 @@ export default {
     this._addLog('你踏入了第 1 层地牢');
     if (!this.tutorialSeen) {
       this.tutorialSeen = true;
-      storage.set({ key: 'BAND_SURVIVOR_TUT', value: '1' });
+      this._saveProfile();
     }
     this._saveRun();
   },
@@ -961,8 +1032,9 @@ export default {
         that.potions = s.potions || BASE_PLAYER.potions;
         that._height = s.mh || 10;
         that._width = s.mw || 6;
-        that._grid = s.grid || [];
-        that._visited = s.visited || [];
+        var pv = GameSave.parseSavedRun(s);
+        that._grid = pv.grid || [];
+        that._visited = pv.visited || [];
         that._exploreDirty = true;
         that.relics = s.relics || [];
         that.visitedAreas = s.visitedAreas || [];
@@ -1179,18 +1251,12 @@ export default {
 
   toggleChallenge() {
     this.challengeMode = !this.challengeMode;
-    storage.set({
-      key: 'BAND_SURVIVOR_CHALLENGE',
-      value: this.challengeMode ? '1' : '0'
-    });
+    this._saveProfile();
   },
 
   toggleEndless() {
     this.endless = !this.endless;
-    storage.set({
-      key: 'BAND_SURVIVOR_ENDLESS',
-      value: this.endless ? '1' : '0'
-    });
+    this._saveProfile();
   },
 
   _updateDifficultyLabel() {
@@ -1219,10 +1285,7 @@ export default {
       return;
     }
     this.difficulty = n;
-    storage.set({
-      key: 'BAND_SURVIVOR_DIFF',
-      value: String(n)
-    });
+    this._saveProfile();
     this._loadBest();
   },
 
@@ -3720,10 +3783,8 @@ export default {
   },
 
   _saveMeta() {
-    storage.set({
-      key: 'BAND_SURVIVOR_META',
-      value: JSON.stringify({ soul: this.soul, metaHp: this.metaHp, metaPotion: this.metaPotion, metaAtk: this.metaAtk, bestWeaponAtk: this.bestWeaponAtk, bestArmorDef: this.bestArmorDef, relicCodex: this.relicCodex, equipCodex: this.equipCodex, ngLevel: this.ngLevel })
-    });
+    // META 已并入 PROFILE，保留方法名以兼容 game-progress 调用
+    this._saveProfile();
   },
 
   _updateMetaList() {
@@ -3792,7 +3853,7 @@ export default {
       if (CLASSES[i].id === id) {
         this.charClass = id;
         this._updateClassLabel();
-        storage.set({ key: 'BAND_SURVIVOR_CLASS', value: id });
+        this._saveProfile();
         ok = true;
         break;
       }
@@ -3842,10 +3903,7 @@ export default {
   },
 
   _saveSettings() {
-    storage.set({
-      key: 'BAND_SURVIVOR_SET',
-      value: JSON.stringify({ vibrate: this.vibrateOn, sensitivity: this.sensitivity })
-    });
+    this._saveProfile();
   },
 
   _updateSensLabel() {

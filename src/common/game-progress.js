@@ -99,7 +99,7 @@ export function achievementName(achievements, id) {
 export function unlockAchievement(vm, id) {
   if (vm.unlockedAchievements.indexOf(id) >= 0) return;
   vm.unlockedAchievements.push(id);
-  storage.set({ key: 'BAND_SURVIVOR_ACH', value: JSON.stringify(vm.unlockedAchievements) });
+  vm._saveProfile();
   vm.soul += 5; vm._saveMeta();
   updateAchievementCount(vm);
   for (var i = 0; i < ACHIEVEMENTS.length; i++) {
@@ -122,6 +122,6 @@ export function updateCodexCount(vm) {
 export function discoverMonster(vm, id) {
   if (!id || vm.codex.indexOf(id) >= 0) return;
   vm.codex.push(id);
-  storage.set({ key: 'BAND_SURVIVOR_CODEX', value: JSON.stringify(vm.codex) });
+  vm._saveProfile();
   updateCodexCount(vm);
 }

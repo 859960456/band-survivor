@@ -1,5 +1,54 @@
 import storage from '@system.storage';
 
+// ===== 存档压缩：grid/visited 由嵌套数组转为行字符串（体积约省 60%）=====
+function compressGrid(grid) {
+  var rows = [];
+  for (var i = 0; i < grid.length; i++) {
+    rows.push(grid[i].join(''));
+  }
+  return rows;
+}
+
+function compressVisited(visited) {
+  var rows = [];
+  for (var i = 0; i < visited.length; i++) {
+    var row = visited[i] || [];
+    var chars = '';
+    for (var j = 0; j < row.length; j++) {
+      chars += row[j] ? '1' : '0';
+    }
+    rows.push(chars);
+  }
+  return rows;
+}
+
+// 兼容读取：新版行字符串（gridS/visitedS）与旧版嵌套数组（grid/visited）
+export function parseSavedRun(s) {
+  var grid = null, visited = null, i, j, row, out;
+  if (s.gridS && s.gridS.length) {
+    grid = [];
+    for (i = 0; i < s.gridS.length; i++) {
+      grid.push(s.gridS[i].split(''));
+    }
+  } else if (s.grid && s.grid.length) {
+    grid = s.grid;
+  }
+  if (s.visitedS && s.visitedS.length) {
+    visited = [];
+    for (i = 0; i < s.visitedS.length; i++) {
+      row = s.visitedS[i].split('');
+      out = [];
+      for (j = 0; j < row.length; j++) {
+        out.push(row[j] === '1');
+      }
+      visited.push(out);
+    }
+  } else if (s.visited && s.visited.length) {
+    visited = s.visited;
+  }
+  return { grid: grid, visited: visited };
+}
+
 export function serializeRun(vm) {
   return {
     floor: vm.floor, gold: vm.gold, kills: vm.kills, level: vm.level,
@@ -41,7 +90,7 @@ export function serializeRun(vm) {
     mh: vm._height, mw: vm._width,
     pr: vm._playerR, pc: vm._playerC,
     sr: vm._stairsR, sc: vm._stairsC,
-    grid: vm._grid, visited: vm._visited,
+    gridS: compressGrid(vm._grid), visitedS: compressVisited(vm._visited),
     promoted: vm.promoted, promoteName: vm.promoteName,
     relics: vm.relics, visitedAreas: vm.visitedAreas,
     materials: vm.materials, talentPoints: vm.talentPoints,
@@ -79,7 +128,8 @@ export function loadAndContinue(vm, callback) {
     success: function(data) {
       var s;
       try { s = JSON.parse(data); } catch(e) { vm.hasSave = false; return; }
-      if (!s || !s.grid || s.grid.length === 0) { vm.hasSave = false; return; }
+      var hasMap = (s && s.gridS && s.gridS.length) || (s && s.grid && s.grid.length > 0);
+      if (!s || !hasMap) { vm.hasSave = false; return; }
       callback(s);
     }
   });
@@ -99,7 +149,8 @@ export function restoreBackup(vm) {
       if (!data) { that._addLog('暂无备份存档'); return; }
       var s;
       try { s = JSON.parse(data); } catch (e) { that._addLog('备份存档已损坏'); return; }
-      if (!s || !s.grid || !s.grid.length) { that._addLog('备份存档无效'); return; }
+      var hasMap = (s && s.gridS && s.gridS.length) || (s && s.grid && s.grid.length);
+      if (!s || !hasMap) { that._addLog('备份存档无效'); return; }
       // 等写入成功后再读回，避免慢设备上 set/get 竞态
       storage.set({
         key: 'BAND_SURVIVOR_SAVE', value: data,
@@ -107,17 +158,5 @@ export function restoreBackup(vm) {
         fail: function() { that._addLog('恢复失败，请重试'); }
       });
     }
-  });
-}
-
-export function saveMeta(vm) {
-  storage.set({
-    key: 'BAND_SURVIVOR_META',
-    value: JSON.stringify({
-      soul: vm.soul, metaHp: vm.metaHp, metaPotion: vm.metaPotion,
-      metaAtk: vm.metaAtk, bestWeaponAtk: vm.bestWeaponAtk,
-      bestArmorDef: vm.bestArmorDef, relicCodex: vm.relicCodex,
-      equipCodex: vm.equipCodex
-    })
   });
 }
