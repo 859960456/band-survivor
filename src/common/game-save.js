@@ -78,7 +78,7 @@ export function loadAndContinue(vm, callback) {
     key: 'BAND_SURVIVOR_SAVE',
     success: function(data) {
       var s;
-      try { s = JSON.parse(data); } catch(e) { return; }
+      try { s = JSON.parse(data); } catch(e) { vm.hasSave = false; return; }
       if (!s || !s.grid || s.grid.length === 0) { vm.hasSave = false; return; }
       callback(s);
     }
@@ -97,8 +97,15 @@ export function restoreBackup(vm) {
     key: 'BAND_SURVIVOR_SAVE_2',
     success: function(data) {
       if (!data) { that._addLog('暂无备份存档'); return; }
-      storage.set({ key: 'BAND_SURVIVOR_SAVE', value: data });
-      that._continueRun();
+      var s;
+      try { s = JSON.parse(data); } catch (e) { that._addLog('备份存档已损坏'); return; }
+      if (!s || !s.grid || !s.grid.length) { that._addLog('备份存档无效'); return; }
+      // 等写入成功后再读回，避免慢设备上 set/get 竞态
+      storage.set({
+        key: 'BAND_SURVIVOR_SAVE', value: data,
+        success: function() { that._continueRun(); },
+        fail: function() { that._addLog('恢复失败，请重试'); }
+      });
     }
   });
 }

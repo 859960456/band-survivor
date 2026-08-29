@@ -99,7 +99,7 @@
       <div if="{{showMapPreview}}" class="map-preview-panel">
         <text class="map-preview-title-text">第{{floor}}层 · {{areaName}}</text>
         <div class="minimap-grid">
-          <div for="{{minimapCells}}" class="minimap-cell {{$item.cls}}">
+          <div for="{{minimapCells}}" tid="k" class="minimap-cell {{$item.cls}}">
             <text if="{{$item.text}}" class="minimap-me">{{$item.text}}</text>
             <image if="{{$item.icon}}" class="minimap-img" src="{{$item.icon}}" />
           </div>
@@ -111,7 +111,7 @@
       <div class="map-area">
         <div class="map-container" @swipe="onMapSwipe" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd"
              style="width: {{mapViewW * 18 + 8}}px; height: {{mapViewH * 20 + 8}}px;">
-          <div for="{{mapCells}}" class="cell {{$item.cls}}"
+          <div for="{{mapCells}}" tid="k" class="cell {{$item.cls}}"
                style="left: {{$item.c * 18}}px; top: {{$item.r * 20}}px;">
             <image if="{{$item.icon}}" class="cell-icon" src="{{$item.icon}}"></image>
             <text if="{{$item.cls === 'player'}}" class="cell-text">我</text>
@@ -151,7 +151,7 @@
     <!-- 奖励 / 死亡 -->
     <div if="{{phase === 'reward'}}" class="overlay reward-overlay">
       <text class="reward-title">升级！选择强化</text>
-      <div for="{{upgradeOptions}}" class="upgrade-option rarity-{{$item.rarity || 'common'}}" @click="chooseUpgrade($item.id)">
+      <div for="{{upgradeOptions}}" tid="id" class="upgrade-option rarity-{{$item.rarity || 'common'}}" @click="chooseUpgrade($item.id)">
         <text class="option-name">{{$item.name}}</text>
         <text class="option-desc">{{$item.desc}}</text>
       </div>
@@ -184,7 +184,7 @@
       <text class="dead-text">可用点数：{{talentPoints}}</text>
       <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 300px;">
       <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
-        <div for="{{talentList}}" class="ach-item {{$item.bought ? 'done' : ''}}" @click="buyTalent($item.id)">
+        <div for="{{talentList}}" tid="id" class="ach-item {{$item.bought ? 'done' : ''}}" @click="buyTalent($item.id)">
           <text class="ach-name">{{$item.name}}</text>
           <text class="ach-desc">{{$item.desc}}</text>
         </div>
@@ -204,7 +204,7 @@
       <text class="dead-text">区域探索：{{visitedAreas.length}}/{{areaTotal}}</text>
       <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 300px;">
       <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
-        <div for="{{codexList}}" class="ach-item {{$item.found ? 'done' : ''}}">
+        <div for="{{codexList}}" tid="id" class="ach-item {{$item.found ? 'done' : ''}}">
           <text class="ach-name">{{$item.name || $item.id}}</text>
           <text class="ach-desc">{{$item.found ? '已收录' : '未发现'}}</text>
         </div>
@@ -251,7 +251,7 @@
       <text class="dead-title">成就</text>
       <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 300px;">
       <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
-        <div for="{{achievementList}}" class="ach-item {{$item.done ? 'done' : ''}}">
+        <div for="{{achievementList}}" tid="id" class="ach-item {{$item.done ? 'done' : ''}}">
           <text class="ach-name">{{$item.name}}</text>
           <text class="ach-desc">{{$item.desc}}</text>
         </div>
@@ -343,7 +343,7 @@
       <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
         <text class="shop-title">旅行商店</text>
         <text class="shop-gold">金币 {{gold}}</text>
-        <div for="{{shopItems}}" class="shop-item" @click="buyItem($item.id)">
+        <div for="{{shopItems}}" tid="id" class="shop-item" @click="buyItem($item.id)">
           <text class="shop-name">{{$item.name}}</text>
           <text class="shop-desc">{{$item.desc}} · {{$item.price}}金{{$item.discount ? '（折）' : ''}}</text>
         </div>
@@ -1792,7 +1792,7 @@ export default {
             }
           }
         }
-        cells.push({ r: r, c: c, cls: cls, icon: icon, text: textVal });
+        cells.push({ r: r, c: c, k: r + '_' + c, cls: cls, icon: icon, text: textVal });
       }
     }
     this.minimapCells = cells;
@@ -1888,7 +1888,7 @@ export default {
         } else if (cls === 'portal') {
           icon = '';
         }
-        cells.push({ r: vr, c: vc, cls: cls, icon: icon });
+        cells.push({ r: vr, c: vc, k: vr + '_' + vc, cls: cls, icon: icon });
       }
     }
     this.mapCells = cells;
@@ -3453,8 +3453,12 @@ export default {
       var dr = this._playerR - mon.row;
       var dc = this._playerC - mon.col;
       if (Math.abs(dr) + Math.abs(dc) === 1) {
-        // 相邻攻击
+        // 相邻攻击（与战斗内规则一致：先掷闪避）
         var stats = this._monsterStats(mon.id);
+        if (this.dodge > 0 && Math.random() * 100 < this.dodge) {
+          this._addLog('你闪避了 ' + stats.name + ' 的攻击');
+          continue;
+        }
         var dmg = Math.max(1, Math.round((stats.atk - this.armorDef - (this._bonusDef || 0)) * (BALANCE.monsterDmgMin + Math.random() * (BALANCE.monsterDmgMax - BALANCE.monsterDmgMin))));
         var absorbed = Math.min(this._shield, dmg);
         this._shield -= absorbed;
