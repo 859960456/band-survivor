@@ -201,7 +201,7 @@
     <!-- 图鉴 -->
     <div if="{{phase === 'codex'}}" class="overlay dead-overlay">
       <text class="dead-title">怪物图鉴</text>
-      <text class="dead-text">区域探索：{{visitedAreas.length}}/4</text>
+      <text class="dead-text">区域探索：{{visitedAreas.length}}/{{areaTotal}}</text>
       <scroll class="shop-scroll" scroll-y="{{true}}" style="height: 300px;">
       <div style="position: absolute; flex-direction: column; width: 192px; align-items: center;">
         <div for="{{codexList}}" class="ach-item {{$item.found ? 'done' : ''}}">
@@ -539,6 +539,7 @@ export default {
     relicTotal: 0,
     equipCodex: [],
     equipTotal: 0,
+    areaTotal: 0,
     canClaimDaily: false,
     metaHp: 0,
     metaPotion: 0,
@@ -661,6 +662,7 @@ export default {
     this.shopItems = SHOP_ITEMS;
     this.relicTotal = RELICS.length;
     this.equipTotal = WEAPONS.length + ARMORS.length;
+    this.areaTotal = AREAS.length;
     this.areaName = '';
     this.areaEff = '';
     this._width = 6;
@@ -3475,23 +3477,6 @@ export default {
         }
       }
     }
-  },
-
-  _surroundMove(mon, dr, dc) {
-    var sideDr = dc !== 0 ? Math.sign(dr) : 0;
-    var sideDc = dr !== 0 ? Math.sign(dc) : 0;
-    var attempts = [[sideDr || (Math.random() < 0.5 ? 1 : -1), 0], [0, sideDc || (Math.random() < 0.5 ? 1 : -1)]];
-    for (var a = 0; a < attempts.length; a++) {
-      var nr = mon.row + attempts[a][0];
-      var nc = mon.col + attempts[a][1];
-      if (nr >= 0 && nr < this._height && nc >= 0 && nc < this._width &&
-          this._grid[nr][nc] !== '#' && this._grid[nr][nc] !== 'S' &&
-          !this._monsterAt(nr, nc) && !(nr === this._playerR && nc === this._playerC)) {
-        mon.row = nr; mon.col = nc;
-        return;
-      }
-    }
-    this._moveMonster(mon, dr, dc);
   },
 
   _chargeMonster(mon, dr, dc) {

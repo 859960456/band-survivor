@@ -42,6 +42,7 @@ export function serializeRun(vm) {
     pr: vm._playerR, pc: vm._playerC,
     sr: vm._stairsR, sc: vm._stairsC,
     grid: vm._grid, visited: vm._visited,
+    promoted: vm.promoted, promoteName: vm.promoteName,
     relics: vm.relics, visitedAreas: vm.visitedAreas,
     materials: vm.materials, talentPoints: vm.talentPoints,
     talents: vm.talents, monsters: vm._monsters, items: vm._items
